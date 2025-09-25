@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VFIED Admin - Event Review Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2d3748;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #667eea;
+        }
+
+        .admin-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-bar {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .stats-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 40px 20px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .event-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+
+        .event-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .event-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .event-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .event-description {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            line-height: 1.6;
+            color: #475569;
+        }
+
+        .event-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-approve {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-reject {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            gap: 12px;
+            color: #64748b;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            color: #5a67d8;
+            transform: translateX(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .stats-content {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .event-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .event-actions {
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 0 16px 40px 16px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>VFIED</h1>
+                <span class="admin-badge">Admin Panel</span>
+            </div>
+            <a href="/" class="back-link">← Back to Main App</a>
+        </div>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stats-content">
+            <div class="stat-card">
+                <div class="stat-number" id="pending-count">-</div>
+                <div class="stat-label">Pending Events</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="approved-count">-</div>
+                <div class="stat-label">Approved Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-count">-</div>
+                <div class="stat-label">Total Submissions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="response-time">-</div>
+                <div class="stat-label">Avg Response Time</div>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Pending Events</h2>
+                <button class="refresh-btn" onclick="loadPendingEvents()">🔄 Refresh</button>
+            </div>
+            
+            <div id="pending-events">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Loading pending events...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Recent Actions</h2>
+            </div>
+            
+            <div id="recent-actions">
+                <div class="empty-state">
+                    <div class="empty-icon">📝</div>
+                    <p>Recent moderation actions will appear here</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // API Configuration
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3048' 
+            : 'https://vfied-v3.onrender.com';
+
+        let recentActions = [];
+
+        // Load pending events on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPendingEvents();
+            loadStats();
+        });
+
+        async function loadPendingEvents() {
+            const container = document.getElementById('pending-events');
+            
+            try {
+                container.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>Loading pending events...</span>
+                    </div>
+                `;
+
+                const response = await fetch(`${API_BASE}/v1/admin/events/pending`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const events = data.events || [];
+
+                if (events.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🎉</div>
+                            <h3>All caught up!</h3>
+                            <p>No pending events to review right now.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = events.map(event => createEventCard(event)).join('');
+                updatePendingCount(events.length);
+
+            } catch (error) {
+                console.error('Failed to load pending events:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <h3>Connection Error</h3>
+                        <p>Failed to load pending events: ${error.message}</p>
+                        <button class="btn btn-secondary" onclick="loadPendingEvents()" style="margin-top: 16px;">
+                            🔄 Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function createEventCard(event) {
+            const submittedDate = new Date(event.submitted_at).toLocaleDateString();
+            const submittedTime = new Date(event.submitted_at).toLocaleTimeString();
+            
+            return `
+                <div class="event-card" id="event-${event.id}">
+                    <div class="event-header">
+                        <div>
+                            <h3 class="event-title">${escapeHtml(event.title)}</h3>
+                            <div class="event-meta">
+                                <span class="meta-item">📅 ${event.when}</span>
+                                <span class="meta-item">📍 ${escapeHtml(event.location)}</span>
+                                <span class="meta-item">💰 ${escapeHtml(event.price)}</span>
+                                <span class="meta-item">🏷️ ${escapeHtml(event.tag)}</span>
+                            </div>
+                        </div>
+                        <span class="status-badge status-pending">Pending</span>
+                    </div>
+
+                    <div class="event-description">
+                        "${escapeHtml(event.description)}"
+                    </div>
+
+                    <div class="event-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Contact</span>
+                            <span class="detail-value">${escapeHtml(event.contact_name || 'N/A')}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Email</span>
+                            <span class="detail-value">${escapeHtml(event.contact_email)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">City</span>
+                            <span class="detail-value">${escapeHtml(event.city)} (${escapeHtml(event.country_code)})</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Submitted</span>
+                            <span class="detail-value">${submittedDate} at ${submittedTime}</span>
+                        </div>
+                    </div>
+
+                    <div class="event-actions">
+                        <button class="btn btn-approve" onclick="approveEvent('${event.id}')">
+                            ✅ Approve Event
+                        </button>
+                        <button class="btn btn-reject" onclick="showRejectDialog('${event.id}')">
+                            ❌ Reject Event
+                        </button>
+                        <button class="btn btn-secondary" onclick="previewEvent('${event.id}')">
+                            👁️ Preview
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function approveEvent(eventId) {
+            try {
+                const response = await fetch(`${API_BASE}/v1/admin/events/${eventId}/approve`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    addRecentAction(`Approved event ${eventId}`, 'approved');
+                    removeEventCard(eventId);
+                    showNotification('Event approved successfully! ✅', 'success');
+                    loadStats(); // Refresh stats
+                } else {
+                    throw new Error(result.message || 'Failed to approve event');
+                }
+
+            } catch (error) {
+                console.error('Approval error:', error);
+                showNotification(`Failed to approve event: ${error.message}`, 'error');
+            }
+        }
+
+        function showRejectDialog(eventId) {
+            const reason = prompt('Please provide a reason for rejection (optional):');
+            if (reason !== null) { // User didn't cancel
+                rejectEvent(eventId, reason);
+            }
+        }
+
+        async function rejectEvent(eventId, reason = '') {
+            try {
+                const response = await fetch(`${API_BASE}/v1/admin/events/${eventId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    addRecentAction(`Rejected event ${eventId}${reason ? `: ${reason}` : ''}`, 'rejected');
+                    removeEventCard(eventId);
+                    showNotification('Event rejected ❌', 'success');
+                    loadStats(); // Refresh stats
+                } else {
+                    throw new Error(result.message || 'Failed to reject event');
+                }
+
+            } catch (error) {
+                console.error('Rejection error:', error);
+                showNotification(`Failed to reject event: ${error.message}`, 'error');
+            }
+        }
+
+        function previewEvent(eventId) {
+            // This would open the event in a preview modal
+            showNotification('Preview feature coming soon! 👁️', 'info');
+        }
+
+        function removeEventCard(eventId) {
+            const card = document.getElementById(`event-${eventId}`);
+            if (card) {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(-20px)';
+                
+                setTimeout(() => {
+                    card.remove();
+                    
+                    // Check if no more events
+                    const container = document.getElementById('pending-events');
+                    if (container.children.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">🎉</div>
+                                <h3>All caught up!</h3>
+                                <p>No pending events to review right now.</p>
+                            </div>
+                        `;
+                    }
+                }, 300);
+            }
+        }
+
+        function addRecentAction(action, type) {
+            const timestamp = new Date().toLocaleString();
+            recentActions.unshift({ action, type, timestamp });
+            recentActions = recentActions.slice(0, 10); // Keep only last 10
+            updateRecentActions();
+        }
+
+        function updateRecentActions() {
+            const container = document.getElementById('recent-actions');
+            
+            if (recentActions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <p>Recent moderation actions will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = recentActions.map(action => `
+                <div class="event-card" style="padding: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>${escapeHtml(action.action)}</span>
+                        <span class="status-badge status-${action.type}">${action.type}</span>
+                    </div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 8px;">${action.timestamp}</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadStats() {
+            // This would load actual stats from your backend
+            // For now, showing placeholder values
+            updatePendingCount();
+            document.getElementById('approved-count').textContent = recentActions.filter(a => a.type === 'approved').length;
+            document.getElementById('total-count').textContent = '...';
+            document.getElementById('response-time').textContent = '< 1h';
+        }
+
+        function updatePendingCount(count) {
+            const pendingEvents = document.querySelectorAll('#pending-events .event-card').length;
+            document.getElementById('pending-count').textContent = count !== undefined ? count : pendingEvents;
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create a simple toast notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#667eea'};
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                max-width: 400px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        // Add CSS for slide animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(100%);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

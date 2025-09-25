@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VFIED API Documentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #2d3748;
+            color: white;
+            padding: 2rem 1rem;
+            overflow-y: auto;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 2rem;
+            max-width: 800px;
+        }
+        .sidebar h2 { margin-bottom: 1rem; font-size: 1.2rem; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin-bottom: 0.5rem; }
+        .sidebar a { 
+            color: #a0aec0; 
+            text-decoration: none; 
+            padding: 0.5rem;
+            display: block;
+            border-radius: 4px;
+        }
+        .sidebar a:hover { background: #4a5568; color: white; }
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+        }
+        .method {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-right: 1rem;
+        }
+        .method.post { background: #28a745; color: white; }
+        .method.get { background: #007bff; color: white; }
+        .method.patch { background: #ffc107; color: black; }
+        code {
+            background: #f1f3f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+        pre {
+            background: #2d3748;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        .try-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 1rem 0;
+        }
+        .try-button:hover { background: #0056b3; }
+        .response {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            display: none;
+        }
+        h1 { color: #007bff; margin-bottom: 1rem; }
+        h2 { color: #2d3748; margin: 2rem 0 1rem; }
+        h3 { color: #4a5568; margin: 1.5rem 0 0.5rem; }
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            margin: -2rem -2rem 2rem -2rem;
+            border-radius: 0 0 16px 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>🍽️ VFIED API</h2>
+        <ul>
+            <li><a href="#getting-started">Getting Started</a></li>
+            <li><a href="#authentication">Authentication</a></li>
+            <li><a href="#quick-decision">Quick Decision</a></li>
+            <li><a href="#recommendations">Recommendations</a></li>
+            <li><a href="#menu-upload">Menu Upload</a></li>
+            <li><a href="#menu-management">Menu Management</a></li>
+            <li><a href="#analytics">Analytics</a></li>
+            <li><a href="#examples">Examples</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <div class="hero">
+            <h1>🍽️ VFIED API Documentation</h1>
+            <p>The world's first culturally-aware food intelligence API</p>
+            <p>Get personalized food recommendations based on location, mood, and culture</p>
+        </div>
+
+        <section id="getting-started">
+            <h2>🚀 Getting Started</h2>
+            <p>VFIED API provides culturally-aware food recommendations that adapt to location, mood, dietary preferences, and cultural context.</p>
+            
+            <h3>Base URL</h3>
+            <code>https://api.vfied.com</code>
+            
+            <h3>Quick Test</h3>
+            <pre><code>curl -X POST https://api.vfied.com/v1/recommend \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "location": {"city": "London", "country": "UK", "country_code": "GB"},
+    "mood_text": "tired but celebrating",
+    "dietary": ["vegetarian"]
+  }'</code></pre>
+        </section>
+
+        <section id="authentication">
+            <h2>🔑 Authentication</h2>
+            <p>All API requests require an API key in the Authorization header:</p>
+            <pre><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+            <p>Get your API key from the <a href="/dashboard">dashboard</a>.</p>
+        </section>
+
+        <section id="quick-decision">
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/v1/quick_decision</strong>
+                <p>Get an instant food decision without detailed reasoning. Perfect for "surprise me" features.</p>
+                
+                <h3>Request Body</h3>
+                <pre><code>{
+  "location": {
+    "city": "London",
+    "country": "United Kingdom", 
+    "country_code": "GB"
+  },
+  "dietary": ["vegetarian", "gluten-free"]
+}</code></pre>
+
+                <h3>Response</h3>
+                <pre><code>{
+  "success": true,
+  "decision": "Vegetable Curry",
+  "country_code": "IN",
+  "explanation": "Perfect comfort food for London weather",
+  "dietary_note": "Meets all your dietary requirements",
+  "processing_time_ms": 45
+}</code></pre>
+
+                <button class="try-button" onclick="tryQuickDecision()">Try It</button>
+                <div class="response" id="quick-decision-response"></div>
+            </div>
+        </section>
+
+        <section id="recommendations">
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/v1/recommend</strong>
+                <p>Get detailed personalized recommendations with cultural context and reasoning.</p>
+                
+                <h3>Request Body</h3>
+                <pre><code>{
+  "location": {
+    "city": "Nairobi",
+    "country": "Kenya",
+    "country_code": "KE"
+  },
+  "mood_text": "celebrating a promotion",
+  "mood_ids": ["CELEBRATING"],
+  "dietary": ["halal"],
+  "budget": "high",
+  "menu_source": "global_database"
+}</code></pre>
+
+                <h3>Response</h3>
+                <pre><code>{
+  "success": true,
+  "request_id": "req_1629123456789_abc123",
+  "food": {
+    "name": "Nyama Choma",
+    "emoji": "🥩",
+    "country": "Kenya",
+    "country_code": "KE",
+    "category": "celebration",
+    "tags": ["grilled", "meat", "celebration"],
+    "macros": {
+      "kcal": 450,
+      "protein_g": 35,
+      "carbs_g": 5,
+      "fat_g": 25
+    }
+  },
+  "friend_message": "Perfect for celebrating! Nyama Choma is the ultimate Kenyan celebration food.",
+  "reasoning": "Traditional celebration dish that matches your location and festive mood",
+  "cultural_note": "Nyama Choma is Kenya's national dish, perfect for special occasions",
+  "alternatives": [
+    {"name": "Pilau", "emoji": "🍚", "reason": "Another celebration favorite"},
+    {"name": "Ugali with Stew", "emoji": "🍛", "reason": "Classic comfort celebration"}
+  ],
+  "confidence": 95,
+  "processing_time_ms": 127
+}</code></pre>
+
+                <button class="try-button" onclick="tryRecommendation()">Try It</button>
+                <div class="response" id="recommendation-response"></div>
+            </div>
+        </section>
+
+        <section id="menu-upload">
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/v1/menus</strong>
+                <p>Upload your restaurant menu to get personalized recommendations from your own items.</p>
+                
+                <h3>Request Body</h3>
+                <pre><code>{
+  "menu": [
+    {
+      "name": "Ugali Mayai",
+      "emoji": "🍳",
+      "country": "Kenya",
+      "country_code": "KE",
+      "category": "comfort",
+      "tags": ["vegetarian", "protein-rich", "traditional"],
+      "macros": {
+        "kcal": 420,
+        "protein_g": 22,
+        "carbs_g": 60,
+        "fat_g": 10
+      },
+      "price": "8.99",
+      "currency": "GBP",
+      "availability": "in_stock",
+      "menu_link": "https://restaurant.com/menu/ugali-mayai"
+    }
+  ],
+  "mode": "snapshot"
+}</code></pre>
+
+                <h3>Response</h3>
+                <pre><code>{
+  "success": true,
+  "summary": {
+    "accepted": 1,
+    "rejected": 0,
+    "total": 1
+  },
+  "menu_version": "v_1629123456789",
+  "processing_time_ms": 234
+}</code></pre>
+
+                <p><strong>Mode Options:</strong></p>
+                <ul>
+                    <li><code>snapshot</code> - Replace entire menu (default)</li>
+                    <li><code>patch</code> - Update only provided items</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="menu-management">
+            <div class="endpoint">
+                <span class="method patch">PATCH</span>
+                <strong>/v1/menus/availability</strong>
+                <p>Update availability and prices for specific menu items quickly.</p>
+                
+                <h3>Request Body</h3>
+                <pre><code>{
+  "updates": [
+    {
+      "menu_item_id": "ugali-mayai-123",
+      "availability": "sold_out"
+    },
+    {
+      "menu_item_id": "jollof-rice-456", 
+      "price": "13.50",
+      "availability": "in_stock"
+    }
+  ]
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/v1/menus</strong>
+                <p>Get your current uploaded menu.</p>
+                
+                <h3>Response</h3>
+                <pre><code>{
+  "success": true,
+  "menu": [...],
+  "version": "v_1629123456789",
+  "item_count": 25,
+  "updated_at": "2025-08-18T15:30:00Z"
+}</code></pre>
+            </div>
+        </section>
+
+        <section id="analytics">
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/v1/analytics</strong>
+                <p>Get your API usage and account information.</p>
+                
+                <h3>Response</h3>
+                <pre><code>{
+  "success": true,
+  "usage": {
+    "current_period": 1247,
+    "limit": 50000,
+    "percentage": 2
+  },
+  "plan": "growth",
+  "vendor_id": "vendor_123",
+  "menu_status": "uploaded"
+}</code></pre>
+            </div>
+        </section>
+
+        <section id="examples">
+            <h2>💡 Examples</h2>
+            
+            <h3>Use Case 1: Food Delivery App</h3>
+            <pre><code>// User opens app in London, feeling tired
+const suggestion = await fetch('/v1/recommend', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer ' + apiKey },
+  body: JSON.stringify({
+    location: { city: 'London', country: 'UK', country_code: 'GB' },
+    mood_text: 'tired after work',
+    dietary: ['vegetarian'],
+    budget: 'medium'
+  })
+});
+
+// Returns: "Vegetable Curry" with cultural context</code></pre>
+
+            <h3>Use Case 2: Restaurant Menu Personalization</h3>
+            <pre><code>// First, upload your menu
+await fetch('/v1/menus', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer ' + apiKey },
+  body: JSON.stringify({ menu: restaurantMenuItems })
+});
+
+// Then get personalized recommendations
+const recommendation = await fetch('/v1/recommend', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer ' + apiKey },
+  body: JSON.stringify({
+    location: { city: 'London', country: 'UK', country_code: 'GB' },
+    mood_text: 'celebrating anniversary',
+    menu_source: 'my_uploaded_menu'
+  })
+});
+
+// Returns recommendation from YOUR menu items</code></pre>
+
+            <h3>Use Case 3: Travel App</h3>
+            <pre><code>// Tourist in Tokyo wants authentic experience
+const suggestion = await fetch('/v1/recommend', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer ' + apiKey },
+  body: JSON.stringify({
+    location: { city: 'Tokyo', country: 'Japan', country_code: 'JP' },
+    mood_text: 'adventurous tourist',
+    cultural_priority: true
+  })
+});
+
+// Returns: Authentic Japanese dish with cultural explanation</code></pre>
+        </section>
+
+        <section id="pricing">
+            <h2>💰 Pricing</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+                <div style="border: 1px solid #dee2e6; padding: 1.5rem; border-radius: 8px;">
+                    <h3>Free</h3>
+                    <p style="font-size: 2rem; color: #007bff;">$0/month</p>
+                    <ul>
+                        <li>1,000 API calls/month</li>
+                        <li>Global food database</li>
+                        <li>Basic recommendations</li>
+                        <li>Email support</li>
+                    </ul>
+                </div>
+                
+                <div style="border: 2px solid #007bff; padding: 1.5rem; border-radius: 8px;">
+                    <h3>Growth</h3>
+                    <p style="font-size: 2rem; color: #007bff;">$49/month</p>
+                    <ul>
+                        <li>50,000 API calls/month</li>
+                        <li>Menu upload (500 items)</li>
+                        <li>Advanced recommendations</li>
+                        <li>Priority support</li>
+                        <li>Analytics dashboard</li>
+                    </ul>
+                </div>
+                
+                <div style="border: 1px solid #dee2e6; padding: 1.5rem; border-radius: 8px;">
+                    <h3>Scale</h3>
+                    <p style="font-size: 2rem; color: #007bff;">$299/month</p>
+                    <ul>
+                        <li>500,000 API calls/month</li>
+                        <li>Unlimited menu items</li>
+                        <li>Webhooks</li>
+                        <li>Custom analytics</li>
+                        <li>Dedicated support</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <p><strong>Enterprise:</strong> Custom pricing for 1M+ calls/month with SLA guarantees and white-label options.</p>
+        </section>
+    </div>
+
+    <script>
+        const demoApiKey = 'demo_growth_key_456';
+
+        async function tryQuickDecision() {
+            const responseElement = document.getElementById('quick-decision-response');
+            responseElement.style.display = 'block';
+            responseElement.textContent = 'Making API call...';
+
+            try {
+                const response = await fetch('/v1/quick_decision', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${demoApiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        location: { city: 'London', country: 'United Kingdom', country_code: 'GB' },
+                        dietary: ['vegetarian']
+                    })
+                });
+
+                const data = await response.json();
+                responseElement.innerHTML = `<strong>Response:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                responseElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            }
+        }
+
+        async function tryRecommendation() {
+            const responseElement = document.getElementById('recommendation-response');
+            responseElement.style.display = 'block';
+            responseElement.textContent = 'Making API call...';
+
+            try {
+                const response = await fetch('/v1/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${demoApiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        location: { city: 'Nairobi', country: 'Kenya', country_code: 'KE' },
+                        mood_text: 'celebrating a promotion',
+                        dietary: ['halal'],
+                        budget: 'high'
+                    })
+                });
+
+                const data = await response.json();
+                responseElement.innerHTML = `<strong>Response:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                responseElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

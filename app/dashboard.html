@@ -1,0 +1,1269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>VFIED • Vendor Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      
+      --bg-primary: #0f0f23;
+      --bg-secondary: #1a1a2e;
+      --bg-tertiary: #16213e;
+      --bg-card: #0f1419;
+      --bg-hover: #1f2937;
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      
+      --border: #1e293b;
+      --border-light: #334155;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      
+      --radius: 12px;
+      --radius-lg: 16px;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: none;
+    }
+    
+    .header .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin-top: 0.5rem;
+    }
+    
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    
+    .back-link:hover {
+      background: var(--bg-hover);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    
+    .connection-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    
+    .connection-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 1.5rem;
+      align-items: end;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .form-group label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-group input {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 0.875rem 1rem;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+    
+    .status-dot.connected { background: var(--success); }
+    .status-dot.error { background: var(--danger); }
+    .status-dot.warning { background: var(--warning); }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.5rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+      border-color: var(--primary);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+      color: white;
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+      color: white;
+    }
+    
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+    
+    .grid {
+      display: grid;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--border-light);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .metric {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+    
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0.875rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .status-pill.healthy {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .status-pill.degraded {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    
+    .status-pill.unhealthy {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    .checklist {
+      list-style: none;
+      margin-top: 1rem;
+    }
+    
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .checklist-item:last-child {
+      border-bottom: none;
+    }
+    
+    .checklist-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .checklist-icon.pass {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+    
+    .checklist-icon.fail {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+    
+    .upload-zone {
+      border: 2px dashed var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+    
+    .upload-zone-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: var(--radius);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      color: white;
+      font-size: 1.5rem;
+    }
+    
+    .table-container {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-top: 1.5rem;
+      border: 1px solid var(--border);
+    }
+    
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .table th {
+      background: var(--bg-secondary);
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+    
+    .table tr:hover {
+      background: var(--bg-hover);
+    }
+    
+    .textarea {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 1rem;
+      color: var(--text-primary);
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.875rem;
+      resize: vertical;
+      min-height: 120px;
+      width: 100%;
+      margin: 1rem 0;
+    }
+    
+    .textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    .code-block {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      overflow-x: auto;
+      margin-top: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+      position: relative;
+    }
+    
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .message {
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius);
+      margin: 1rem 0;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .message-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .message-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    .message-info {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--info);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .badge-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    
+    .badge-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .header h1 { font-size: 2rem; }
+      .connection-form { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div>
+        <h1>🍽️ VFIED</h1>
+        <div class="subtitle">Vendor Dashboard</div>
+      </div>
+      <a href="/" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM5.354 4.646a.5.5 0 1 0-.708.708L7.793 8.5l-3.147 3.146a.5.5 0 0 0 .708.708L8.5 9.207l3.146 3.147a.5.5 0 0 0 .708-.708L9.207 8.5l3.147-3.146a.5.5 0 0 0-.708-.708L8.5 7.793 5.354 4.646Z"/>
+        </svg>
+        Back to App
+      </a>
+    </header>
+
+    <!-- Connection Panel -->
+    <div class="connection-panel">
+      <div class="connection-form">
+        <div class="form-group">
+          <label>API Endpoint</label>
+          <input id="baseUrl" value="https://vfied-v3.onrender.com" placeholder="https://api.vfied.com"/>
+        </div>
+        <div class="form-group">
+          <label>API Key</label>
+          <input id="apiKey" value="" placeholder="vf_..."/>
+        </div>
+        <button id="refreshBtn" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+            <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+          </svg>
+          Refresh All
+        </button>
+      </div>
+      <div class="status-indicator">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="connectionStatus">Ready to connect...</span>
+      </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="grid grid-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">System Health</h3>
+          <div class="status-pill healthy" id="healthPill">
+            <div class="status-dot"></div>
+            Checking...
+          </div>
+        </div>
+        <div class="code-block" id="healthDetails">Loading...</div>
+        <button id="loadHealthBtn" class="btn btn-secondary btn-sm" style="margin-top: 1rem;">Refresh Health</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Usage Stats</h3>
+          <button id="loadUsageBtn" class="btn btn-secondary btn-sm">Load</button>
+        </div>
+        <div class="metric-grid" id="usageMetrics">
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Plan</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Usage</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Limit</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Percent</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Restaurant Summary</h3>
+          <button id="loadSummaryBtn" class="btn btn-secondary btn-sm">Load</button>
+        </div>
+        <div class="metric-grid" id="summaryMetrics">
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Vendor</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Items</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Version</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Updated</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Analytics</h3>
+          <button id="loadStatsBtn" class="btn btn-secondary btn-sm">Load</button>
+        </div>
+        <div class="metric-grid" id="analyticsMetrics">
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Requests</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Users</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Success</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">—</div>
+            <div class="metric-label">Popular</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MVP Checklist -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">System Checklist</h3>
+        <button id="loadChecklistBtn" class="btn btn-secondary">Load Checklist</button>
+      </div>
+      <div id="checklistContent">
+        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+          Click "Load Checklist" to verify system components
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Management -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Menu Management</h3>
+        <div style="display: flex; gap: 0.75rem;">
+          <button id="loadMenuBtn" class="btn btn-secondary">Load Menu</button>
+          <button id="exportMenuBtn" class="btn btn-secondary">Export JSON</button>
+          <button id="addSampleBtn" class="btn btn-success">Add Sample</button>
+        </div>
+      </div>
+
+      <!-- Upload Zone -->
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-zone-icon">📋</div>
+        <h4 style="margin-bottom: 0.5rem; font-weight: 600;">Upload Restaurant Menu</h4>
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">Drop JSON file here or click to browse</p>
+        <input type="file" id="fileInput" accept=".json" style="display: none;">
+        <button class="btn btn-secondary btn-sm">Choose File</button>
+      </div>
+
+      <!-- JSON Editor -->
+      <div>
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Or paste menu JSON:</label>
+        <textarea 
+          id="menuJsonInput" 
+          class="textarea"
+          placeholder='{"restaurant_name": "My Restaurant", "location": {"city": "London", "country_code": "GB"}, "menu_items": [{"name": "Dish Name", "price": "£10", "description": "Delicious dish"}]}'
+        ></textarea>
+        <button id="submitMenuBtn" class="btn btn-success">Submit Menu Data</button>
+      </div>
+
+      <div id="menuMessages"></div>
+
+      <!-- Menu Items Table -->
+      <div class="table-container">
+        <table class="table" id="menuTable">
+          <thead>
+            <tr>
+              <th>Dish Name</th>
+              <th>Restaurant</th>
+              <th>Price</th>
+              <th>Meal Period</th>
+              <th>Tags</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Recent Activity</h3>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <select id="telemetryType" style="padding: 0.5rem; border-radius: var(--radius); background: var(--bg-tertiary); border: 1px solid var(--border-light); color: var(--text-primary);">
+            <option value="">All Types</option>
+            <option value="feedback">Feedback</option>
+            <option value="recommendation">Recommendations</option>
+            <option value="telemetry">System Events</option>
+          </select>
+          <input id="telemetrySince" type="datetime-local" style="padding: 0.5rem; border-radius: var(--radius); background: var(--bg-tertiary); border: 1px solid var(--border-light); color: var(--text-primary);">
+          <select id="telemetryLimit" style="padding: 0.5rem; border-radius: var(--radius); background: var(--bg-tertiary); border: 1px solid var(--border-light); color: var(--text-primary);">
+            <option>50</option>
+            <option selected>100</option>
+            <option>200</option>
+          </select>
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+            <input type="checkbox" id="telemetryAuto"> Auto-refresh
+          </label>
+          <button id="loadTelemetryBtn" class="btn btn-secondary">Load</button>
+        </div>
+      </div>
+      <div class="code-block" id="telemetryFeed">No recent activity</div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Utility functions
+    const $ = (id) => document.getElementById(id);
+    const api = () => ({ 
+      base: $('baseUrl').value.trim().replace(/\/+$/, ''), 
+      key: $('apiKey').value.trim() 
+    });
+
+    // Update connection status
+    const updateStatus = (message, type = 'info') => {
+      const status = $('connectionStatus');
+      const dot = $('statusDot');
+      
+      status.textContent = message;
+      dot.className = 'status-dot ' + type;
+      
+      if (type === 'connected') {
+        dot.classList.add('connected');
+      } else if (type === 'error') {
+        dot.classList.add('error');
+      }
+    };
+
+    // Show message
+    const showMessage = (containerId, message, type = 'info') => {
+      const container = $(containerId);
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message message-${type} fade-in`;
+      messageDiv.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          ${type === 'success' ? 
+            '<path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>' :
+            '<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>'
+          }
+        </svg>
+        ${message}
+      `;
+      
+      container.innerHTML = '';
+      container.appendChild(messageDiv);
+      
+      setTimeout(() => messageDiv.remove(), 5000);
+    };
+
+    // API helpers
+    async function apiGet(path) {
+      try {
+        const { base, key } = api();
+        updateStatus(`Connecting to ${base}${path}...`);
+        
+        const response = await fetch(base + path, {
+          headers: key ? { 'Authorization': 'Bearer ' + key } : {}
+        });
+        
+        const data = await response.json();
+        updateStatus('Connected successfully', 'connected');
+        return data;
+      } catch (error) {
+        updateStatus(`Connection failed: ${error.message}`, 'error');
+        throw error;
+      }
+    }
+
+    async function apiPost(path, body) {
+      try {
+        const { base, key } = api();
+        const response = await fetch(base + path, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(key ? { 'Authorization': 'Bearer ' + key } : {})
+          },
+          body: JSON.stringify(body || {})
+        });
+        return await response.json();
+      } catch (error) {
+        updateStatus(`Request failed: ${error.message}`, 'error');
+        throw error;
+      }
+    }
+
+    // Dashboard functions
+    async function loadHealth() {
+      try {
+        const { base } = api();
+        const startTime = performance.now();
+        
+        const response = await fetch(base + '/health');
+        const data = await response.json();
+        const responseTime = Math.round(performance.now() - startTime);
+        
+        const pill = $('healthPill');
+        const details = $('healthDetails');
+        
+        pill.className = 'status-pill';
+        
+        if (data.status === 'healthy' && responseTime < 1000) {
+          pill.classList.add('healthy');
+          pill.innerHTML = `<div class="status-dot"></div>Healthy (${responseTime}ms)`;
+        } else if (data.status === 'degraded' || responseTime > 1000) {
+          pill.classList.add('degraded');
+          pill.innerHTML = `<div class="status-dot"></div>Degraded (${responseTime}ms)`;
+        } else {
+          pill.classList.add('unhealthy');
+          pill.innerHTML = `<div class="status-dot"></div>Unhealthy (${responseTime}ms)`;
+        }
+        
+        details.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        const pill = $('healthPill');
+        pill.className = 'status-pill unhealthy';
+        pill.innerHTML = '<div class="status-dot"></div>Unreachable';
+        $('healthDetails').textContent = `Error: ${error.message}`;
+      }
+    }
+
+    async function loadUsage() {
+      try {
+        const data = await apiGet('/v1/analytics');
+        const container = $('usageMetrics');
+        
+        container.innerHTML = `
+          <div class="metric">
+            <div class="metric-value">${data.plan || '—'}</div>
+            <div class="metric-label">Plan</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${data.usage?.current_period || '—'}</div>
+            <div class="metric-label">Usage</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${data.usage?.limit || '—'}</div>
+            <div class="metric-label">Limit</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${data.usage?.percentage ? data.usage.percentage + '%' : '—'}</div>
+            <div class="metric-label">Percent</div>
+          </div>
+        `;
+      } catch (error) {
+        showMessage('usageMetrics', 'Failed to load usage data', 'error');
+      }
+    }
+
+    async function loadSummary() {
+      try {
+        const data = await apiGet('/v1/admin/summary');
+        const container = $('summaryMetrics');
+        
+        container.innerHTML = `
+          <div class="metric">
+            <div class="metric-value">${data.vendor_id || '—'}</div>
+            <div class="metric-label">Vendor</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${data.menu_items ?? '—'}</div>
+            <div class="metric-label">Items</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${data.menu_version || '—'}</div>
+            <div class="metric-label">Version</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : '—'}</div>
+            <div class="metric-label">Updated</div>
+          </div>
+        `;
+      } catch (error) {
+        showMessage('summaryMetrics', 'Failed to load summary', 'error');
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const data = await apiGet('/v1/analytics/stats');
+        const container = $('analyticsMetrics');
+        
+        container.innerHTML = `
+          <div class="metric">
+            <div class="metric-value">${data.total_events || '—'}</div>
+            <div class="metric-label">Requests</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${data.unique_users || '—'}</div>
+            <div class="metric-label">Users</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${data.success_rate || '—'}%</div>
+            <div class="metric-label">Success</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${data.popular_foods?.[0]?.[0] || '—'}</div>
+            <div class="metric-label">Popular</div>
+          </div>
+        `;
+      } catch (error) {
+        showMessage('analyticsMetrics', 'Stats unavailable', 'error');
+      }
+    }
+
+    async function loadChecklist() {
+      try {
+        const data = await apiGet('/v1/admin/checklist');
+        const container = $('checklistContent');
+        
+        const summaryBadges = `
+          <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+            <span class="badge ${data.summary?.phase1_pass ? 'badge-success' : 'badge-danger'}">
+              Phase 1: ${data.summary?.phase1_pass ? 'PASS' : 'FAIL'}
+            </span>
+            <span class="badge ${data.summary?.phase2_seed_pass ? 'badge-success' : 'badge-warning'}">
+              Phase 2: ${data.summary?.phase2_seed_pass ? 'PASS' : 'PARTIAL'}
+            </span>
+            <span class="badge badge-info">Countries: ${data.counts?.countries || '—'}</span>
+            <span class="badge badge-info">Menu Items: ${data.counts?.menu_items || '—'}</span>
+          </div>
+        `;
+        
+        const checklistItems = (data.items || []).map(item => `
+          <div class="checklist-item">
+            <div class="checklist-icon ${item.ok ? 'pass' : 'fail'}">
+              ${item.ok ? '✓' : '✗'}
+            </div>
+            <div>
+              <div style="font-weight: 500;">${item.label}</div>
+              ${!item.ok ? '<div style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem;">Needs attention</div>' : ''}
+            </div>
+          </div>
+        `).join('');
+        
+        container.innerHTML = summaryBadges + '<ul class="checklist">' + checklistItems + '</ul>';
+      } catch (error) {
+        showMessage('checklistContent', 'Failed to load checklist', 'error');
+      }
+    }
+
+    async function loadMenu() {
+      try {
+        const data = await apiGet('/v1/menus');
+        const tbody = $('menuTable').querySelector('tbody');
+        
+        if (!data.items || data.items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">No menu items found</td></tr>';
+          return;
+        }
+        
+        tbody.innerHTML = data.items.map(item => `
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 1.25rem;">${item.emoji || '🍽️'}</span>
+                <span style="font-weight: 500;">${item.name || '—'}</span>
+              </div>
+            </td>
+            <td>${item.restaurant_name || '—'}</td>
+            <td style="font-weight: 500;">${item.price || '—'}</td>
+            <td>
+              <span class="badge badge-info">${item.meal_period || 'all_day'}</span>
+            </td>
+            <td>
+              ${(item.search_tags || item.tags || []).slice(0, 3).map(tag => 
+                `<span class="badge badge-success" style="margin-right: 0.25rem;">${tag}</span>`
+              ).join('')}
+            </td>
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="removeMenuItem('${item.menu_item_id || item.name}')">
+                Remove
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        showMessage('menuMessages', 'Failed to load menu', 'error');
+      }
+    }
+
+    async function exportMenu() {
+      try {
+        const data = await apiGet('/v1/menus');
+        const json = JSON.stringify(data.items || [], null, 2);
+        
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(json);
+          showMessage('menuMessages', 'Menu JSON copied to clipboard!', 'success');
+        } else {
+          const textarea = document.createElement('textarea');
+          textarea.value = json;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          showMessage('menuMessages', 'Menu JSON copied!', 'success');
+        }
+      } catch (error) {
+        showMessage('menuMessages', 'Failed to export menu', 'error');
+      }
+    }
+
+    async function addSampleMenu() {
+      const sampleData = {
+        restaurant_id: 'demo_restaurant_' + Date.now(),
+        restaurant_name: 'Demo Restaurant',
+        location: { city: 'London', country_code: 'GB' },
+        menu_items: [
+          {
+            name: 'Margherita Pizza',
+            emoji: '🍕',
+            price: '£12.50',
+            description: 'Fresh mozzarella, tomato sauce, basil',
+            tags: ['vegetarian', 'popular'],
+            meal_period: 'lunch',
+            dietary: { vegetarian: true }
+          },
+          {
+            name: 'Fish & Chips',
+            emoji: '🍟',
+            price: '£14.90',
+            description: 'Beer battered cod with chunky chips',
+            tags: ['british', 'classic'],
+            meal_period: 'dinner'
+          }
+        ]
+      };
+
+      try {
+        const result = await apiPost('/v1/restaurant/menu', sampleData);
+        if (result.success) {
+          showMessage('menuMessages', `Added ${result.items_added || 2} sample items!`, 'success');
+          loadMenu();
+        } else {
+          showMessage('menuMessages', 'Failed to add sample menu', 'error');
+        }
+      } catch (error) {
+        showMessage('menuMessages', 'Error adding sample menu', 'error');
+      }
+    }
+
+    async function submitMenuData() {
+      const jsonData = $('menuJsonInput').value.trim();
+      if (!jsonData) {
+        showMessage('menuMessages', 'Please enter menu JSON data', 'error');
+        return;
+      }
+
+      try {
+        const data = JSON.parse(jsonData);
+        const result = await apiPost('/v1/restaurant/menu', data);
+        
+        if (result.success) {
+          showMessage('menuMessages', `Successfully processed: ${result.items_added} items added`, 'success');
+          $('menuJsonInput').value = '';
+          loadMenu();
+        } else {
+          showMessage('menuMessages', result.error || 'Failed to process menu', 'error');
+        }
+      } catch (error) {
+        showMessage('menuMessages', 'Invalid JSON format', 'error');
+      }
+    }
+
+    async function loadTelemetry() {
+      try {
+        const params = new URLSearchParams();
+        const type = $('telemetryType').value;
+        const since = $('telemetrySince').value;
+        const limit = $('telemetryLimit').value;
+        
+        if (type) params.set('type', type);
+        if (since) params.set('since', new Date(since).toISOString());
+        if (limit) params.set('limit', limit);
+        
+        const data = await apiGet('/v1/admin/telemetry?' + params.toString());
+        const feed = $('telemetryFeed');
+        
+        if (!data.items || data.items.length === 0) {
+          feed.textContent = 'No recent activity';
+        } else {
+          feed.textContent = data.items.map(item => JSON.stringify(item)).join('\n');
+        }
+      } catch (error) {
+        $('telemetryFeed').textContent = `Error loading activity: ${error.message}`;
+      }
+    }
+
+    // File upload handling
+    const uploadZone = $('uploadZone');
+    const fileInput = $('fileInput');
+    
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleFileUpload(files[0]);
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFileUpload(e.target.files[0]);
+    });
+
+    async function handleFileUpload(file) {
+      if (!file.name.endsWith('.json')) {
+        showMessage('menuMessages', 'Please upload a JSON file', 'error');
+        return;
+      }
+
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        $('menuJsonInput').value = JSON.stringify(data, null, 2);
+        showMessage('menuMessages', 'File loaded successfully! Review and submit.', 'success');
+      } catch (error) {
+        showMessage('menuMessages', 'Invalid JSON file', 'error');
+      }
+    }
+
+    // Auto-refresh telemetry
+    let telemetryTimer = null;
+    function toggleAutoRefresh() {
+      clearInterval(telemetryTimer);
+      if ($('telemetryAuto').checked) {
+        telemetryTimer = setInterval(loadTelemetry, 10000);
+      }
+    }
+
+    // Event listeners
+    $('refreshBtn').addEventListener('click', () => {
+      loadHealth();
+      loadUsage();
+      loadSummary();
+      loadStats();
+      loadMenu();
+      loadTelemetry();
+      loadChecklist();
+    });
+    
+    $('loadHealthBtn').addEventListener('click', loadHealth);
+    $('loadUsageBtn').addEventListener('click', loadUsage);
+    $('loadSummaryBtn').addEventListener('click', loadSummary);
+    $('loadStatsBtn').addEventListener('click', loadStats);
+    $('loadChecklistBtn').addEventListener('click', loadChecklist);
+    $('loadMenuBtn').addEventListener('click', loadMenu);
+    $('exportMenuBtn').addEventListener('click', exportMenu);
+    $('addSampleBtn').addEventListener('click', addSampleMenu);
+    $('submitMenuBtn').addEventListener('click', submitMenuData);
+    $('loadTelemetryBtn').addEventListener('click', loadTelemetry);
+    $('telemetryAuto').addEventListener('change', toggleAutoRefresh);
+
+    // Global function for remove buttons
+    window.removeMenuItem = async (itemId) => {
+      if (confirm('Remove this menu item?')) {
+        showMessage('menuMessages', 'Remove functionality coming soon...', 'info');
+      }
+    };
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load stored credentials
+      const storedKey = localStorage.getItem('vfied_api_key');
+      if (storedKey) $('apiKey').value = storedKey;
+
+      // Check URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlKey = urlParams.get('key');
+      if (urlKey) {
+        $('apiKey').value = urlKey;
+        localStorage.setItem('vfied_api_key', urlKey);
+      }
+
+      // Detect environment
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      $('baseUrl').value = isLocal ? 'http://localhost:3048' : 'https://vfied-v3.onrender.com';
+
+      // Generate demo key if needed
+      if (!storedKey && !urlKey) {
+        const demoKey = `vf_demo_${Math.random().toString(36).slice(2,15)}`;
+        $('apiKey').value = demoKey;
+        localStorage.setItem('vfied_api_key', demoKey);
+      }
+
+      // Auto-load all sections after a brief delay
+      setTimeout(() => {
+        loadHealth();
+        loadUsage();
+        loadSummary();
+        loadStats();
+        loadMenu();
+        loadTelemetry();
+        loadChecklist();
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

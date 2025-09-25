@@ -1,0 +1,22 @@
+[
+  { "name": "Hidden Ramen", "area": "Soho", "emoji": "🍜" },
+  { "name": "Sunday Roasts", "area": "Hackney", "emoji": "🥩" },
+  { "name": "Late Night Eats", "area": "Shoreditch", "emoji": "🌙" },
+  { "name": "Date Spots", "area": "Covent Garden", "emoji": "💕" },
+  { "name": "Best Sushi Under £20", "area": "Fitzrovia", "emoji": "🍣" },
+  { "name": "Bangin’ Bao", "area": "Camden", "emoji": "🥟" },
+  { "name": "Proper Curry", "area": "Brick Lane", "emoji": "🍛" },
+  { "name": "Comfort Noodles", "area": "Chinatown", "emoji": "🍜" },
+  { "name": "Sunday Brunch", "area": "Islington", "emoji": "🥞" },
+  { "name": "Coffee & Pastries", "area": "Kensington", "emoji": "☕️" },
+  { "name": "Street Tacos", "area": "Brixton", "emoji": "🌮" },
+  { "name": "Vegan Favourites", "area": "Dalston", "emoji": "🥗" },
+  { "name": "Crispy Fried Chicken", "area": "Peckham", "emoji": "🍗" },
+  { "name": "Pho Therapy", "area": "Hammersmith", "emoji": "🍲" },
+  { "name": "Neapolitan Pizza", "area": "Clapham", "emoji": "🍕" },
+  { "name": "Cheesecake Crawl", "area": "Soho", "emoji": "🍰" },
+  { "name": "Budget Lunches", "area": "Holborn", "emoji": "💷" },
+  { "name": "Korean BBQ", "area": "New Malden", "emoji": "🍖" },
+  { "name": "Local Pubs", "area": "Greenwich", "emoji": "🍺" },
+  { "name": "Seafood Fix", "area": "Mayfair", "emoji": "🦐" }
+]
