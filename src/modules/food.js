@@ -42,6 +42,9 @@ export async function initializeFood(config) {
   addMoodSuggestions();
   renderFriendChips();
   
+  // Expose handleDecision globally so buttons can access it
+  window.VFIED.handleDecision = handleDecision;
+  
   console.log('🍽️ Food module initialized');
 }
 
