@@ -700,7 +700,8 @@ export function setupFoodRoutes(app, upload) {
         mood_text,
         dietary,
         meal_period: timeContext?.meal_period,
-        cravingAttributes: parseCravings(mood_text).attributes
+        cravingAttributes: parseCravings(mood_text).attributes,
+        timeContext: timeContext // ADD THIS LINE
       });
       
       if (menuSuggestions && menuSuggestions.length > 0) {
