@@ -300,7 +300,7 @@ class MenuManager {
     return categoryEmojis[category] || item.emoji || '🍽️';
   }
 
-  async searchMenus({ location, mood_text = '', dietary = [], meal_period = 'all_day', attributes = [], limit = 10 }) {
+  async searchMenus({ location, mood_text = '', dietary = [], meal_period = 'all_day', attributes = [], limit = 10, timeContext = null }) {
     const results = [];
     const locationKey = `${(location && location.country_code ? location.country_code : 'GB').toLowerCase()}_${(location && location.city ? location.city : '').toLowerCase()}`;
     
@@ -312,7 +312,17 @@ class MenuManager {
           !key.includes(location && location.city ? location.city.toLowerCase() : '')) {
         continue;
       }
-      
+     if (timeContext && menu.opening_hours) {
+    const now = new Date();
+    const currentDay = now.toLocaleDateString('en', {weekday: 'long'}).toLowerCase();
+    const currentTime = now.toTimeString().slice(0,5);
+    
+    const todayHours = menu.opening_hours[currentDay];
+    if (!todayHours || currentTime < todayHours.open || currentTime > todayHours.close) {
+      console.log(`⏰ Skipping ${menu.restaurant_name} - closed (${currentTime} not between ${todayHours?.open}-${todayHours?.close})`);
+      continue; // Skip closed restaurants
+    }
+  } 
       const matchingItems = menu.menu_items.filter(item => {
         if (!item.available) return false;
         
@@ -477,7 +487,7 @@ class MenuManager {
 export const menuManager = new MenuManager();
 
 export async function recommendFromMenus(params) {
-  const { location, mood_text, dietary, meal_period, cravingAttributes } = params;
+  const { location, mood_text, dietary, meal_period, cravingAttributes, timeContext } = params;
   
   try {
     const menuItems = await menuManager.searchMenus({
@@ -486,6 +496,7 @@ export async function recommendFromMenus(params) {
       dietary: dietary || [],
       meal_period: meal_period || 'all_day',
       attributes: cravingAttributes || [],
+      timeContext: timeContext,  // ADD THIS LINE
       limit: 6
     });
     
