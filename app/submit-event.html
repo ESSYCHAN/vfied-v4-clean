@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Event - VFIED</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .btn:hover {
+            background: #5a67d8;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .success {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #276749;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .error {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to VFIED</a>
+        
+        <div class="header">
+            <h1>Submit Your Event</h1>
+            <p>Share your food, culture, or music event with the VFIED community</p>
+        </div>
+
+        <div id="success-message" class="success" style="display: none;">
+            <h4>Event Submitted Successfully!</h4>
+            <p>Your event will be reviewed by our team and appear in the app within 24-48 hours.</p>
+        </div>
+
+        <form id="eventForm">
+            <div class="form-group">
+                <label for="title">Event Title *</label>
+                <input type="text" id="title" name="title" required placeholder="e.g., Italian Food Festival">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" required placeholder="Tell people what makes your event special..."></textarea>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select category</option>
+                        <option value="food">Food</option>
+                        <option value="music">Music</option>
+                        <option value="culture">Culture</option>
+                        <option value="market">Market</option>
+                        <option value="nightlife">Nightlife</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Price</label>
+                    <input type="text" id="price" name="price" placeholder="Free, £10, £5-15, etc.">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="date">Date *</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="time">Time</label>
+                    <input type="time" id="time" name="time">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="venue">Venue/Location *</label>
+                <input type="text" id="venue" name="venue" required placeholder="Restaurant name, market, venue address">
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="city">City *</label>
+                    <input type="text" id="city" name="city" required placeholder="London, Nairobi, etc.">
+                </div>
+
+                <div class="form-group">
+                    <label for="country">Country *</label>
+                    <select id="country" name="country" required>
+                        <option value="">Select country</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="KE">Kenya</option>
+                        <option value="US">United States</option>
+                        <option value="NG">Nigeria</option>
+                        <option value="FR">France</option>
+                        <option value="DE">Germany</option>
+                        <option value="IT">Italy</option>
+                        <option value="JP">Japan</option>
+                        <option value="AU">Australia</option>
+                        <option value="CA">Canada</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="contact_name">Your Name *</label>
+                    <input type="text" id="contact_name" name="contact_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="contact_email">Contact Email *</label>
+                    <input type="email" id="contact_email" name="contact_email" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                <span id="submitText">Submit Event</span>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3048' 
+            : 'https://vfied-v3.onrender.com';
+
+        document.getElementById('eventForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            
+            submitBtn.disabled = true;
+            submitText.innerHTML = '<span class="loading"></span>Submitting...';
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/events/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: data.title,
+                        description: data.description,
+                        location: {
+                            venue: data.venue,
+                            city: data.city,
+                            country_code: data.country
+                        },
+                        date: data.date,
+                        time: data.time,
+                        category: data.category,
+                        price: data.price || 'Free',
+                        contact_name: data.contact_name,
+                        contact_email: data.contact_email
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('success-message').style.display = 'block';
+                    document.getElementById('eventForm').style.display = 'none';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    throw new Error(result.error || 'Failed to submit event');
+                }
+
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('Sorry, there was an error submitting your event. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitText.textContent = 'Submit Event';
+            }
+        });
+    </script>
+</body>
+</html>

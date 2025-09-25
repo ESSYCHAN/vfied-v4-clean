@@ -1,0 +1,8 @@
+[
+    { "title": "Borough Market Tasting", "emoji": "🧀", "date": "This week", "area": "London Bridge", "price": "£", "map": "Borough Market London" },
+    { "title": "Shoreditch Night Bites", "emoji": "🌙", "date": "Fri–Sat", "area": "Shoreditch", "price": "££", "map": "Shoreditch London" },
+    { "title": "Street Food Festival", "emoji": "🍢", "date": "Sat", "area": "Southbank", "price": "Free", "map": "Southbank Centre" },
+    { "title": "Wine & Small Plates", "emoji": "🍷", "date": "Sun", "area": "Soho", "price": "£££", "map": "Soho London" },
+    { "title": "Farmers’ Market", "emoji": "🥦", "date": "Sun morning", "area": "Marylebone", "price": "£–££", "map": "Marylebone Farmers Market" }
+  ]
+  

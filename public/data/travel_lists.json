@@ -1,0 +1,33 @@
+{
+    "London": [
+      { "name": "Sunday Roast", "emoji": "🥩", "note": "With Yorkshire pudding" },
+      { "name": "Pie & Mash", "emoji": "🥧", "note": "Proper East End comfort" },
+      { "name": "Chicken Tikka Masala", "emoji": "🍛", "note": "London’s national dish 😉" }
+    ],
+    "Nairobi": [
+      { "name": "Nyama Choma", "emoji": "🍖", "note": "With kachumbari & ugali" },
+      { "name": "Mutura", "emoji": "🌭", "note": "Street-side speciality" },
+      { "name": "Pilau", "emoji": "🍚", "note": "Coastal spice profile" }
+    ],
+    "Paris": [
+      { "name": "Croissant", "emoji": "🥐", "note": "Find a real artisan bakery" },
+      { "name": "Steak Frites", "emoji": "🥩", "note": "Classic bistro order" },
+      { "name": "Crêpes", "emoji": "🥞", "note": "Savory buckwheat or sweet" }
+    ],
+    "Tokyo": [
+      { "name": "Ramen", "emoji": "🍜", "note": "Shoyu/Shio/Tonkotsu—pick a style" },
+      { "name": "Sushi Omakase", "emoji": "🍣", "note": "Book ahead for quality" },
+      { "name": "Katsu Sando", "emoji": "🥪", "note": "Convenience store perfection" }
+    ],
+    "New York": [
+      { "name": "Dollar Slice", "emoji": "🍕", "note": "Iconic cheap bite" },
+      { "name": "Bagel & Lox", "emoji": "🥯", "note": "Weekend default" },
+      { "name": "Pastrami on Rye", "emoji": "🥪", "note": "Classic deli experience" }
+    ],
+    "Rome": [
+      { "name": "Cacio e Pepe", "emoji": "🍝", "note": "Pecorino + pepper magic" },
+      { "name": "Supplì", "emoji": "🍙", "note": "Fried rice balls" },
+      { "name": "Gelato", "emoji": "🍨", "note": "Look for low overrun shops" }
+    ]
+  }
+  

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VFIED - Restaurant Partner Signup</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        .form-section h3 {
+            color: #4a5568;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            background: white;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .pricing-tiers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .tier {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .tier:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        .tier.selected {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+        .tier.recommended {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+        .tier.recommended::before {
+            content: "Most Popular";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #48bb78;
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .tier h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+        .tier .price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        .tier ul {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+        .tier li {
+            padding: 0.25rem 0;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+        .tier li::before {
+            content: "✓";
+            color: #48bb78;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .error {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        .success {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #276749;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .features {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        .features h3 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #2d3748;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        .feature {
+            text-align: center;
+            padding: 1rem;
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .feature h4 {
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+        .feature p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .pricing-tiers {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ VFIED</h1>
+            <p>Join the world's first culturally-aware food intelligence network</p>
+        </div>
+
+        <div class="features">
+            <h3>Why Partner with VFIED?</h3>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h4>Smart Recommendations</h4>
+                    <p>AI matches your dishes to customer moods and cultural preferences</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🌍</div>
+                    <h4>Global Reach</h4>
+                    <p>Connect with customers seeking authentic cultural food experiences</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h4>Real-time Analytics</h4>
+                    <p>Track performance and optimize your menu based on AI insights</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h4>Easy Integration</h4>
+                    <p>Simple API integration with your existing ordering systems</p>
+                </div>
+            </div>
+        </div>
+
+        <form id="signupForm" class="card">
+            <div id="success-message" class="success" style="display: none;">
+                <h4>🎉 Welcome to VFIED!</h4>
+                <p>Your account has been created successfully. Check your email for your API key and setup instructions.</p>
+            </div>
+
+            <div class="form-section">
+                <h3>📋 Restaurant Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="restaurantName">Restaurant Name *</label>
+                        <input type="text" id="restaurantName" name="restaurantName" required>
+                        <div class="error" id="restaurantName-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cuisineType">Cuisine Type *</label>
+                        <select id="cuisineType" name="cuisineType" required>
+                            <option value="">Select cuisine type</option>
+                            <option value="british">British</option>
+                            <option value="kenyan">Kenyan</option>
+                            <option value="ethiopian">Ethiopian</option>
+                            <option value="nigerian">Nigerian</option>
+                            <option value="indian">Indian</option>
+                            <option value="chinese">Chinese</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="thai">Thai</option>
+                            <option value="italian">Italian</option>
+                            <option value="french">French</option>
+                            <option value="mediterranean">Mediterranean</option>
+                            <option value="mexican">Mexican</option>
+                            <option value="fusion">Fusion</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <div class="error" id="cuisineType-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input type="text" id="city" name="city" required placeholder="e.g., London, Nairobi">
+                        <div class="error" id="city-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country *</label>
+                        <select id="country" name="country" required>
+                            <option value="">Select country</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="KE">Kenya</option>
+                            <option value="US">United States</option>
+                            <option value="NG">Nigeria</option>
+                            <option value="ET">Ethiopia</option>
+                            <option value="UG">Uganda</option>
+                            <option value="TZ">Tanzania</option>
+                            <option value="IN">India</option>
+                            <option value="JP">Japan</option>
+                            <option value="FR">France</option>
+                            <option value="DE">Germany</option>
+                            <option value="IT">Italy</option>
+                            <option value="ES">Spain</option>
+                            <option value="AU">Australia</option>
+                            <option value="CA">Canada</option>
+                        </select>
+                        <div class="error" id="country-error"></div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="address">Full Address</label>
+                        <textarea id="address" name="address" placeholder="Street address, postal code"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="website">Website</label>
+                        <input type="url" id="website" name="website" placeholder="https://yourrestaurant.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+44 20 7xxx xxxx">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>👤 Contact Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                        <div class="error" id="firstName-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                        <div class="error" id="lastName-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                        <div class="error" id="email-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Your Role *</label>
+                        <select id="role" name="role" required>
+                            <option value="">Select your role</option>
+                            <option value="owner">Owner</option>
+                            <option value="manager">Manager</option>
+                            <option value="chef">Head Chef</option>
+                            <option value="marketing">Marketing Manager</option>
+                            <option value="tech">Tech Manager</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <div class="error" id="role-error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>💰 Choose Your Plan</h3>
+                <div class="pricing-tiers">
+                    <div class="tier" data-plan="free">
+                        <h4>Free</h4>
+                        <div class="price">£0<span style="font-size: 1rem;">/month</span></div>
+                        <ul>
+                            <li>1,000 API calls/month</li>
+                            <li>Global food database</li>
+                            <li>Basic recommendations</li>
+                            <li>Email support</li>
+                        </ul>
+                    </div>
+                    <div class="tier recommended" data-plan="growth">
+                        <h4>Growth</h4>
+                        <div class="price">£49<span style="font-size: 1rem;">/month</span></div>
+                        <ul>
+                            <li>50,000 API calls/month</li>
+                            <li>Menu upload (500 items)</li>
+                            <li>Advanced recommendations</li>
+                            <li>Priority support</li>
+                            <li>Analytics dashboard</li>
+                        </ul>
+                    </div>
+                    <div class="tier" data-plan="scale">
+                        <h4>Scale</h4>
+                        <div class="price">£299<span style="font-size: 1rem;">/month</span></div>
+                        <ul>
+                            <li>500,000 API calls/month</li>
+                            <li>Unlimited menu items</li>
+                            <li>Webhooks</li>
+                            <li>Custom analytics</li>
+                            <li>Dedicated support</li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" id="selectedPlan" name="selectedPlan" value="free">
+                <div class="error" id="plan-error"></div>
+            </div>
+
+            <div class="form-section">
+                <h3>📋 Additional Information</h3>
+                <div class="form-group">
+                    <label for="menuSize">Approximate number of menu items</label>
+                    <select id="menuSize" name="menuSize">
+                        <option value="">Select range</option>
+                        <option value="1-20">1-20 items</option>
+                        <option value="21-50">21-50 items</option>
+                        <option value="51-100">51-100 items</option>
+                        <option value="101-500">101-500 items</option>
+                        <option value="500+">500+ items</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="currentSystems">Current ordering/POS systems (optional)</label>
+                    <input type="text" id="currentSystems" name="currentSystems" placeholder="e.g., Square, Toast, Deliveroo">
+                </div>
+                <div class="form-group">
+                    <label for="goals">What are your main goals with VFIED? (optional)</label>
+                    <textarea id="goals" name="goals" placeholder="e.g., Increase online orders, reach new customers, showcase authentic cuisine"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                <span id="submitText">Create My Restaurant Account</span>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3048' 
+            : 'https://vfied-v3.onrender.com';
+
+        // Plan selection
+        document.querySelectorAll('.tier').forEach(tier => {
+            tier.addEventListener('click', () => {
+                document.querySelectorAll('.tier').forEach(t => t.classList.remove('selected'));
+                tier.classList.add('selected');
+                document.getElementById('selectedPlan').value = tier.dataset.plan;
+            });
+        });
+
+        // Set default selection
+        document.querySelector('[data-plan="free"]').classList.add('selected');
+
+        // Form validation
+        function validateForm() {
+            const required = ['restaurantName', 'cuisineType', 'city', 'country', 'firstName', 'lastName', 'email', 'role'];
+            let isValid = true;
+
+            // Clear previous errors
+            document.querySelectorAll('.error').forEach(error => error.textContent = '');
+
+            required.forEach(field => {
+                const input = document.getElementById(field);
+                if (!input.value.trim()) {
+                    document.getElementById(field + '-error').textContent = 'This field is required';
+                    isValid = false;
+                }
+            });
+
+            // Email validation
+            const email = document.getElementById('email').value;
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                document.getElementById('email-error').textContent = 'Please enter a valid email address';
+                isValid = false;
+            }
+
+            // Plan selection validation
+            if (!document.getElementById('selectedPlan').value) {
+                document.getElementById('plan-error').textContent = 'Please select a plan';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Form submission
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitText.innerHTML = '<span class="loading"></span>Creating Account...';
+
+            // Collect form data
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                // Send to your backend
+                const response = await fetch(`${API_BASE}/v1/restaurants/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        restaurant: {
+                            name: data.restaurantName,
+                            cuisineType: data.cuisineType,
+                            city: data.city,
+                            country: data.country,
+                            country_code: data.country, // Use the country code
+                            address: data.address,
+                            website: data.website,
+                            phone: data.phone
+                        },
+                        contact: {
+                            name: `${data.firstName} ${data.lastName}`, // Backend expects single 'name' field
+                            email: data.email,
+                            phone: data.phone,
+                            position: data.role
+                        },
+                        plan: data.selectedPlan,
+                        terms_accepted: true, // Add this required field
+                        marketing_consent: false // Add this optional field
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Store credentials for dashboard
+                    localStorage.setItem('vfied_api_key', result.credentials.api_key);
+                    localStorage.setItem('vfied_restaurant_id', result.restaurant_id);
+                    
+                    // Update success message with working link
+                    const successDiv = document.getElementById('success-message');
+                    successDiv.innerHTML = `
+                        <h4>🎉 Welcome to VFIED!</h4>
+                        <p>Your account has been created successfully.</p>
+                        <p><strong>Restaurant ID:</strong> ${result.restaurant_id}</p>
+                        <p><strong>API Key:</strong> ${result.credentials.api_key}</p>
+                        <div style="margin-top: 1rem;">
+                            <button onclick="window.location.href='dashboard.html'" style="background:#667eea;color:white;padding:12px 24px;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                                Access Your Dashboard →
+                            </button>
+                        </div>
+                    `;
+                    successDiv.style.display = 'block';
+                    document.getElementById('signupForm').style.display = 'none';
+                } else {
+                    throw new Error(result.error || 'Failed to create account');
+                }
+
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('Sorry, there was an error creating your account. Please try again or contact support.');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitText.textContent = 'Create My Restaurant Account';
+            }
+        });
+
+        // Auto-fill country based on city (optional enhancement)
+        document.getElementById('city').addEventListener('blur', (e) => {
+            const city = e.target.value.toLowerCase();
+            const countrySelect = document.getElementById('country');
+            
+            const cityCountryMap = {
+                'london': 'GB',
+                'manchester': 'GB',
+                'birmingham': 'GB',
+                'nairobi': 'KE',
+                'mombasa': 'KE',
+                'kisumu': 'KE',
+                'kampala': 'UG',
+                'lagos': 'NG',
+                'abuja': 'NG',
+                'addis ababa': 'ET',
+                'dar es salaam': 'TZ',
+                'new york': 'US',
+                'los angeles': 'US',
+                'chicago': 'US',
+                'mumbai': 'IN',
+                'delhi': 'IN',
+                'tokyo': 'JP',
+                'osaka': 'JP',
+                'paris': 'FR',
+                'lyon': 'FR',
+                'berlin': 'DE',
+                'munich': 'DE'
+            };
+
+            if (cityCountryMap[city] && !countrySelect.value) {
+                countrySelect.value = cityCountryMap[city];
+            }
+        });
+    </script>
+</body>
+</html>

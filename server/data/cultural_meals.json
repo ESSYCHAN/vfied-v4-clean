@@ -1,0 +1,363 @@
+{
+    "KE": {
+      "country": "Kenya",
+      "breakfast": {
+        "time": "6:00-9:00",
+        "never": ["ugali", "nyama choma", "pilau", "githeri", "mukimo", "wet fry", "biryani"],
+        "traditional": {
+          "beverages": ["chai (kenyan milk tea)", "black coffee", "white coffee", "milo", "drinking chocolate"],
+          "breads": ["mandazi", "chapati", "white bread", "brown bread", "mkate wa kumimina"],
+          "spreads": ["blue band margarine", "jam", "peanut butter", "honey"],
+          "proteins": ["boiled eggs", "fried eggs", "scrambled eggs", "sausages", "smokies"],
+          "porridges": ["uji (fermented porridge)", "wimbi porridge", "oats porridge"],
+          "quick": ["bread and tea", "mandazi and chai", "chapati and tea"],
+          "weekend_special": ["english breakfast", "samosas", "bhajias"]
+        },
+        "modern_urban": ["cereal with milk", "yogurt", "toast", "coffee and croissant"],
+        "hotel_breakfast": ["spanish omelette", "french toast", "pancakes"],
+        "notes": "Ugali is NEVER breakfast. It's a stiff maize meal for lunch/dinner only. Chai is essential - usually very milky and sweet with spices."
+      },
+      "lunch": {
+        "time": "12:00-14:00",
+        "traditional": {
+          "starches": ["ugali", "rice", "chapati", "mukimo", "githeri"],
+          "vegetables": ["sukuma wiki", "cabbage", "managu", "terere", "kunde", "ndengu"],
+          "proteins": ["beef stew", "chicken stew", "omena (small fish)", "fish", "matumbo", "beans"],
+          "combinations": ["ugali + sukuma + beef", "rice + beans (wairimu)", "chapati + ndengu", "githeri mix"],
+          "soups": ["bone soup", "chicken soup"]
+        },
+        "office_lunch": ["chips masala", "pilau", "chicken and chips"],
+        "special_occasion": ["nyama choma", "wet fry", "biryani"],
+        "vegetarian": ["githeri", "beans and chapati", "mukimo", "vegetable stew"],
+        "notes": "Ugali is the staple, eaten with hands to scoop stews. Sukuma wiki is daily vegetable."
+      },
+      "dinner": {
+        "time": "19:00-21:00",
+        "everyday": ["ugali with stew", "rice combinations", "chapati meals", "githeri"],
+        "special": ["nyama choma", "roast chicken", "fish", "pilau", "biryani"],
+        "light_options": ["tea and bread", "chapati and tea", "leftover lunch"],
+        "urban_modern": ["pizza", "chinese food", "burgers"],
+        "notes": "Similar to lunch but may include grilled meats for special occasions"
+      },
+      "snacks": {
+        "traditional": ["roasted maize", "groundnuts", "boiled maize", "cassava", "sweet potatoes"],
+        "fried": ["samosas", "bhajias", "viazi karai", "kebabs"],
+        "modern": ["crisps", "biscuits", "cakes", "chocolate"],
+        "street_food": ["mutura", "smokie pasua", "mayai pasua", "chips"]
+      },
+      "beverages": {
+        "hot": ["chai", "coffee", "cocoa", "milo"],
+        "cold": ["soda", "juice", "maji (water)", "madafu (coconut water)"],
+        "traditional": ["mursik", "busaa", "muratina"],
+        "modern": ["smoothies", "milkshakes", "iced coffee"]
+      }
+    },
+    
+    "NG": {
+      "country": "Nigeria",
+      "breakfast": {
+        "time": "6:00-9:00",
+        "never": ["pounded yam", "fufu", "eba", "amala", "jollof rice", "egusi soup", "ogbono soup"],
+        "traditional": {
+          "porridges": ["akamu/ogi/pap", "custard", "oats"],
+          "proteins": ["akara (bean cakes)", "moi moi", "eggs", "kosai"],
+          "breads": ["agege bread", "butter bread", "wheat bread"],
+          "beverages": ["tea", "coffee", "milo", "bournvita"],
+          "quick": ["bread and tea", "bread and akara", "yam and egg sauce"],
+          "filling": ["yam and egg", "plantain and eggs", "potato and egg"]
+        },
+        "regional": {
+          "north": ["masa", "kosai", "dan wake"],
+          "south": ["akara and pap", "okpa", "abacha"],
+          "west": ["ewa agoyin and bread", "moi moi"]
+        },
+        "notes": "Heavy soups and swallows are dinner foods. Akamu/pap is common across regions."
+      },
+      "lunch": {
+        "time": "13:00-15:00",
+        "popular": ["jollof rice", "fried rice", "white rice and stew", "coconut rice"],
+        "proteins": ["chicken", "beef", "fish", "turkey", "goat meat"],
+        "sides": ["plantain", "moi moi", "salad", "coleslaw"],
+        "soups_light": ["pepper soup", "vegetable soup"],
+        "beans": ["beans and plantain", "beans porridge", "beans and rice"],
+        "quick_options": ["noodles", "spaghetti", "yam porridge"],
+        "notes": "Rice dishes dominate lunch. Jollof rice is the national favorite."
+      },
+      "dinner": {
+        "time": "19:00-21:00",
+        "swallows": ["pounded yam", "eba (garri)", "amala", "fufu", "semo", "wheat"],
+        "soups": ["egusi", "ogbono", "okra", "vegetable", "afang", "edikaikong", "oha", "bitterleaf"],
+        "combinations": ["pounded yam + egusi", "eba + okra", "amala + ewedu and gbegiri"],
+        "light": ["tea and bread", "indomie", "beans"],
+        "notes": "Swallows with soup is traditional dinner. Eaten with hands, rolling swallow into balls."
+      },
+      "snacks": {
+        "fried": ["puff puff", "chin chin", "buns", "spring rolls"],
+        "nuts": ["groundnuts", "cashews", "tiger nuts"],
+        "traditional": ["roasted corn", "coconut", "garden egg", "cucumber"],
+        "modern": ["meat pie", "sausage roll", "donuts", "shawarma"]
+      },
+      "street_food": {
+        "popular": ["suya", "kilishi", "asun", "nkwobi", "abacha", "boli"],
+        "regional": ["masa (north)", "akara (everywhere)", "roasted yam (south)"]
+      }
+    },
+    
+    "GB": {
+      "country": "United Kingdom",
+      "breakfast": {
+        "time": "7:00-9:00",
+        "never": ["sunday roast", "christmas dinner", "beef wellington", "cottage pie"],
+        "traditional": {
+          "full_english": ["eggs", "bacon", "sausages", "beans", "mushrooms", "tomatoes", "black pudding", "toast"],
+          "quick": ["cereal", "toast with jam/marmalade", "porridge", "muesli"],
+          "beverages": ["tea with milk", "coffee", "orange juice"],
+          "breads": ["toast", "crumpets", "english muffins", "croissant"],
+          "continental": ["pastries", "fruit", "yogurt"]
+        },
+        "modern": ["avocado toast", "smoothie bowl", "granola", "eggs benedict", "shakshuka"],
+        "weekend": ["full english", "pancakes", "french toast", "eggs royale"],
+        "notes": "Full English is weekend treat. Weekday breakfast is usually quick - cereal or toast."
+      },
+      "lunch": {
+        "time": "12:00-14:00",
+        "traditional": ["sandwich", "soup", "jacket potato", "ploughman's lunch", "cornish pasty"],
+        "pub_lunch": ["fish and chips", "pie and mash", "bangers and mash", "hunters chicken"],
+        "modern": ["salad", "wrap", "sushi", "poke bowl", "burrito"],
+        "meal_deals": ["sandwich + crisps + drink", "pasta pot", "salad box"],
+        "sunday": ["sunday roast with yorkshire pudding"],
+        "notes": "Sandwiches dominate. Meal deals from Tesco/Boots are office staples."
+      },
+      "dinner": {
+        "time": "18:00-20:00",
+        "traditional": ["roast dinner", "shepherd's pie", "cottage pie", "toad in the hole", "beef stew"],
+        "popular": ["curry (adopted national dish)", "pasta", "stir-fry", "fajitas", "chilli"],
+        "pub_classics": ["steak and ale pie", "fish and chips", "gammon and eggs"],
+        "modern": ["thai", "chinese takeaway", "pizza", "korean", "mexican"],
+        "quick": ["beans on toast", "cheese on toast", "ready meals"],
+        "notes": "Curry is hugely popular - especially on Fridays. Sunday roast is tradition."
+      },
+      "snacks": {
+        "traditional": ["crisps", "biscuits", "scones", "victoria sponge", "bourbon biscuits"],
+        "tea_time": ["cucumber sandwiches", "cake", "shortbread"],
+        "modern": ["protein bars", "rice cakes", "hummus and veg"],
+        "pub": ["pork scratchings", "nuts", "scotch egg"]
+      },
+      "beverages": {
+        "hot": ["tea (with milk)", "coffee", "hot chocolate"],
+        "alcoholic": ["beer", "cider", "gin and tonic", "wine"],
+        "soft": ["squash", "fizzy drinks", "water"]
+      }
+    },
+    
+    "US": {
+      "country": "United States",
+      "breakfast": {
+        "time": "6:00-9:00",
+        "never": ["steak dinner", "thanksgiving turkey", "bbq ribs", "lobster"],
+        "traditional": {
+          "hot": ["pancakes", "waffles", "french toast", "eggs and bacon", "hash browns"],
+          "proteins": ["bacon", "sausage", "ham", "eggs (any style)"],
+          "quick": ["cereal", "oatmeal", "toast", "bagel with cream cheese"],
+          "beverages": ["coffee", "orange juice", "milk"],
+          "breads": ["bagels", "english muffins", "biscuits", "donuts"]
+        },
+        "regional": {
+          "south": ["biscuits and gravy", "grits", "chicken and waffles"],
+          "northeast": ["bagel and lox", "taylor ham"],
+          "southwest": ["breakfast burrito", "huevos rancheros"]
+        },
+        "modern": ["smoothie", "acai bowl", "avocado toast", "overnight oats", "protein shake"],
+        "notes": "Coffee is essential. Pancakes/waffles are weekend treats."
+      },
+      "lunch": {
+        "time": "12:00-13:00",
+        "traditional": ["sandwich", "burger", "hot dog", "pizza slice", "salad"],
+        "fast_food": ["mcdonalds", "subway", "chipotle", "taco bell"],
+        "office": ["salad", "soup and sandwich", "leftover dinner", "meal prep"],
+        "school": ["pb&j sandwich", "chicken nuggets", "pizza"],
+        "regional": {
+          "philly": ["cheesesteak"],
+          "new_york": ["deli sandwich", "pizza"],
+          "south": ["bbq", "fried chicken"]
+        },
+        "notes": "Quick lunch, often eaten at desk. 30-60 minute lunch break typical."
+      },
+      "dinner": {
+        "time": "18:00-20:00",
+        "traditional": ["steak", "roast chicken", "meatloaf", "pot roast", "mac and cheese"],
+        "popular": ["pasta", "tacos", "pizza", "chinese takeout", "burgers"],
+        "bbq": ["ribs", "pulled pork", "brisket", "grilled chicken"],
+        "comfort": ["fried chicken", "chili", "casserole", "lasagna"],
+        "healthy": ["grilled salmon", "salad", "quinoa bowl", "roasted vegetables"],
+        "notes": "Dinner is the main meal. Takeout/delivery very common."
+      },
+      "snacks": {
+        "salty": ["chips", "pretzels", "popcorn", "nachos", "cheese and crackers"],
+        "sweet": ["cookies", "candy", "ice cream", "brownies"],
+        "healthy": ["fruit", "veggie sticks", "yogurt", "granola bars"],
+        "sports": ["wings", "nachos", "pizza", "beer"]
+      }
+    },
+    
+    "JP": {
+      "country": "Japan",
+      "breakfast": {
+        "time": "6:00-8:00",
+        "never": ["ramen", "yakiniku", "sukiyaki", "tempura dinner sets"],
+        "traditional": {
+          "complete": ["gohan (rice)", "miso soup", "grilled fish", "tsukemono (pickles)", "nori", "natto"],
+          "proteins": ["tamagoyaki", "grilled salmon", "natto", "tofu"],
+          "quick": ["onigiri", "tamago kake gohan", "ochazuke"],
+          "beverages": ["green tea", "coffee", "milk"]
+        },
+        "modern": ["toast", "coffee", "yogurt", "fruit", "cereal"],
+        "convenience": ["onigiri from konbini", "sandwich", "coffee"],
+        "notes": "Traditional includes rice, not noodles. Many now eat western-style toast."
+      },
+      "lunch": {
+        "time": "12:00-13:00",
+        "popular": ["ramen", "udon", "soba", "donburi", "bento", "curry rice"],
+        "bento": ["rice", "protein", "pickles", "vegetables", "fruit"],
+        "quick": ["konbini bento", "onigiri", "sandwich"],
+        "teishoku": ["main dish + rice + miso soup + pickles"],
+        "business": ["sushi", "tempura set", "unagi"],
+        "notes": "1 hour lunch break. Ramen/soba shops popular for quick lunch."
+      },
+      "dinner": {
+        "time": "19:00-21:00",
+        "home": ["curry rice", "yakitori", "gyoza", "nikujaga", "teriyaki"],
+        "special": ["sushi", "kaiseki", "shabu-shabu", "sukiyaki", "yakiniku"],
+        "quick": ["ramen", "gyudon", "convenience store", "takeout bento"],
+        "izakaya": ["yakitori", "edamame", "karaage", "sashimi"],
+        "notes": "Often eat out due to long work hours. Convenience stores important."
+      },
+      "snacks": {
+        "traditional": ["senbei", "mochi", "dango", "dorayaki", "manju"],
+        "modern": ["pocky", "kit kat", "chips", "chocolate"],
+        "konbini": ["onigiri", "sandwiches", "fried chicken", "oden"]
+      }
+    },
+    
+    "IN": {
+      "country": "India",
+      "breakfast": {
+        "time": "7:00-9:00",
+        "never": ["biryani", "full thali", "tandoori chicken", "dal makhani"],
+        "north": {
+          "traditional": ["paratha", "poori", "chole bhature", "aloo puri"],
+          "quick": ["toast with chai", "poha", "upma"],
+          "beverages": ["chai", "lassi", "coffee"]
+        },
+        "south": {
+          "traditional": ["idli sambar", "dosa", "vada", "uttapam", "pongal"],
+          "quick": ["upma", "puttu", "appam"],
+          "beverages": ["filter coffee", "chai"]
+        },
+        "west": {
+          "traditional": ["dhokla", "thepla", "poha", "sabudana khichdi"],
+          "mumbai": ["vada pav", "misal pav"]
+        },
+        "east": {
+          "traditional": ["luchi", "aloo dum", "cholar dal"],
+          "bengali": ["muri", "telebhaja"]
+        },
+        "notes": "Regional variations huge. South prefers rice-based, North wheat-based."
+      },
+      "lunch": {
+        "time": "12:30-14:00",
+        "thali": ["rice/roti", "dal", "sabzi", "pickle", "papad", "curd"],
+        "office": ["tiffin", "dabba service", "meal subscription"],
+        "quick": ["rice and dal", "roti sabzi", "pulao", "khichdi"],
+        "notes": "Main meal of day. Thali provides complete nutrition."
+      },
+      "dinner": {
+        "time": "20:00-22:00",
+        "traditional": ["roti/rice", "dal", "sabzi", "curry"],
+        "special": ["biryani", "tandoori", "paneer dishes", "korma"],
+        "light": ["khichdi", "soup", "dosa"],
+        "notes": "Later than western countries. Often lighter than lunch."
+      },
+      "snacks": {
+        "fried": ["samosa", "pakora", "bhajiya", "vada"],
+        "chaat": ["bhel puri", "pani puri", "sev puri", "dahi puri"],
+        "sweet": ["jalebi", "gulab jamun", "rasgulla", "barfi"],
+        "evening": ["chai with biscuits", "namkeen", "mixture"]
+      },
+      "street_food": {
+        "popular": ["pani puri", "vada pav", "pav bhaji", "chole bhature", "momos"],
+        "regional": ["kathi roll (kolkata)", "dabeli (gujarat)", "litti chokha (bihar)"]
+      }
+    },
+    
+    "FR": {
+      "country": "France",
+      "breakfast": {
+        "time": "7:00-9:00",
+        "never": ["coq au vin", "beef bourguignon", "cassoulet", "bouillabaisse"],
+        "traditional": {
+          "breads": ["croissant", "pain au chocolat", "baguette", "brioche"],
+          "spreads": ["butter", "jam", "honey", "nutella"],
+          "beverages": ["café", "café au lait", "chocolat chaud", "orange juice"],
+          "simple": ["tartine (bread with jam)", "croissant with coffee"]
+        },
+        "modern": ["cereal", "yogurt", "fruit"],
+        "notes": "Light breakfast. Pastry and coffee typical. No eggs/meat traditionally."
+      },
+      "lunch": {
+        "time": "12:00-14:00",
+        "traditional": ["entrée + plat + dessert", "quiche", "croque monsieur", "salade niçoise"],
+        "bistro": ["steak frites", "duck confit", "moules frites"],
+        "quick": ["sandwich jambon-beurre", "panini", "salade"],
+        "business": ["three course meal", "wine with lunch"],
+        "notes": "Main meal traditionally. 2-hour lunch break common."
+      },
+      "dinner": {
+        "time": "19:30-21:00",
+        "traditional": ["pot-au-feu", "boeuf bourguignon", "ratatouille", "gratin dauphinois"],
+        "formal": ["multiple courses", "cheese before dessert"],
+        "casual": ["pasta", "pizza", "omelette", "soup"],
+        "notes": "Later than UK/US. Often lighter if lunch was substantial."
+      },
+      "snacks": {
+        "goûter": ["pain au chocolat", "biscuits", "fruit", "yogurt"],
+        "apéro": ["olives", "cheese", "charcuterie", "nuts"],
+        "sweet": ["madeleines", "macarons", "éclairs"]
+      }
+    },
+    
+    "MX": {
+      "country": "Mexico",
+      "breakfast": {
+        "time": "7:00-10:00",
+        "never": ["mole dinner", "pozole", "cochinita pibil"],
+        "traditional": {
+          "dishes": ["chilaquiles", "huevos rancheros", "huevos divorciados", "molletes"],
+          "quick": ["tamales", "pan dulce", "quesadilla"],
+          "beverages": ["café de olla", "atole", "champurrado", "juice"],
+          "breads": ["bolillo", "concha", "pan dulce"]
+        },
+        "street": ["tacos de canasta", "tamales", "atole"],
+        "notes": "Hearty breakfast common. Eggs with salsa typical."
+      },
+      "lunch": {
+        "time": "14:00-16:00",
+        "traditional": ["comida corrida (set meal)", "soup + main + dessert"],
+        "popular": ["tacos", "tortas", "enchiladas", "pozole", "mole"],
+        "quick": ["quesadilla", "gorditas", "sopes"],
+        "notes": "Main meal of day. Often largest meal."
+      },
+      "dinner": {
+        "time": "20:00-22:00",
+        "light": ["quesadillas", "tacos", "cereal", "pan dulce with milk"],
+        "street": ["tacos al pastor", "elote", "esquites"],
+        "special": ["pozole", "tamales", "barbacoa"],
+        "notes": "Often lighter than lunch. Street food popular."
+      },
+      "snacks": {
+        "street": ["elote", "churros", "marquesitas", "tostilocos"],
+        "traditional": ["jicama with lime", "cucumber with chili", "fruit with chamoy"],
+        "sweet": ["dulce de leche", "mazapán", "pulparindo"]
+      }
+    }
+  }
