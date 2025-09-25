@@ -194,6 +194,7 @@ function escapeHtml(s) {
 // ---- Expose Global API ----
 window.VFIED = {
   ...window.VFIED,
+  handleDecision: null, // Will be set by food module
   exploreGem,
   tryTravel,
   currentTab: () => currentTab,
