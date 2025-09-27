@@ -499,7 +499,7 @@ export async function recommendFromMenus(params) {
       timeContext: timeContext,  // ADD THIS LINE
       limit: 6
     });
-    
+    console.log(`🔍 Menu search found ${menuItems.length} matching items`); 
     if (menuItems.length === 0) {
       console.log('🔍 No menu items found matching criteria');
       return null;
