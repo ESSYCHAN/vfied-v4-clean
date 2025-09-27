@@ -751,12 +751,1301 @@
       "cuisine_type": "american",
       "updated_at": "2025-09-25T17:55:50.829Z",
       "created_at": "2025-09-25T17:55:50.829Z"
+    },
+    "gb_london_brags_brams_hackney_road": {
+      "restaurant_id": "brags_brams_hackney_road",
+      "restaurant_name": "Brags & Brams",
+      "location": {
+        "city": "London",
+        "country_code": "GB",
+        "address": "263-265 Hackney Road"
+      },
+      "menu_items": [
+        {
+          "menu_item_id": "brags_brams_hackney_road_0_1758828780898",
+          "name": "Veg Omelette",
+          "emoji": "🥚",
+          "price": "£12.9",
+          "description": "Spinach, feta cheese, onions, mushroom",
+          "category": "omelettes",
+          "tags": [
+            "vegetarian",
+            "eggs",
+            "cheese"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "vegetarian",
+            "eggs",
+            "cheese"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.899Z",
+          "updated_at": "2025-09-25T19:33:00.899Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_1_1758828780899",
+          "name": "Sujuk Omelette",
+          "emoji": "🥚",
+          "price": "£12.9",
+          "description": "Sujuk, cheddar cheese",
+          "category": "omelettes",
+          "tags": [
+            "turkish",
+            "meat",
+            "eggs"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "turkish",
+            "meat",
+            "eggs"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.899Z",
+          "updated_at": "2025-09-25T19:33:00.899Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_2_1758828780899",
+          "name": "Three Cheese Omelette",
+          "emoji": "🧀",
+          "price": "£12.9",
+          "description": "Cheddar, feta, halloumi cheese",
+          "category": "omelettes",
+          "tags": [
+            "vegetarian",
+            "cheese",
+            "eggs"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "vegetarian",
+            "cheese",
+            "eggs"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.899Z",
+          "updated_at": "2025-09-25T19:33:00.899Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_3_1758828780899",
+          "name": "Cilbir (Medi Eggs)",
+          "emoji": "🥚",
+          "price": "£14.5",
+          "description": "Poached eggs, yoghurt, dill, spinach, spicy butter, sourdough",
+          "category": "breakfast_mains",
+          "tags": [
+            "mediterranean",
+            "eggs",
+            "spicy",
+            "popular"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "mediterranean",
+            "eggs",
+            "spicy",
+            "popular"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.899Z",
+          "updated_at": "2025-09-25T19:33:00.899Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_4_1758828780899",
+          "name": "Mediterranean",
+          "emoji": "🫒",
+          "price": "£16.9",
+          "description": "Scrambled eggs, halloumi, sujuk, mushroom, avocado, cheese pastry, feta cheese, olives, shakshuka dip, honey cream, sourdough",
+          "category": "breakfast_mains",
+          "tags": [
+            "mediterranean",
+            "sharing",
+            "premium"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "mediterranean",
+            "sharing",
+            "premium"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.899Z",
+          "updated_at": "2025-09-25T19:33:00.899Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_5_1758828780899",
+          "name": "Newington Green",
+          "emoji": "🥓",
+          "price": "£16.9",
+          "description": "Scrambled eggs, bacon, cumberland sausage, hash brown, beans, tomato, pancake, fruits, maple syrup",
+          "category": "breakfast_mains",
+          "tags": [
+            "full_english",
+            "hearty",
+            "popular"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "full_english",
+            "hearty",
+            "popular"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.899Z",
+          "updated_at": "2025-09-25T19:33:00.899Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_6_1758828780899",
+          "name": "Oh So Veggie",
+          "emoji": "🥑",
+          "price": "£15.5",
+          "description": "Vegan sausage, avocado, mushroom, hash brown, grilled tomatoes, spinach, beans, sourdough",
+          "category": "breakfast_mains",
+          "tags": [
+            "vegan",
+            "healthy",
+            "plant_based"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "vegan",
+            "healthy",
+            "plant_based",
+            "vegetarian",
+            "grilled"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": true,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.899Z",
+          "updated_at": "2025-09-25T19:33:00.899Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_7_1758828780899",
+          "name": "Shakshuka",
+          "emoji": "🍅",
+          "price": "£14.5",
+          "description": "Mildly spiced tomatoes with peppers, eggs, sourdough",
+          "category": "breakfast_mains",
+          "tags": [
+            "mediterranean",
+            "spicy",
+            "tomato",
+            "popular"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "mediterranean",
+            "spicy",
+            "tomato",
+            "popular"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.899Z",
+          "updated_at": "2025-09-25T19:33:00.899Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_8_1758828780899",
+          "name": "Brags Breakfast",
+          "emoji": "🍳",
+          "price": "£16.5",
+          "description": "Bacon, fried eggs, cumberland sausage, hash brown, beans, tomato, french toast, nutella, berry spread",
+          "category": "breakfast_mains",
+          "tags": [
+            "full_english",
+            "premium",
+            "sweet_savory"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "full_english",
+            "premium",
+            "sweet_savory",
+            "fried"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.899Z",
+          "updated_at": "2025-09-25T19:33:00.899Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_9_1758828780899",
+          "name": "Smashed Burger",
+          "emoji": "🍔",
+          "price": "£15",
+          "description": "Double beef patty, grilled onions, gherkins, cheese, burger sauce",
+          "category": "burgers",
+          "tags": [
+            "beef",
+            "popular",
+            "comfort"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "beef",
+            "popular",
+            "comfort",
+            "american",
+            "grilled"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_10_1758828780900",
+          "name": "Chicken Burger",
+          "emoji": "🐔",
+          "price": "£16",
+          "description": "Marinated grilled chicken, tomato, lettuce, cheese, burger sauce",
+          "category": "burgers",
+          "tags": [
+            "chicken",
+            "grilled"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "chicken",
+            "grilled",
+            "american"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_11_1758828780900",
+          "name": "Veg Burger",
+          "emoji": "🌱",
+          "price": "£14",
+          "description": "Lentil & chickpea patty, tomato, lettuce, romesco sauce, onion",
+          "category": "burgers",
+          "tags": [
+            "vegan",
+            "plant_based",
+            "healthy"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "vegan",
+            "plant_based",
+            "healthy",
+            "american"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": true,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_12_1758828780900",
+          "name": "Mixed Leaf Salad",
+          "emoji": "🥗",
+          "price": "£8.5",
+          "description": "Mixed greens, red onions, red cabbage, sun dried tomato, olives",
+          "category": "salads",
+          "tags": [
+            "healthy",
+            "light",
+            "fresh"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "healthy",
+            "light",
+            "fresh"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": true,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_13_1758828780900",
+          "name": "Chicken Caesar Salad",
+          "emoji": "🥗",
+          "price": "£12.5",
+          "description": "Grilled chicken, lettuce, croutons, caesar sauce, parmesan",
+          "category": "salads",
+          "tags": [
+            "classic",
+            "protein",
+            "popular"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "classic",
+            "protein",
+            "popular",
+            "grilled",
+            "fresh"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_14_1758828780900",
+          "name": "Fennel Salad",
+          "emoji": "🍃",
+          "price": "£8.5",
+          "description": "Fennel, red onions, apple, capers",
+          "category": "salads",
+          "tags": [
+            "fresh",
+            "unique",
+            "healthy"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "fresh",
+            "unique",
+            "healthy"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_15_1758828780900",
+          "name": "Rigatoni",
+          "emoji": "🍝",
+          "price": "£13",
+          "description": "Feta, chilli pepper, onions, parsley",
+          "category": "pasta",
+          "tags": [
+            "italian",
+            "cheese",
+            "pasta"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "italian",
+            "cheese",
+            "pasta"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_16_1758828780900",
+          "name": "Chardonnay Chicken",
+          "emoji": "🍝",
+          "price": "£16.5",
+          "description": "Creamy mushroom sauce, potato, parsley",
+          "category": "pasta",
+          "tags": [
+            "chicken",
+            "creamy",
+            "wine"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "chicken",
+            "creamy",
+            "wine"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_17_1758828780900",
+          "name": "Brams Granola",
+          "emoji": "🥣",
+          "price": "£9",
+          "description": "Greek yogurt, berry compote, honey, mixed fruits",
+          "category": "grains",
+          "tags": [
+            "healthy",
+            "yogurt",
+            "berries"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "healthy",
+            "yogurt",
+            "berries"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_18_1758828780900",
+          "name": "Brams Pancakes",
+          "emoji": "🥞",
+          "price": "£14",
+          "description": "Berry compote, seasonal fruits, chantilly cream, maple syrup",
+          "category": "sweet",
+          "tags": [
+            "sweet",
+            "berries",
+            "popular"
+          ],
+          "meal_period": "brunch",
+          "search_tags": [
+            "sweet",
+            "berries",
+            "popular"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_19_1758828780900",
+          "name": "French Classico",
+          "emoji": "🥞",
+          "price": "£14",
+          "description": "Nutella, banana, berries, chantilly",
+          "category": "sweet",
+          "tags": [
+            "sweet",
+            "nutella",
+            "indulgent"
+          ],
+          "meal_period": "brunch",
+          "search_tags": [
+            "sweet",
+            "nutella",
+            "indulgent"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_20_1758828780900",
+          "name": "Waffle",
+          "emoji": "🧇",
+          "price": "£14",
+          "description": "Hazelnut croquant, peanut butter, fruits, ice cream",
+          "category": "sweet",
+          "tags": [
+            "sweet",
+            "nuts",
+            "ice_cream"
+          ],
+          "meal_period": "brunch",
+          "search_tags": [
+            "sweet",
+            "nuts",
+            "ice_cream"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_21_1758828780900",
+          "name": "Eggs Florentine",
+          "emoji": "🥚",
+          "price": "£12.9",
+          "description": "Eggs, sauteed spinach, hollandaise",
+          "category": "benedicts",
+          "tags": [
+            "eggs",
+            "vegetarian",
+            "classic"
+          ],
+          "meal_period": "brunch",
+          "search_tags": [
+            "eggs",
+            "vegetarian",
+            "classic"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_22_1758828780900",
+          "name": "Eggs Royale",
+          "emoji": "🍣",
+          "price": "£13.5",
+          "description": "Eggs, smoked salmon, hollandaise",
+          "category": "benedicts",
+          "tags": [
+            "eggs",
+            "salmon",
+            "premium"
+          ],
+          "meal_period": "brunch",
+          "search_tags": [
+            "eggs",
+            "salmon",
+            "premium"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_23_1758828780900",
+          "name": "Eggs Benedict",
+          "emoji": "🥓",
+          "price": "£13.5",
+          "description": "Eggs, bacon, hollandaise",
+          "category": "benedicts",
+          "tags": [
+            "classic",
+            "bacon",
+            "popular"
+          ],
+          "meal_period": "brunch",
+          "search_tags": [
+            "classic",
+            "bacon",
+            "popular"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        },
+        {
+          "menu_item_id": "brags_brams_hackney_road_24_1758828780900",
+          "name": "Brags Bennie",
+          "emoji": "🌶️",
+          "price": "£13.5",
+          "description": "Eggs, romesco, avocado",
+          "category": "benedicts",
+          "tags": [
+            "spicy",
+            "avocado",
+            "unique"
+          ],
+          "meal_period": "brunch",
+          "search_tags": [
+            "spicy",
+            "avocado",
+            "unique"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:33:00.900Z",
+          "updated_at": "2025-09-25T19:33:00.900Z"
+        }
+      ],
+      "delivery_platforms": {},
+      "opening_hours": {
+        "monday": {
+          "open": "07:00",
+          "close": "17:00"
+        },
+        "tuesday": {
+          "open": "07:00",
+          "close": "17:00"
+        },
+        "wednesday": {
+          "open": "07:00",
+          "close": "17:00"
+        },
+        "thursday": {
+          "open": "07:00",
+          "close": "17:00",
+          "pizza": {
+            "open": "13:00",
+            "close": "21:00"
+          }
+        },
+        "friday": {
+          "open": "07:00",
+          "close": "17:00",
+          "pizza": {
+            "open": "13:00",
+            "close": "21:00"
+          }
+        },
+        "saturday": {
+          "open": "08:00",
+          "close": "17:00",
+          "pizza": {
+            "open": "13:00",
+            "close": "21:00"
+          }
+        },
+        "sunday": {
+          "open": "08:00",
+          "close": "17:00",
+          "pizza": {
+            "open": "13:00",
+            "close": "21:00"
+          }
+        }
+      },
+      "cuisine_type": "american",
+      "updated_at": "2025-09-25T19:33:00.900Z",
+      "created_at": "2025-09-25T18:55:55.646Z"
+    },
+    "gb_london_demo_restaurant_1758826827430": {
+      "restaurant_id": "demo_restaurant_1758826827430",
+      "restaurant_name": "Demo Restaurant",
+      "location": {
+        "city": "London",
+        "country_code": "GB",
+        "address": ""
+      },
+      "menu_items": [
+        {
+          "menu_item_id": "demo_restaurant_1758826827430_0_1758826827432",
+          "name": "Margherita Pizza",
+          "emoji": "🍕",
+          "price": "£12.50",
+          "description": "Fresh mozzarella, tomato sauce, basil",
+          "category": "main",
+          "tags": [
+            "vegetarian",
+            "popular"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "vegetarian",
+            "popular",
+            "italian",
+            "healthy",
+            "fresh"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:00:27.432Z",
+          "updated_at": "2025-09-25T19:00:27.432Z"
+        },
+        {
+          "menu_item_id": "demo_restaurant_1758826827430_1_1758826827432",
+          "name": "Fish & Chips",
+          "emoji": "🍟",
+          "price": "£14.90",
+          "description": "Beer battered cod with chunky chips",
+          "category": "main",
+          "tags": [
+            "british",
+            "classic"
+          ],
+          "meal_period": "dinner",
+          "search_tags": [
+            "british",
+            "classic"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T19:00:27.432Z",
+          "updated_at": "2025-09-25T19:00:27.432Z"
+        }
+      ],
+      "delivery_platforms": {},
+      "opening_hours": {},
+      "cuisine_type": "italian",
+      "updated_at": "2025-09-25T19:00:27.433Z",
+      "created_at": "2025-09-25T19:00:27.433Z"
+    },
+    "gb_london_canto73_newington_green": {
+      "restaurant_id": "canto73_newington_green",
+      "restaurant_name": "CANTO 73",
+      "location": {
+        "city": "London",
+        "country_code": "GB",
+        "address": "43 Newington Green"
+      },
+      "menu_items": [
+        {
+          "menu_item_id": "canto73_newington_green_0_1758830498346",
+          "name": "Homemade Bakes",
+          "emoji": "🥐",
+          "price": "£8",
+          "description": "See counter for daily selection",
+          "category": "bakery",
+          "tags": [
+            "bakery",
+            "daily_special"
+          ],
+          "meal_period": "all_day",
+          "search_tags": [
+            "bakery",
+            "daily_special"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_1_1758830498347",
+          "name": "Homemade Granola, Yoghurt and Seasonal Fruit",
+          "emoji": "🥣",
+          "price": "£8",
+          "description": "House-made granola with natural yoghurt",
+          "category": "breakfast",
+          "tags": [
+            "granola",
+            "healthy",
+            "seasonal"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "granola",
+            "healthy",
+            "seasonal"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_2_1758830498347",
+          "name": "Wild Three-Cornered Leek Soup",
+          "emoji": "🍲",
+          "price": "£6",
+          "description": "Choose vegetable or chicken stock base",
+          "category": "soups",
+          "tags": [
+            "soup",
+            "seasonal",
+            "foraged"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "soup",
+            "seasonal",
+            "foraged"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_3_1758830498347",
+          "name": "Egg Salad, Tenderstem Broccoli and Bearnaise",
+          "emoji": "🥪",
+          "price": "£8",
+          "description": "Fresh egg salad sandwich with seasonal greens",
+          "category": "sandwiches",
+          "tags": [
+            "sandwich",
+            "eggs",
+            "seasonal"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "sandwich",
+            "eggs",
+            "seasonal",
+            "healthy",
+            "fresh"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_4_1758830498347",
+          "name": "Bifana",
+          "emoji": "🥪",
+          "price": "£9.50",
+          "description": "Portuguese pork sandwich with fermented pepper mayo",
+          "category": "sandwiches",
+          "tags": [
+            "portuguese",
+            "pork",
+            "fermented"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "portuguese",
+            "pork",
+            "fermented"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_5_1758830498347",
+          "name": "Slow Cooked Beef Shin Doughnut",
+          "emoji": "🍩",
+          "price": "£11.50",
+          "description": "With gochujang mayo",
+          "category": "mains",
+          "tags": [
+            "beef",
+            "korean",
+            "innovative"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "beef",
+            "korean",
+            "innovative"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_6_1758830498347",
+          "name": "House Smoked Salmon on Rye",
+          "emoji": "🐟",
+          "price": "£12",
+          "description": "Golden beetroot hummus and horseradish",
+          "category": "sandwiches",
+          "tags": [
+            "salmon",
+            "smoked",
+            "premium"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "salmon",
+            "smoked",
+            "premium"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_7_1758830498347",
+          "name": "Nourish Bowl",
+          "emoji": "🥗",
+          "price": "£12",
+          "description": "Giant couscous base, seasonal toppings with yoghurt and wasabi dressing",
+          "category": "bowls",
+          "tags": [
+            "healthy",
+            "seasonal",
+            "bowl"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "healthy",
+            "seasonal",
+            "bowl"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_8_1758830498347",
+          "name": "Chicken Schnitzel, Potato Salad and Hispi Cabbage Slaw",
+          "emoji": "🍗",
+          "price": "£15",
+          "description": "Crispy chicken schnitzel with seasonal sides",
+          "category": "mains",
+          "tags": [
+            "chicken",
+            "german",
+            "comfort"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "chicken",
+            "german",
+            "comfort",
+            "fried",
+            "fresh"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_9_1758830498347",
+          "name": "Cod Cheeks, Lime Butter Sauce and Coconut Rice",
+          "emoji": "🐟",
+          "price": "£15",
+          "description": "Sustainable cod cheeks with tropical flavors",
+          "category": "mains",
+          "tags": [
+            "fish",
+            "sustainable",
+            "tropical"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "fish",
+            "sustainable",
+            "tropical"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_10_1758830498347",
+          "name": "Borlotti Beans and Caramelised Onions",
+          "emoji": "🫘",
+          "price": "£13",
+          "description": "Fried friggitelli peppers and parmesan",
+          "category": "mains",
+          "tags": [
+            "beans",
+            "vegetarian",
+            "italian"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "beans",
+            "vegetarian",
+            "italian",
+            "fried"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        },
+        {
+          "menu_item_id": "canto73_newington_green_11_1758830498347",
+          "name": "Supper Club Experience",
+          "emoji": "🍽️",
+          "price": "£60",
+          "description": "Seven seasonal plates with chef explanation (Fridays & Saturdays at 7:30pm)",
+          "category": "tasting_menu",
+          "tags": [
+            "tasting_menu",
+            "seasonal",
+            "experience"
+          ],
+          "meal_period": "dinner",
+          "search_tags": [
+            "tasting_menu",
+            "seasonal",
+            "experience"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-09-25T20:01:38.347Z",
+          "updated_at": "2025-09-25T20:01:38.347Z"
+        }
+      ],
+      "delivery_platforms": {},
+      "opening_hours": {
+        "monday": "closed",
+        "tuesday": "closed",
+        "wednesday": "closed",
+        "thursday": {
+          "lunch": {
+            "open": "09:00",
+            "close": "16:00"
+          },
+          "kitchen": {
+            "open": "12:00",
+            "close": "15:00"
+          }
+        },
+        "friday": {
+          "lunch": {
+            "open": "09:00",
+            "close": "16:00"
+          },
+          "kitchen": {
+            "open": "12:00",
+            "close": "15:00"
+          },
+          "supper_club": {
+            "open": "19:30",
+            "close": "22:30"
+          }
+        },
+        "saturday": {
+          "lunch": {
+            "open": "09:00",
+            "close": "16:00"
+          },
+          "kitchen": {
+            "open": "12:00",
+            "close": "15:00"
+          },
+          "supper_club": {
+            "open": "19:30",
+            "close": "22:30"
+          }
+        },
+        "sunday": {
+          "lunch": {
+            "open": "09:00",
+            "close": "16:00"
+          },
+          "kitchen": {
+            "open": "12:00",
+            "close": "15:00"
+          }
+        }
+      },
+      "cuisine_type": "international",
+      "updated_at": "2025-09-25T20:01:38.348Z",
+      "created_at": "2025-09-25T20:01:38.348Z"
     }
   },
   "stats": {
-    "total_items": 25,
-    "total_restaurants": 1,
-    "last_updated": "2025-09-25T17:55:50.829Z"
+    "total_items": 64,
+    "total_restaurants": 4,
+    "last_updated": "2025-09-25T20:01:38.348Z"
   },
-  "last_saved": "2025-09-25T17:55:50.832Z"
+  "last_saved": "2025-09-25T20:01:38.348Z"
 }
