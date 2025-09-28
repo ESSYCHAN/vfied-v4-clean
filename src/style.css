@@ -106,11 +106,9 @@ header {
 header h1 {
   font-size: var(--text-3xl);
   font-weight: 800;
-  background: linear-gradient(135deg, var(--gray-100), var(--primary-400));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: white; /* Simple white text instead of gradient */
   letter-spacing: -0.02em;
+  margin-bottom: 4px;
 }
 
 header p {
