@@ -76,6 +76,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  /* Remove any height constraints */
+  height: auto;
+  min-height: 100vh;
 }
 
 /* App container */
@@ -84,7 +87,10 @@ body {
   max-width: 430px;
   margin: 0 auto;
   position: relative;
-  padding: 0 var(--safe-area-left) 120px var(--safe-area-right);
+  padding: 0 var(--safe-area-left) calc(100px + var(--safe-area-bottom)) var(--safe-area-right);
+  /* Enable scrolling */
+  overflow-y: visible;
+  overflow-x: hidden;
 }
 
 /* Header - Clean and minimal */
@@ -155,6 +161,8 @@ header p {
   padding: var(--space-6);
   margin: var(--space-4);
   box-shadow: var(--shadow-lg);
+  /* Ensure it doesn't have fixed height */
+  height: auto;
 }
 
 /* Typography improvements */
@@ -591,7 +599,9 @@ nav > div {
 
 /* Ensure content doesn't get hidden behind fixed nav */
 .tab-content {
-  padding-bottom: 20px; /* Extra space above bottom nav */
+  padding-bottom: 40px;
+  min-height: auto;
+  /* Remove any height constraints */
 }
 
 /* Modal scrolling improvements */

@@ -29,8 +29,8 @@
 <script src="./src/mobile-enhancements.js"></script>
 <!-- Theme color -->
 <meta name="theme-color" content="#7c3aed">
-  <script async type="module" crossorigin src="/assets/index-DXHrXgWL.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-OpucEBvb.css">
+  <script async type="module" crossorigin src="/assets/index-ZF-2OoLP.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BWX1Z0gN.css">
   <script type="module">import.meta.url;import("_").catch(()=>1);(async function*(){})().next();window.__vite_is_modern_browser=true</script>
   <script type="module">!function(){if(window.__vite_is_modern_browser)return;console.warn("vite: loading legacy chunks, syntax error above and the same error below should be ignored");var e=document.getElementById("vite-legacy-polyfill"),n=document.createElement("script");n.src=e.src,n.onload=function(){System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))},document.body.appendChild(n)}();</script>
 </head>
@@ -1001,21 +1001,27 @@
 
       // Rendering helpers
       showShortlistResult(decisions) {
-        const single = document.getElementById('suggestion-result'); if (single) single.classList.add('hidden');
+        const single = document.getElementById('suggestion-result'); 
+        if (single) single.classList.add('hidden');
+        
         let section = document.getElementById('shortlist-result');
         if (!section) {
           section = document.createElement('div');
           section.id = 'shortlist-result';
           section.className = 'shortlist-result';
-          document.getElementById('decide-button').parentNode.insertBefore(section, document.getElementById('decide-button').nextSibling);
+          // Append to the food tab container instead of after the button
+          document.getElementById('food-tab').appendChild(section);
         }
+        
         section.innerHTML = `
-          <div style="margin:24px 20px;">
-            <h3 style="text-align:center; margin:0 0 20px 0; font-size:18px; font-weight:700; color:#a5b4fc;">Your 3 Perfect Picks</h3>
+          <div style="margin:24px 20px; background:rgba(0,0,0,0.3); border-radius:16px; padding:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <h3 style="margin:0; font-size:18px; font-weight:700; color:#a5b4fc;">Your 3 Perfect Picks</h3>
+              <button id="close-shortlist" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:50%; width:32px; height:32px; color:#94a3b8; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;">×</button>
+            </div>
             <div style="display:grid; gap:12px;">
               ${decisions.map((d,i)=>`
-                <div class="decision-card" data-food="${this.escapeHtml(d.name)}" style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:16px; cursor:pointer; transition:.2s;"
-                     onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
+                <div class="decision-card" data-food="${this.escapeHtml(d.name)}" style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:16px; cursor:pointer; transition:.2s;">
                   <div style="display:flex; align-items:center; gap:12px;">
                     <div style="font-size:28px;">${d.emoji}</div>
                     <div style="flex:1;">
@@ -1031,7 +1037,13 @@
               <button id="add-mood-context" style="padding:12px; background:rgba(124,58,237,.2); border:1px solid rgba(124,58,237,.3); border-radius:12px; color:#a5b4fc; font-weight:700; cursor:pointer; font-size:14px;">🧠 Add Mood</button>
             </div>
           </div>`;
+          
         section.classList.remove('hidden');
+
+        // Add close button functionality
+        document.getElementById('close-shortlist').addEventListener('click', () => {
+          section.classList.add('hidden');
+        });
 
         document.getElementById('shuffle-picks').addEventListener('click', () => this.makeDecision());
         document.getElementById('add-mood-context').addEventListener('click', () => this.showAdvancedMode());
@@ -1478,6 +1490,6 @@
 <!-- <script type="module" src="./src/main.js"></script> -->
   <script nomodule>!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
   <script nomodule crossorigin id="vite-legacy-polyfill" src="/assets/polyfills-legacy-B93rlMtN.js"></script>
-  <script nomodule crossorigin id="vite-legacy-entry" data-src="/assets/index-legacy-DaGedIc_.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
+  <script nomodule crossorigin id="vite-legacy-entry" data-src="/assets/index-legacy-Db17iQ0j.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
 </body>
 </html>
