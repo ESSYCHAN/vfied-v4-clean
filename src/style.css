@@ -89,7 +89,7 @@ body {
 
 /* Header - Clean and minimal */
 header {
-  padding: calc(var(--safe-area-top) + var(--space-6)) var(--space-4) var(--space-6);
+  padding: calc(var(--safe-area-top) + 60px) var(--space-4) var(--space-6);
   background: rgba(3, 7, 18, 0.8);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--gray-800);
