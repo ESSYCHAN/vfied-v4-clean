@@ -25,11 +25,9 @@ body {
   color: var(--ink);
   line-height: 1.5;
   overflow-x: hidden;
-  -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  -webkit-touch-callout: none;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -1346,3 +1344,155 @@ h1 {
   }
 }
 
+/* ===== iOS OPTIMIZATION PATCH ===== */
+/* Add this to the END of your style.css file */
+
+/* Utility class for elements that shouldn't be selectable */
+.no-select {
+  -webkit-user-select: none; 
+  user-select: none; 
+  -webkit-touch-callout: none;
+}
+
+/* iOS header safe area & stickiness */
+header {
+  position: sticky;
+  top: calc(0px + var(--safe-area-top));
+}
+
+/* Make taps feel native */
+a, button, .diet-chip, .friend-chip, .insights-toggle, .travel-action-btn, .event-cta button {
+  -webkit-tap-highlight-color: rgba(255,255,255,0.08);
+  touch-action: manipulation;
+}
+
+/* Improved focus states for accessibility */
+button:focus-visible, 
+.tab-btn:focus-visible, 
+input:focus-visible, 
+select:focus-visible, 
+textarea:focus-visible {
+  outline: 2px solid rgba(124,58,237,0.65);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Inputs: avoid iOS zoom + make caret visible */
+.form-group input,
+.form-group select,
+.form-group textarea,
+#mood-input {
+  font-size: 16px !important;  /* Prevents iOS zoom - overrides existing 15px */
+  -webkit-appearance: none; 
+  appearance: none;
+  caret-color: #e5ecff;
+}
+
+/* Select arrow styling fix (keeps your custom dropdown arrows) */
+.form-group select {
+  background-image: linear-gradient(45deg, transparent 50%, #a5b4fc 50%), 
+                    linear-gradient(135deg, #a5b4fc 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 32px;
+}
+
+/* Keep bottom nav off the home indicator */
+nav { 
+  bottom: env(safe-area-inset-bottom, 0); 
+}
+
+/* Smoothing & crisp text on iOS Retina displays */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Make tappable chips bigger for comfortable iOS tapping (Fitts' Law) */
+.diet-chip, 
+.mood-chip, 
+.friend-chip, 
+.event-filter-chip, 
+.travel-mode-chip {
+  min-height: 44px;  /* iOS minimum comfortable touch target */
+}
+
+/* Utility: prevent images from overflowing cards */
+img { 
+  max-width: 100%; 
+  height: auto; 
+  display: block; 
+}
+
+/* Additional iOS-specific optimizations */
+@supports (-webkit-touch-callout: none) {
+  /* These styles only apply on iOS devices */
+  
+  /* Optimize scroll performance on iOS */
+  #app, .modal-body {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* iOS-specific button styling */
+  button, .btn {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* iOS input styling improvements */
+  input[type="text"], 
+  input[type="email"], 
+  input[type="password"], 
+  textarea {
+    border-radius: 8px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
+/* ===== END iOS OPTIMIZATION PATCH ===== */
+/* ===== VFIED iOS polish & bug fixes ===== */
+
+/* 1) Missing design tokens */
+:root {
+  --gray-200: #e5e7eb;     /* used by labels & secondary button text */
+  --primary-300: #c4b5fd;  /* used on active tab hover */
+}
+
+/* 2) WebKit blur compatibility */
+header,
+nav,
+.modal { 
+  -webkit-backdrop-filter: blur(20px); 
+  backdrop-filter: blur(20px);
+}
+
+/* 3) Bottom sheet: safe-area + smooth animation */
+.modal-content {
+  padding-bottom: calc(var(--space-4) + var(--safe-area-bottom));
+  transform: translate3d(0,100%,0);
+  will-change: transform;
+}
+.modal.active .modal-content {
+  transform: translate3d(0,0,0);
+}
+
+/* 4) Inputs: visible caret on dark bg */
+#mood-input,
+.form-group input,
+.form-group select,
+.form-group textarea { 
+  caret-color: var(--gray-100);
+}
+
+/* 5) Accessible focus ring */
+button:focus-visible,
+.tab-btn:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgba(124,58,237,0.65);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
