@@ -96,9 +96,11 @@ header {
   position: sticky;
   top: 0;
   z-index: 50;
+  text-align: center; /* Add this */
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column; /* Change this */
+  align-items: center; /* Add this */
+  justify-content: center; /* Change this */
 }
 
 header h1 {
@@ -394,7 +396,7 @@ nav > div {
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-/* Modals - Modern bottom sheet style */
+/* Modals - Centered positioning */
 .modal {
   display: none;
   position: fixed;
@@ -406,25 +408,28 @@ nav > div {
 
 .modal.active {
   display: flex;
-  align-items: flex-end;
+  align-items: center; /* Changed from flex-end to center */
   justify-content: center;
+  padding: 20px; /* Add padding */
 }
 
 .modal-content {
   background: var(--gray-900);
   border: 1px solid var(--gray-700);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  border-radius: var(--radius-xl); /* Remove the 0 0 from bottom */
   width: 100%;
   max-width: 430px;
-  max-height: 85vh;
+  max-height: 80vh; /* Changed from 85vh */
   overflow: hidden;
   box-shadow: var(--shadow-xl);
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(0.9); /* Changed animation */
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modal.active .modal-content {
-  transform: translateY(0);
+  transform: scale(1); /* Changed animation */
+  opacity: 1;
 }
 
 .modal-header {
