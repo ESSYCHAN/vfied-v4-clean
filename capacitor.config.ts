@@ -8,13 +8,25 @@ const config: CapacitorConfig = {
     androidScheme: 'https'
   },
   plugins: {
+    StatusBar: {
+      style: 'dark',
+      backgroundColor: '#0a0e19'  // Match your app background
+    },
     Haptics: {
       vibrationDuration: 50
     },
-    StatusBar: {
-      style: 'dark',
-      backgroundColor: '#7c3aed'
+    SplashScreen: {
+      launchShowDuration: 2000,
+      backgroundColor: '#0a0e19',
+      showSpinner: false
     }
+  },
+  ios: {
+    contentInset: 'automatic'
+  },
+  android: {
+    allowMixedContent: true,
+    captureInput: true
   }
 };
 
