@@ -106,7 +106,7 @@ header {
 header h1 {
   font-size: var(--text-3xl);
   font-weight: 800;
-  color: white; /* Simple white text instead of gradient */
+  color: white; /* Simple white text that will definitely show */
   letter-spacing: -0.02em;
   margin-bottom: 4px;
 }
