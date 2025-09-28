@@ -1,4 +1,4 @@
-/* VFIED - Modern UI Redesign */
+/* VFIED - Modern UI Redesign - Fixed Version */
 
 :root {
   /* Modern color system */
@@ -59,6 +59,9 @@
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
   --safe-area-right: env(safe-area-inset-right, 0px);
+  
+  /* Navigation height */
+  --nav-height: 80px;
 }
 
 /* Reset and base styles */
@@ -76,25 +79,24 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  /* Remove any height constraints */
   height: auto;
   min-height: 100vh;
 }
 
-/* App container */
+/* App container - Fixed layout */
 #app {
   min-height: 100vh;
   max-width: 430px;
   margin: 0 auto;
   position: relative;
   padding: 0 var(--safe-area-left) 0 var(--safe-area-right);
-  height: 100vh; /* Set explicit height */
-  overflow: hidden; /* Prevent body scroll, let content scroll */
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* Header - Clean and minimal */
+/* Header - Fixed at top */
 header {
   padding: calc(var(--safe-area-top) + 60px) var(--space-4) var(--space-6);
   background: rgba(3, 7, 18, 0.8);
@@ -103,17 +105,18 @@ header {
   position: sticky;
   top: 0;
   z-index: 50;
-  text-align: center; /* Add this */
+  text-align: center;
   display: flex;
-  flex-direction: column; /* Change this */
-  align-items: center; /* Add this */
-  justify-content: center; /* Change this */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 header h1 {
   font-size: var(--text-3xl);
   font-weight: 800;
-  color: white; /* Simple white text that will definitely show */
+  color: white;
   letter-spacing: -0.02em;
   margin-bottom: 4px;
 }
@@ -122,6 +125,24 @@ header p {
   font-size: var(--text-sm);
   color: var(--gray-400);
   margin-top: var(--space-1);
+}
+
+/* Main content area - Scrollable */
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--nav-height) + 40px);
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+
+/* Specific food tab content */
+#food-tab {
+  height: auto;
+  min-height: 100%;
+  padding-bottom: 20px;
 }
 
 /* Location bar */
@@ -162,7 +183,6 @@ header p {
   padding: var(--space-6);
   margin: var(--space-4);
   box-shadow: var(--shadow-lg);
-  /* Ensure it doesn't have fixed height */
   height: auto;
 }
 
@@ -263,6 +283,7 @@ h5 { font-size: var(--text-base); font-weight: 600; line-height: 1.5; }
   justify-content: center;
   gap: var(--space-3);
   -webkit-tap-highlight-color: transparent;
+  position: relative;
 }
 
 #decide-button:hover:not(:disabled) {
@@ -283,7 +304,7 @@ h5 { font-size: var(--text-base); font-weight: 600; line-height: 1.5; }
   box-shadow: none;
 }
 
-/* Bottom navigation - Modern tab bar */
+/* Bottom navigation - Fixed at bottom */
 nav {
   position: fixed;
   bottom: 0;
@@ -294,6 +315,7 @@ nav {
   border-top: 1px solid var(--gray-800);
   padding: var(--space-3) var(--safe-area-left) calc(var(--space-4) + var(--safe-area-bottom)) var(--safe-area-right);
   z-index: 50;
+  flex-shrink: 0;
 }
 
 nav > div {
@@ -403,7 +425,7 @@ nav > div {
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-/* Modals - Centered positioning */
+/* Modals - Fixed and cleaned up */
 .modal {
   display: none;
   position: fixed;
@@ -415,27 +437,29 @@ nav > div {
 
 .modal.active {
   display: flex;
-  align-items: center; /* Changed from flex-end to center */
+  align-items: center;
   justify-content: center;
-  padding: 20px; /* Add padding */
+  padding: 20px;
 }
 
 .modal-content {
   background: var(--gray-900);
   border: 1px solid var(--gray-700);
-  border-radius: var(--radius-xl); /* Remove the 0 0 from bottom */
+  border-radius: var(--radius-xl);
   width: 100%;
   max-width: 430px;
-  max-height: 80vh; /* Changed from 85vh */
+  max-height: 90vh;
   overflow: hidden;
   box-shadow: var(--shadow-xl);
-  transform: scale(0.9); /* Changed animation */
+  transform: scale(0.9);
   opacity: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 .modal.active .modal-content {
-  transform: scale(1); /* Changed animation */
+  transform: scale(1);
   opacity: 1;
 }
 
@@ -445,6 +469,7 @@ nav > div {
   justify-content: space-between;
   padding: var(--space-5);
   border-bottom: 1px solid var(--gray-800);
+  flex-shrink: 0;
 }
 
 .modal-title {
@@ -475,8 +500,38 @@ nav > div {
 
 .modal-body {
   padding: var(--space-5);
-  max-height: calc(85vh - 80px);
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+/* Specific modal content scrolling areas */
+#travel-results-modal {
+  max-height: 400px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 16px;
+  overscroll-behavior: contain;
+}
+
+#events-grid-modal {
+  max-height: 500px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 4px;
+  overscroll-behavior: contain;
+}
+
+.shortlist-result {
+  max-height: calc(100vh - 400px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+  overscroll-behavior: contain;
 }
 
 /* Button variants */
@@ -517,6 +572,37 @@ nav > div {
 .btn-secondary:hover {
   background: var(--gray-600);
   border-color: var(--gray-500);
+}
+
+/* Custom scrollbar styling for WebKit browsers */
+.tab-content::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar,
+#travel-results-modal::-webkit-scrollbar,
+#events-grid-modal::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tab-content::-webkit-scrollbar-track,
+.modal-body::-webkit-scrollbar-track,
+#travel-results-modal::-webkit-scrollbar-track,
+#events-grid-modal::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+
+.tab-content::-webkit-scrollbar-thumb,
+.modal-body::-webkit-scrollbar-thumb,
+#travel-results-modal::-webkit-scrollbar-thumb,
+#events-grid-modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover,
+.modal-body::-webkit-scrollbar-thumb:hover,
+#travel-results-modal::-webkit-scrollbar-thumb:hover,
+#events-grid-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Utility classes */
@@ -586,121 +672,4 @@ nav > div {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-/* Main app scrolling */
-#app {
-  min-height: 100vh;
-  max-width: 430px;
-  margin: 0 auto;
-  position: relative;
-  padding: 0 var(--safe-area-left) calc(var(--nav-height) + var(--safe-area-bottom) + 20px) var(--safe-area-right);
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* Ensure content doesn't get hidden behind fixed nav */
-.tab-content {
-  height: calc(100vh - 140px); /* Adjust based on header + nav height */
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 40px;
-}
-
-/* Modal scrolling improvements */
-.modal-body {
-  padding: var(--space-5);
-  max-height: calc(85vh - 80px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  /* iOS momentum scrolling */
-  -webkit-overflow-scrolling: touch;
-  /* Smooth scrolling behavior */
-  scroll-behavior: smooth;
-}
-
-/* Specific modal content constraints */
-.modal-content {
-  background: var(--gray-900);
-  border: 1px solid var(--gray-700);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 430px;
-  max-height: 90vh; /* Ensure modal doesn't exceed viewport */
-  overflow: hidden;
-  box-shadow: var(--shadow-xl);
-  transform: scale(0.9);
-  opacity: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column; /* Stack header and body vertically */
-}
-
-/* Make modal body take remaining space and scroll */
-.modal-body {
-  flex: 1;
-  min-height: 0; /* Allow flexbox shrinking */
-}
-
-/* Travel results scrolling */
-#travel-results-modal {
-  max-height: 400px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  margin-top: 16px;
-}
-
-/* Events grid scrolling */
-#events-grid-modal {
-  max-height: 500px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-right: 4px; /* Space for scrollbar */
-}
-
-/* Shortlist results scrolling */
-.shortlist-result {
-  max-height: calc(100vh - 400px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  margin-bottom: 20px;
-}
-
-/* Custom scrollbar styling for WebKit browsers */
-.modal-body::-webkit-scrollbar,
-#travel-results-modal::-webkit-scrollbar,
-#events-grid-modal::-webkit-scrollbar {
-  width: 4px;
-}
-
-.modal-body::-webkit-scrollbar-track,
-#travel-results-modal::-webkit-scrollbar-track,
-#events-grid-modal::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 2px;
-}
-
-.modal-body::-webkit-scrollbar-thumb,
-#travel-results-modal::-webkit-scrollbar-thumb,
-#events-grid-modal::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-}
-
-.modal-body::-webkit-scrollbar-thumb:hover,
-#travel-results-modal::-webkit-scrollbar-thumb:hover,
-#events-grid-modal::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Prevent scroll chaining (iOS overscroll) */
-.modal-body,
-#travel-results-modal,
-#events-grid-modal {
-  overscroll-behavior: contain;
-}
-
-/* Ensure nav height variable is defined */
-:root {
-  --nav-height: 80px;
 }
