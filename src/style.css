@@ -83,20 +83,19 @@ body {
   min-height: 100vh;
 }
 
-/* App container - Fixed layout */
+/* App container - Single, clean definition */
 #app {
   min-height: 100vh;
   max-width: 430px;
   margin: 0 auto;
   position: relative;
-  padding: 0 var(--safe-area-left) 0 var(--safe-area-right);
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
+  padding: 0 var(--safe-area-left) calc(var(--nav-height) + var(--safe-area-bottom) + 20px) var(--safe-area-right);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Header - Fixed at top */
+/* Header - Clean and minimal */
 header {
   padding: calc(var(--safe-area-top) + 60px) var(--space-4) var(--space-6);
   background: rgba(3, 7, 18, 0.8);
@@ -110,7 +109,6 @@ header {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 header h1 {
@@ -125,24 +123,6 @@ header p {
   font-size: var(--text-sm);
   color: var(--gray-400);
   margin-top: var(--space-1);
-}
-
-/* Main content area - Scrollable */
-.tab-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(var(--nav-height) + 40px);
-  min-height: 0;
-  overscroll-behavior: contain;
-}
-
-/* Specific food tab content */
-#food-tab {
-  height: auto;
-  min-height: 100%;
-  padding-bottom: 20px;
 }
 
 /* Location bar */
@@ -184,6 +164,11 @@ header p {
   margin: var(--space-4);
   box-shadow: var(--shadow-lg);
   height: auto;
+}
+
+/* Content area */
+.tab-content {
+  padding-bottom: 20px;
 }
 
 /* Typography improvements */
@@ -283,7 +268,6 @@ h5 { font-size: var(--text-base); font-weight: 600; line-height: 1.5; }
   justify-content: center;
   gap: var(--space-3);
   -webkit-tap-highlight-color: transparent;
-  position: relative;
 }
 
 #decide-button:hover:not(:disabled) {
@@ -304,7 +288,7 @@ h5 { font-size: var(--text-base); font-weight: 600; line-height: 1.5; }
   box-shadow: none;
 }
 
-/* Bottom navigation - Fixed at bottom */
+/* Bottom navigation - Modern tab bar */
 nav {
   position: fixed;
   bottom: 0;
@@ -315,7 +299,6 @@ nav {
   border-top: 1px solid var(--gray-800);
   padding: var(--space-3) var(--safe-area-left) calc(var(--space-4) + var(--safe-area-bottom)) var(--safe-area-right);
   z-index: 50;
-  flex-shrink: 0;
 }
 
 nav > div {
@@ -425,7 +408,7 @@ nav > div {
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-/* Modals - Fixed and cleaned up */
+/* Modals - Clean and centered */
 .modal {
   display: none;
   position: fixed;
@@ -509,31 +492,6 @@ nav > div {
   overscroll-behavior: contain;
 }
 
-/* Specific modal content scrolling areas */
-#travel-results-modal {
-  max-height: 400px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  margin-top: 16px;
-  overscroll-behavior: contain;
-}
-
-#events-grid-modal {
-  max-height: 500px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-right: 4px;
-  overscroll-behavior: contain;
-}
-
-.shortlist-result {
-  max-height: calc(100vh - 400px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  margin-bottom: 20px;
-  overscroll-behavior: contain;
-}
-
 /* Button variants */
 .btn {
   display: inline-flex;
@@ -574,15 +532,38 @@ nav > div {
   border-color: var(--gray-500);
 }
 
-/* Custom scrollbar styling for WebKit browsers */
-.tab-content::-webkit-scrollbar,
+/* Scrollable content areas */
+#travel-results-modal {
+  max-height: 400px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 16px;
+  overscroll-behavior: contain;
+}
+
+#events-grid-modal {
+  max-height: 500px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 4px;
+  overscroll-behavior: contain;
+}
+
+.shortlist-result {
+  max-height: calc(100vh - 400px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+  overscroll-behavior: contain;
+}
+
+/* Custom scrollbar styling */
 .modal-body::-webkit-scrollbar,
 #travel-results-modal::-webkit-scrollbar,
 #events-grid-modal::-webkit-scrollbar {
   width: 4px;
 }
 
-.tab-content::-webkit-scrollbar-track,
 .modal-body::-webkit-scrollbar-track,
 #travel-results-modal::-webkit-scrollbar-track,
 #events-grid-modal::-webkit-scrollbar-track {
@@ -590,7 +571,6 @@ nav > div {
   border-radius: 2px;
 }
 
-.tab-content::-webkit-scrollbar-thumb,
 .modal-body::-webkit-scrollbar-thumb,
 #travel-results-modal::-webkit-scrollbar-thumb,
 #events-grid-modal::-webkit-scrollbar-thumb {
@@ -598,7 +578,6 @@ nav > div {
   border-radius: 2px;
 }
 
-.tab-content::-webkit-scrollbar-thumb:hover,
 .modal-body::-webkit-scrollbar-thumb:hover,
 #travel-results-modal::-webkit-scrollbar-thumb:hover,
 #events-grid-modal::-webkit-scrollbar-thumb:hover {
