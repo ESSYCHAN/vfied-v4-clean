@@ -997,21 +997,27 @@
 
       // Rendering helpers
       showShortlistResult(decisions) {
-        const single = document.getElementById('suggestion-result'); if (single) single.classList.add('hidden');
+        const single = document.getElementById('suggestion-result'); 
+        if (single) single.classList.add('hidden');
+        
         let section = document.getElementById('shortlist-result');
         if (!section) {
           section = document.createElement('div');
           section.id = 'shortlist-result';
           section.className = 'shortlist-result';
-          document.getElementById('decide-button').parentNode.insertBefore(section, document.getElementById('decide-button').nextSibling);
+          // Append to the food tab container instead of after the button
+          document.getElementById('food-tab').appendChild(section);
         }
+        
         section.innerHTML = `
-          <div style="margin:24px 20px;">
-            <h3 style="text-align:center; margin:0 0 20px 0; font-size:18px; font-weight:700; color:#a5b4fc;">Your 3 Perfect Picks</h3>
+          <div style="margin:24px 20px; background:rgba(0,0,0,0.3); border-radius:16px; padding:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+              <h3 style="margin:0; font-size:18px; font-weight:700; color:#a5b4fc;">Your 3 Perfect Picks</h3>
+              <button id="close-shortlist" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:50%; width:32px; height:32px; color:#94a3b8; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;">×</button>
+            </div>
             <div style="display:grid; gap:12px;">
               ${decisions.map((d,i)=>`
-                <div class="decision-card" data-food="${this.escapeHtml(d.name)}" style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:16px; cursor:pointer; transition:.2s;"
-                     onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
+                <div class="decision-card" data-food="${this.escapeHtml(d.name)}" style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:16px; cursor:pointer; transition:.2s;">
                   <div style="display:flex; align-items:center; gap:12px;">
                     <div style="font-size:28px;">${d.emoji}</div>
                     <div style="flex:1;">
@@ -1027,7 +1033,13 @@
               <button id="add-mood-context" style="padding:12px; background:rgba(124,58,237,.2); border:1px solid rgba(124,58,237,.3); border-radius:12px; color:#a5b4fc; font-weight:700; cursor:pointer; font-size:14px;">🧠 Add Mood</button>
             </div>
           </div>`;
+          
         section.classList.remove('hidden');
+
+        // Add close button functionality
+        document.getElementById('close-shortlist').addEventListener('click', () => {
+          section.classList.add('hidden');
+        });
 
         document.getElementById('shuffle-picks').addEventListener('click', () => this.makeDecision());
         document.getElementById('add-mood-context').addEventListener('click', () => this.showAdvancedMode());
