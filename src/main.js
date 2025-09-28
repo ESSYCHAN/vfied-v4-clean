@@ -4,7 +4,7 @@ import { initializeEvents } from './modules/events.js';
 import { initializeAuth } from './modules/auth.js';
 import { initializeUI, toast, updateStatsUI } from './modules/ui.js';
 import { CONFIG } from './config.js';
-
+import './mobile-enhancements.js';
 export const API_BASE = CONFIG.API_BASE;
 
 // ---- App State ----
