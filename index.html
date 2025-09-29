@@ -159,23 +159,29 @@
 </div> <!-- CLOSE APP DIV HERE -->
 
 <!-- Bottom Navigation -->
-<nav style="position:fixed; bottom:0; left:0; right:0; background:rgba(10,14,25,0.95); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.1); padding:16px 0 20px 0; z-index:100;">
+<nav style="position:fixed; bottom:0; left:0; right:0; background:rgba(26,26,46,0.95); backdrop-filter:blur(20px); border-top:1px solid rgba(15,60,96,0.7); padding:16px 0 20px 0; z-index:100;">
   <div style="max-width:430px; margin:0 auto; display:flex; justify-content:space-around;">
-    <div onclick="document.getElementById('food-tab').scrollIntoView()" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#667eea; cursor:pointer;">
-      <span style="font-size:20px;">🍽️</span>
+    
+    <!-- Food tab -->
+    <div onclick="document.getElementById('food-tab').scrollIntoView()" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#6d28d9; cursor:pointer; padding:8px; border-radius:8px; min-width:44px; min-height:44px; justify-content:center;">
+      <span style="font-size:20px;">🍴</span>
       <span style="font-size:11px; font-weight:600;">Food</span>
     </div>
-    <div onclick="window.vfiedApp.openTravelModal()" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#64748b; cursor:pointer;">
-      <span style="font-size:20px;">✈️</span>
+    
+    <!-- Travel tab -->
+    <div onclick="window.vfiedApp.openTravelModal()" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#64748b; cursor:pointer; padding:8px; border-radius:8px; min-width:44px; min-height:44px; justify-content:center;">
+      <span style="font-size:20px;">🧭</span>
       <span style="font-size:11px; font-weight:600;">Travel</span>
     </div>
-    <div onclick="window.vfiedApp.openEventsModal()" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#64748b; cursor:pointer;">
-      <span style="font-size:20px;">🎭</span>
+    
+    <!-- Events tab -->
+    <div onclick="window.vfiedApp.openEventsModal()" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#64748b; cursor:pointer; padding:8px; border-radius:8px; min-width:44px; min-height:44px; justify-content:center;">
+      <span style="font-size:20px;">📅</span>
       <span style="font-size:11px; font-weight:600;">Events</span>
     </div>
-    <div onclick="alert('Profile feature coming soon!')" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#64748b; cursor:pointer;">
-      <span style="font-size:20px;">👤</span>
-      <span style="font-size:11px; font-weight:600;">Profile</span>
+    <div onclick="alert('Profile feature coming soon!')" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:#64748b; cursor:pointer; padding:8px; border-radius:8px; min-width:44px; min-height:44px; justify-content:center; -webkit-tap-highlight-color:transparent;">
+      <span style="font-size:20px;">⚙️</span>
+      <span style="font-size:11px; font-weight:600;">Settings</span>
     </div>
   </div>
 </nav>
@@ -1041,10 +1047,12 @@
             </div>
           </div>`).join('')}
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 20px;">
-        <button id="shuffle-picks" style="padding: 12px; background: rgba(22, 33, 62, 0.8); border: 1px solid rgba(83, 52, 131, 0.4); border-radius: 12px; color: #f8fafc; font-weight: 700; cursor: pointer; font-size: 14px; -webkit-tap-highlight-color: transparent;">🔄 New Picks</button>
-      
-        <button id="scroll-to-top" style="padding: 12px; background: rgba(22, 33, 62, 0.8); border: 1px solid rgba(83, 52, 131, 0.4); border-radius: 12px; color: #f8fafc; font-weight: 700; cursor: pointer; font-size: 14px; -webkit-tap-highlight-color: transparent;">↑ Back to Top</button>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;">
+        <button id="shuffle-picks" style="padding: 16px 12px; background: rgba(22, 33, 62, 0.8); border: 1px solid rgba(83, 52, 131, 0.4); border-radius: 12px; color: #f8fafc; font-weight: 700; cursor: pointer; font-size: 14px; -webkit-tap-highlight-color: transparent; min-height: 48px;">🔄 New Picks</button>
+        <button id="scroll-to-top" style="padding: 16px 12px; background: rgba(22, 33, 62, 0.8); border: 1px solid rgba(83, 52, 131, 0.4); border-radius: 12px; color: #f8fafc; font-weight: 700; cursor: pointer; font-size: 14px; -webkit-tap-highlight-color: transparent; min-height: 48px;">↑ Back to Top</button>
+      </div>
+      <div style="margin-top: 12px;">
+        <button id="add-mood-context" style="width: 100%; padding: 16px 12px; background: rgba(109, 40, 217, 0.2); border: 1px solid rgba(109, 40, 217, 0.3); border-radius: 12px; color: #8b5cf6; font-weight: 700; cursor: pointer; font-size: 14px; -webkit-tap-highlight-color: transparent; min-height: 48px;">🧠 Add Mood Context</button>
       </div>
     </div>`;
     

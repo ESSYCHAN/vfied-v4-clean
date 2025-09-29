@@ -1,2 +1,2 @@
 function t(){import.meta.url,import("_").catch(()=>1),(async function*(){})().next()}export{t as __vite_legacy_guard};
-//# sourceMappingURL=index-DA7OEu-7.js.map
+//# sourceMappingURL=index-DiaE_yhX.js.map

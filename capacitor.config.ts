@@ -10,23 +10,21 @@ const config: CapacitorConfig = {
   plugins: {
     StatusBar: {
       style: 'dark',
-      backgroundColor: '#0a0e19'  // Match your app background
+      backgroundColor: '#0f0f23'
     },
     Haptics: {
-      vibrationDuration: 50
+      enabled: true
     },
     SplashScreen: {
       launchShowDuration: 2000,
-      backgroundColor: '#0a0e19',
-      showSpinner: false
+      backgroundColor: '#0f0f23',
+      showSpinner: false,
+      launchAutoHide: true
     }
   },
   ios: {
     contentInset: 'automatic'
-  },
-  android: {
-    allowMixedContent: true,
-    captureInput: true
+    // Remove this line: scheme: 'VFIED'
   }
 };
 

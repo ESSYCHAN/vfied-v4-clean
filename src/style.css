@@ -571,3 +571,235 @@ div[style*="Why this choice"],
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Travel Mode Chips - match dietary chips */
+.travel-mode-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: rgba(22, 33, 62, 0.6);
+  border: 1px solid rgba(83, 52, 131, 0.4);
+  border-radius: var(--radius-full);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--gray-200);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.travel-mode-chip:active {
+  transform: scale(0.95);
+}
+
+.travel-mode-chip.active {
+  background: var(--primary-600);
+  border-color: var(--primary-500);
+  color: white;
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
+}
+
+/* Event Filter Chips - match dietary chips */
+.event-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: rgba(22, 33, 62, 0.6);
+  border: 1px solid rgba(83, 52, 131, 0.4);
+  border-radius: var(--radius-full);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--gray-200);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.event-filter-chip:active {
+  transform: scale(0.95);
+}
+
+.event-filter-chip.active {
+  background: var(--primary-600);
+  border-color: var(--primary-500);
+  color: white;
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
+}
+
+/* Time Filter Buttons - match style */
+.time-filter {
+  background: rgba(22, 33, 62, 0.6);
+  border: 1px solid rgba(83, 52, 131, 0.4);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--gray-200);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.time-filter:active {
+  transform: scale(0.95);
+}
+
+.time-filter.active {
+  background: var(--primary-600);
+  border-color: var(--primary-500);
+  color: white;
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
+}
+
+/* Travel Action Buttons */
+.travel-action-btn {
+  background: rgba(22, 33, 62, 0.8);
+  border: 1px solid rgba(83, 52, 131, 0.4);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--gray-100);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.travel-action-btn:active {
+  transform: scale(0.96);
+  background: rgba(15, 60, 96, 0.9);
+}
+
+.travel-action-btn:hover {
+  background: rgba(15, 60, 96, 0.8);
+  border-color: rgba(83, 52, 131, 0.5);
+}
+
+/* Event Cards */
+.event-card {
+  background: rgba(22, 33, 62, 0.6);
+  border: 1px solid rgba(83, 52, 131, 0.4);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  gap: var(--space-3);
+}
+
+.event-card:active {
+  transform: scale(0.98);
+  background: rgba(15, 60, 96, 0.7);
+}
+
+.event-card:hover {
+  background: rgba(22, 33, 62, 0.8);
+  border-color: rgba(83, 52, 131, 0.5);
+  box-shadow: var(--shadow-md);
+}
+
+.event-emoji {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.event-info {
+  flex: 1;
+}
+
+.event-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--gray-100);
+  margin-bottom: var(--space-1);
+}
+
+.event-details {
+  font-size: var(--text-xs);
+  color: var(--gray-400);
+  margin-bottom: var(--space-2);
+}
+
+.event-description {
+  font-size: var(--text-sm);
+  color: var(--gray-300);
+  line-height: 1.4;
+}
+
+/* Modal Info Banners - consistent styling */
+.modal-info-banner {
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.15), rgba(99, 102, 241, 0.15));
+  border: 1px solid rgba(109, 40, 217, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  text-align: center;
+}
+
+.modal-info-banner p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-300);
+}
+
+.modal-info-banner span {
+  color: #8b5cf6;
+  font-weight: 700;
+}
+
+/* Form inputs in modals - match main interface */
+.modal-body select,
+.modal-body input[type="text"] {
+  width: 100%;
+  background: rgba(22, 33, 62, 0.8);
+  border: 1px solid rgba(83, 52, 131, 0.4);
+  color: var(--gray-100);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  min-height: 44px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.modal-body select:focus,
+.modal-body input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
+}
+
+.modal-body label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--gray-300);
+  margin-bottom: var(--space-2);
+  display: block;
+}
+
+/* Section headers in modals */
+.modal-body h5 {
+  margin: 0 0 var(--space-3) 0;
+  font-weight: 700;
+  font-size: var(--text-base);
+  color: var(--gray-100);
+}
+
+.modal-body h6 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: #8b5cf6;
+}
