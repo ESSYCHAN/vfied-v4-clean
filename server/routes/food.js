@@ -1039,39 +1039,7 @@ export function setupFoodRoutes(app, upload) {
     });
   });
 
-  // Restaurant signup
-  app.post('/v1/restaurants/signup', async (req, res) => {
-    try {
-      const { restaurant, contact, plan = 'free', terms_accepted } = req.body;
-      
-      if (!restaurant || !contact || !terms_accepted) {
-        return res.status(400).json({
-          success: false,
-          error: 'Missing required fields: restaurant, contact, terms_accepted'
-        });
-      }
-
-      // Generate credentials
-      const restaurant_id = `rest_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
-      const api_key = `vf_${Math.random().toString(36).slice(2,15)}${Date.now().toString(36)}`;
-      const secret = `sec_${Math.random().toString(36).slice(2,20)}`;
-
-      // In production, save to database
-      console.log('[restaurant signup]', { restaurant_id, restaurant, contact, plan });
-
-      res.status(201).json({
-        success: true,
-        restaurant_id,
-        credentials: {
-          api_key,
-          secret
-        },
-        next_steps: "Check your email for setup instructions. Use your API key to upload menus."
-      });
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
+  
 
   // Restaurant profile
   app.get('/v1/restaurants/profile', (req, res) => {

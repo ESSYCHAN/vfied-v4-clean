@@ -145,12 +145,12 @@ app.get('/health', async (req, res) => {
 });
 
 // Setup route modules
-setupFoodRoutes(app, upload);
+
 setupEventsRoutes(app, upload);
 setupTravelRoutes(app);
 setupUtilityRoutes(app);
 setupRestaurantRoutes(app);
-
+setupFoodRoutes(app, upload);
 
 // Error handler
 app.use((err, _req, res, _next) => {
