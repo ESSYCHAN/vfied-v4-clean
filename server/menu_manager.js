@@ -84,6 +84,273 @@ class MenuManager {
     };
   }
 
+  // NEW: Calculate distance between two coordinates
+  calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in km
+  }
+
+  // NEW: Calculate hidden gem score
+  calculateHiddenGemScore(restaurant, item) {
+    let score = 0;
+    
+    // 1. Limited availability (30 points)
+    if (item.availability === 'weekends_only') score += 30;
+    if (item.availability === 'seasonal') score += 25;
+    if (item.availability === 'chef_special') score += 20;
+    if (item.availability === 'limited_daily') score += 15;
+    
+    // 2. Small batch / preparation time (25 points)
+    if (item.daily_limit && item.daily_limit < 20) score += 25;
+    if (item.preparation_time && item.preparation_time > 60) score += 15;
+    
+    // 3. Family recipe / traditional (20 points)
+    if (item.tags?.includes('family_recipe')) score += 20;
+    if (item.tags?.includes('generational')) score += 15;
+    if (item.tags?.includes('traditional')) score += 10;
+    if (item.tags?.includes('secret_recipe')) score += 25;
+    
+    // 4. Restaurant size / reviews (15 points)
+    if (restaurant.review_count && restaurant.review_count < 50) score += 15;
+    if (restaurant.seating_capacity && restaurant.seating_capacity < 30) score += 10;
+    if (restaurant.type === 'family_owned') score += 10;
+    
+    // 5. Not on delivery apps (10 points)
+    const deliveryPlatforms = restaurant.delivery_platforms || {};
+    const onPlatforms = Object.keys(deliveryPlatforms).filter(k => k.endsWith('_id')).length;
+    if (onPlatforms === 0) score += 10;
+    if (onPlatforms === 1) score += 5;
+    
+    // 6. High rating but low visibility (bonus 15 points)
+    if (restaurant.rating && restaurant.rating > 4.5 && 
+        restaurant.review_count && restaurant.review_count < 100) {
+      score += 15;
+    }
+    
+    // 7. Unique/rare cuisine or technique
+    if (item.tags?.includes('rare')) score += 20;
+    if (item.tags?.includes('unique')) score += 15;
+    if (item.cooking_method === 'wood_fired' || 
+        item.cooking_method === 'charcoal' ||
+        item.cooking_method === 'traditional') score += 10;
+    
+    return Math.min(score, 100); // Cap at 100
+  }
+
+  // NEW: Get hidden gem badge
+  getHiddenGemBadge(score) {
+    if (score >= 90) return { emoji: '🏆', label: 'Legendary Find', color: '#FFD700' };
+    if (score >= 70) return { emoji: '💎', label: 'Hidden Gem', color: '#9B59B6' };
+    if (score >= 50) return { emoji: '⭐', label: 'Local Favorite', color: '#3498DB' };
+    if (score >= 30) return { emoji: '🔍', label: 'Worth Discovering', color: '#95A5A6' };
+    return null;
+  }
+
+  // NEW: Build restaurant link with fallback chain
+  buildRestaurantLink(restaurant) {
+    const platforms = restaurant.delivery_platforms || {};
+    
+    // Priority: Direct website > Deliveroo > Uber Eats > Google Maps
+    if (restaurant.website) {
+      return {
+        url: restaurant.website,
+        type: 'website',
+        label: 'Visit Website'
+      };
+    }
+    
+    if (platforms.deliveroo_id) {
+      return {
+        url: `https://deliveroo.co.uk/menu/${platforms.deliveroo_id}`,
+        type: 'delivery',
+        label: 'Order on Deliveroo'
+      };
+    }
+    
+    if (platforms.ubereats_id) {
+      return {
+        url: `https://www.ubereats.com/store/${platforms.ubereats_id}`,
+        type: 'delivery',
+        label: 'Order on Uber Eats'
+      };
+    }
+    
+    if (platforms.doordash_id) {
+      return {
+        url: `https://www.doordash.com/store/${platforms.doordash_id}`,
+        type: 'delivery',
+        label: 'Order on DoorDash'
+      };
+    }
+    
+    // Fallback to Google Maps/Search
+    const address = restaurant.location?.address || 
+                   `${restaurant.restaurant_name}, ${restaurant.location?.city}`;
+    return {
+      url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
+      type: 'map',
+      label: 'View on Map'
+    };
+  }
+
+  // ENHANCED: Search with location flexibility and distance
+  async searchMenus({ 
+    location, 
+    target_location = null, // NEW: Allow searching different area
+    search_radius = 10, // NEW: km radius (default 10km)
+    mood_text = '', 
+    dietary = [], 
+    meal_period = 'all_day', 
+    attributes = [], 
+    limit = 10, 
+    timeContext = null,
+    sort_by = 'relevance' // NEW: 'relevance', 'distance', 'hidden_gem'
+  }) {
+    const results = [];
+    const searchLoc = target_location || location;
+    const hasCoords = searchLoc?.latitude && searchLoc?.longitude;
+    
+    console.log(`🔍 Searching ${search_radius}km radius around ${searchLoc?.city || 'location'}`);
+    
+    for (const [key, menu] of this.menus) {
+      // Filter by distance if coordinates available
+      if (hasCoords && menu.location?.latitude && menu.location?.longitude) {
+        const distance = this.calculateDistance(
+          searchLoc.latitude,
+          searchLoc.longitude,
+          menu.location.latitude,
+          menu.location.longitude
+        );
+        
+        if (distance > search_radius) {
+          console.log(`📍 Skipping ${menu.restaurant_name} - ${distance.toFixed(1)}km away (outside ${search_radius}km radius)`);
+          continue;
+        }
+        
+        menu.distance_km = distance;
+      } else {
+        // Fallback to city/country matching
+        const menuLocation = `${menu.location.country_code.toLowerCase()}_${menu.location.city.toLowerCase()}`;
+        const searchLocation = `${(searchLoc?.country_code || 'GB').toLowerCase()}_${(searchLoc?.city || '').toLowerCase()}`;
+        
+        if (!menuLocation.includes(searchLocation) && !searchLocation.includes(menuLocation)) {
+          continue;
+        }
+        
+        menu.distance_km = null; // Unknown distance
+      }
+      
+      // Check opening hours
+      if (timeContext && menu.opening_hours) {
+        const now = new Date();
+        const currentDay = now.toLocaleDateString('en', {weekday: 'long'}).toLowerCase();
+        const currentTime = now.toTimeString().slice(0,5);
+        
+        const todayHours = menu.opening_hours[currentDay];
+        if (!todayHours || currentTime < todayHours.open || currentTime > todayHours.close) {
+          console.log(`⏰ Skipping ${menu.restaurant_name} - closed`);
+          continue;
+        }
+      }
+      
+      // Filter menu items
+      const matchingItems = menu.menu_items.filter(item => {
+        if (!item.available) return false;
+        
+        // Meal period filter
+        if (meal_period !== 'all_day' && 
+            item.meal_period !== 'all_day' && 
+            item.meal_period !== meal_period) {
+          return false;
+        }
+        
+        // Dietary restrictions
+        if (dietary.length > 0) {
+          for (const restriction of dietary) {
+            const normalizedRestriction = restriction.replace('-', '_');
+            if (!item.dietary || !item.dietary[normalizedRestriction]) {
+              return false;
+            }
+          }
+        }
+        
+        return true;
+      });
+      
+      // Score and add matching items
+      matchingItems.forEach(item => {
+        let score = Math.random() * 5; // Base randomness
+        const itemText = `${item.name} ${item.description || ''} ${(item.search_tags || []).join(' ')}`.toLowerCase();
+        
+        // Mood matching
+        if (mood_text) {
+          const moodWords = mood_text.toLowerCase().split(/\s+/);
+          for (const word of moodWords) {
+            if (word.length > 2 && itemText.includes(word)) {
+              score += 10;
+            }
+          }
+        }
+        
+        // Attribute matching
+        for (const attr of attributes) {
+          if (itemText.includes(attr.toLowerCase())) {
+            score += 8;
+          }
+        }
+        
+        // Calculate hidden gem score
+        const hiddenGemScore = this.calculateHiddenGemScore(menu, item);
+        const badge = this.getHiddenGemBadge(hiddenGemScore);
+        
+        results.push({
+          ...item,
+          restaurant_name: menu.restaurant_name,
+          restaurant_id: menu.restaurant_id,
+          restaurant_link: this.buildRestaurantLink(menu),
+          delivery_platforms: menu.delivery_platforms,
+          location: menu.location,
+          cuisine_type: menu.cuisine_type,
+          distance_km: menu.distance_km,
+          match_score: score,
+          hidden_gem_score: hiddenGemScore,
+          hidden_gem_badge: badge,
+          // NEW: Enhanced metadata
+          restaurant_rating: menu.rating,
+          restaurant_review_count: menu.review_count,
+          restaurant_type: menu.type
+        });
+      });
+    }
+    
+    // Sort results
+    if (sort_by === 'distance' && results.some(r => r.distance_km !== null)) {
+      results.sort((a, b) => (a.distance_km || 999) - (b.distance_km || 999));
+    } else if (sort_by === 'hidden_gem') {
+      results.sort((a, b) => b.hidden_gem_score - a.hidden_gem_score);
+    } else {
+      // Default: relevance (match_score)
+      results.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+    }
+    
+    const topResults = results.slice(0, limit);
+    
+    console.log(`✅ Found ${results.length} items, returning top ${topResults.length}`);
+    if (topResults.length > 0 && topResults[0].hidden_gem_badge) {
+      console.log(`💎 Top result is a ${topResults[0].hidden_gem_badge.label}!`);
+    }
+    
+    return topResults;
+  }
+
+
   async addRestaurantMenu(restaurantData) {
     const {
       restaurant_id,
@@ -487,19 +754,34 @@ class MenuManager {
 export const menuManager = new MenuManager();
 
 export async function recommendFromMenus(params) {
-  const { location, mood_text, dietary, meal_period, cravingAttributes, timeContext } = params;
+  const { 
+    location, 
+    target_location, // NEW
+    search_radius = 5, // NEW
+    mood_text, 
+    dietary, 
+    meal_period, 
+    cravingAttributes, 
+    timeContext,
+    prioritize_hidden_gems = false // NEW
+  } = params;
   
   try {
     const menuItems = await menuManager.searchMenus({
       location,
+      target_location,
+      search_radius,
       mood_text,
       dietary: dietary || [],
       meal_period: meal_period || 'all_day',
       attributes: cravingAttributes || [],
-      timeContext: timeContext,  // ADD THIS LINE
-      limit: 6
+      timeContext,
+      limit: 6,
+      sort_by: prioritize_hidden_gems ? 'hidden_gem' : 'relevance'
     });
-    console.log(`🔍 Menu search found ${menuItems.length} matching items`); 
+    
+    console.log(`🔍 Menu search found ${menuItems.length} matching items`);
+    
     if (menuItems.length === 0) {
       console.log('🔍 No menu items found matching criteria');
       return null;
@@ -508,13 +790,23 @@ export async function recommendFromMenus(params) {
     const formatted = menuItems.slice(0, 3).map(item => ({
       name: item.name,
       emoji: item.emoji || '🍽️',
-      explanation: item.description || `Available at ${item.restaurant_name}`,
-      restaurant: item.restaurant_name,
+      explanation: `${item.description || ''} ${item.hidden_gem_badge ? `• ${item.hidden_gem_badge.emoji} ${item.hidden_gem_badge.label}` : ''}`.trim(),
+      restaurant: {
+        name: item.restaurant_name,
+        link: item.restaurant_link.url,
+        link_type: item.restaurant_link.type,
+        link_label: item.restaurant_link.label,
+        address: item.location?.address,
+        distance: item.distance_km ? `${item.distance_km.toFixed(1)}km away` : null,
+        rating: item.restaurant_rating,
+        reviews: item.restaurant_review_count
+      },
       price: item.price,
-      delivery_link: menuManager.getDeliveryLink(item.restaurant_id),
+      hidden_gem: item.hidden_gem_badge,
       source: 'restaurant_menu',
       cuisine_type: item.cuisine_type,
-      dietary_info: item.dietary
+      dietary_info: item.dietary,
+      availability: item.availability
     }));
     
     console.log(`🍽️ Returning ${formatted.length} restaurant recommendations`);
@@ -589,4 +881,4 @@ export async function addSampleRestaurants() {
   return { success: true, added: samples.length };
 }
 
-console.log('📋 Enhanced Menu Manager initialized');
+console.log('📋 Enhanced Menu Manager with Location Flexibility & Hidden Gems initialized');

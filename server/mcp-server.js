@@ -829,19 +829,22 @@ app.post('/v1/quick_decision', async (req, res) => {
     });
     const menuSuggestions = await recommendFromMenus({
       location: loc,
+      target_location: v.search_location, // NEW: User can specify different area
+      search_radius: v.search_radius || 5, // NEW: Customizable radius
       mood_text,
       dietary,
       meal_period: timeContext?.meal_period,
-      cravingAttributes: parseCravings(mood_text).attributes
+      cravingAttributes: parseCravings(mood_text).attributes,
+      timeContext,
+      prioritize_hidden_gems: v.show_hidden_gems // NEW: Toggle for gem hunters
     });
     
     if (menuSuggestions && menuSuggestions.length > 0) {
-      // Return actual restaurant items!
       return res.json({
         success: true,
         decisions: menuSuggestions,
         source: 'restaurant_menus',
-        note: 'Available now from local restaurants'
+        search_area: v.search_location ? `Searching ${v.search_location.city}` : `Near ${loc.city}`
       });
     }
     // === PRIORITY: Try GPT first with proper error handling ===
