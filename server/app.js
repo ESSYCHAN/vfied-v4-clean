@@ -118,6 +118,8 @@ app.get('/demo', (req, res) => res.sendFile(path.resolve(__dirname, '../app/demo
 app.get('/dashboard', (req, res) => res.sendFile(path.resolve(__dirname, '../app/dashboard.html')));
 app.get('/submit-event', (req, res) => res.sendFile(path.resolve(__dirname, '../app/submit-event.html')));
 app.get('/admin', (req, res) => res.sendFile(path.resolve(__dirname, '../admin.html')));
+app.get('/signup', (req, res) => res.sendFile(path.resolve(__dirname, '../app/signup.html')));
+app.get('/signup.html', (req, res) => res.sendFile(path.resolve(__dirname, '../app/signup.html')));
 
 app.get('/openapi.json', (_req, res) => {
   res.setHeader('Content-Type','application/json');
