@@ -1,6 +1,8 @@
+// server/routes/restaurants.js
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { sendEmail } from '../utils/email.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,8 +28,17 @@ export function setupRestaurantRoutes(app) {
         .replace(/[^a-z0-9]+/g, '_')
         .replace(/^_|_$/g, '') + '_' + Date.now();
 
-      // Determine tier (import menuManager to get count)
-      const currentCount = 0; // TODO: Get from menuManager.getRestaurantCount()
+      // Determine tier based on current count
+      const profilesPath = path.resolve(__dirname, '../../data/restaurant_profiles.json');
+      let profiles = {};
+      try {
+        const data = await fs.readFile(profilesPath, 'utf8');
+        profiles = JSON.parse(data);
+      } catch (err) {
+        console.log('Creating new restaurant_profiles.json');
+      }
+      
+      const currentCount = Object.keys(profiles).length;
       let tier = 'self_serve';
       if (currentCount < 20) tier = 'white_glove';
       else if (currentCount < 50) tier = 'assisted';
@@ -53,23 +64,142 @@ export function setupRestaurantRoutes(app) {
       };
 
       // Save to file
-      const profilesPath = path.resolve(__dirname, '../../data/restaurant_profiles.json');
-      let profiles = {};
-      
-      try {
-        const data = await fs.readFile(profilesPath, 'utf8');
-        profiles = JSON.parse(data);
-      } catch (err) {
-        console.log('Creating new restaurant_profiles.json');
-      }
-      
       profiles[restaurant_id] = restaurantProfile;
       await fs.writeFile(profilesPath, JSON.stringify(profiles, null, 2));
 
-      console.log(`✅ Restaurant signup: ${restaurant_name} (tier: ${tier})`);
+      console.log(`✅ Restaurant signup #${currentCount + 1}: ${restaurant_name} (tier: ${tier})`);
 
+      // === EMAIL NOTIFICATIONS ===
+      
+      // 1. Email to VFIED team
+      const teamEmail = process.env.VFIED_TEAM_EMAIL;
+      if (teamEmail) {
+        await sendEmail({
+          to: teamEmail,
+          subject: `🎉 New Restaurant Signup #${currentCount + 1}: ${restaurant_name}`,
+          html: `
+            <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #7c3aed;">New Restaurant Partner!</h2>
+              <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Restaurant:</strong> ${restaurant_name}</p>
+                <p><strong>Contact:</strong> ${contact.first_name} ${contact.last_name}</p>
+                <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+                <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+                <p><strong>Location:</strong> ${location.city}, ${location.country_code}</p>
+                <p><strong>Cuisine:</strong> ${cuisine_type}</p>
+                <p><strong>Website:</strong> ${website ? `<a href="${website}">${website}</a>` : 'Not provided'}</p>
+                <p><strong>Tier:</strong> <span style="background: #fbbf24; padding: 4px 12px; border-radius: 4px; font-weight: bold;">${tier.toUpperCase()}</span></p>
+                <p><strong>Menu Size:</strong> ${approximate_menu_items || 'Not specified'}</p>
+                <p><strong>Goals:</strong> ${Array.isArray(goals) ? goals.join(', ') : 'None specified'}</p>
+              </div>
+              <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px; margin: 20px 0;">
+                <p style="margin: 0;"><strong>Next Action:</strong></p>
+                <p style="margin: 8px 0 0 0;">
+                  ${tier === 'white_glove' 
+                    ? '📞 Contact within 24 hours to schedule onboarding call' 
+                    : '📧 They received automated dashboard access'}
+                </p>
+              </div>
+              <p style="color: #6b7280; font-size: 14px;">
+                <strong>Restaurant ID:</strong> <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">${restaurant_id}</code>
+              </p>
+            </div>
+          `
+        });
+      }
+
+      // 2. Email to restaurant
+      const tierMessages = {
+        white_glove: {
+          subject: 'Welcome to VFIED - Your Personalized Onboarding Awaits!',
+          html: `
+            <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #7c3aed;">Welcome to VFIED, ${contact.first_name}!</h2>
+              <p>Thank you for joining VFIED as one of our first 20 restaurant partners.</p>
+              <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <p style="margin: 0 0 12px 0;"><strong>What happens next:</strong></p>
+                <ul style="margin: 0; padding-left: 20px;">
+                  <li style="margin: 8px 0;">You're confirmed as a <strong>White Glove Partner</strong></li>
+                  <li style="margin: 8px 0;">We'll email you within 24 hours to schedule your onboarding call</li>
+                  <li style="margin: 8px 0;">On the call, we'll help you upload your first menu items</li>
+                  <li style="margin: 8px 0;">You'll be live on VFIED within 48 hours</li>
+                </ul>
+              </div>
+              <p style="color: #6b7280; font-size: 14px;">
+                <strong>Your Restaurant ID:</strong> <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">${restaurant_id}</code>
+              </p>
+              <p>Questions? Reply to this email anytime.</p>
+              <p style="color: #6b7280;">- The VFIED Team</p>
+            </div>
+          `
+        },
+        assisted: {
+          subject: 'Welcome to VFIED - Dashboard Access Inside!',
+          html: `
+            <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #7c3aed;">Welcome to VFIED, ${contact.first_name}!</h2>
+              <p>Your restaurant dashboard is ready!</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="https://vfied-v4-clean.onrender.com/dashboard?id=${restaurant_id}" 
+                   style="background: #7c3aed; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                  Access Your Dashboard
+                </a>
+              </div>
+              <div style="background: #f3f4f6; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <p style="margin: 0 0 12px 0;"><strong>What you can do:</strong></p>
+                <ul style="margin: 0; padding-left: 20px;">
+                  <li style="margin: 8px 0;">Upload your menu items</li>
+                  <li style="margin: 8px 0;">View analytics (coming soon)</li>
+                  <li style="margin: 8px 0;">Optional: Book a support call if needed</li>
+                </ul>
+              </div>
+              <p style="color: #6b7280; font-size: 14px;">
+                <strong>Your Restaurant ID:</strong> <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">${restaurant_id}</code>
+              </p>
+              <p>Need help? Reply to this email.</p>
+              <p style="color: #6b7280;">- The VFIED Team</p>
+            </div>
+          `
+        },
+        self_serve: {
+          subject: "You're Live on VFIED!",
+          html: `
+            <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #7c3aed;">Welcome to VFIED, ${contact.first_name}!</h2>
+              <p>Your instant access is ready!</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="https://vfied-v4-clean.onrender.com/dashboard?id=${restaurant_id}" 
+                   style="background: #7c3aed; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                  Go to Dashboard
+                </a>
+              </div>
+              <div style="background: #f3f4f6; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <p style="margin: 0 0 12px 0;"><strong>Quick Start:</strong></p>
+                <ol style="margin: 0; padding-left: 20px;">
+                  <li style="margin: 8px 0;">Upload your menu</li>
+                  <li style="margin: 8px 0;">You'll appear in food recommendations immediately</li>
+                  <li style="margin: 8px 0;">Check analytics weekly</li>
+                </ol>
+              </div>
+              <p style="color: #6b7280; font-size: 14px;">
+                <strong>Your Restaurant ID:</strong> <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">${restaurant_id}</code>
+              </p>
+              <p>Questions? Our help docs are <a href="https://vfied-v4-clean.onrender.com/docs">here</a>.</p>
+              <p style="color: #6b7280;">- The VFIED Team</p>
+            </div>
+          `
+        }
+      };
+
+      await sendEmail({
+        to: email,
+        subject: tierMessages[tier].subject,
+        html: tierMessages[tier].html
+      });
+
+      // Return response
       const messages = {
-        white_glove: 'As one of our first 20 partners, you\'ll get personalized onboarding. We\'ll email you within 24 hours.',
+        white_glove: 'As one of our first 20 partners, you\'ll get personalized onboarding. Check your email!',
         assisted: 'Welcome! Check your email for dashboard access.',
         self_serve: 'You\'re in! Check your email for instant dashboard access.'
       };
