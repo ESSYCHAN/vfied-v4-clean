@@ -111,7 +111,7 @@ app.use('/assets', express.static(path.resolve(__dirname, '../assets')));
 app.use(express.static(path.resolve(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.static(path.resolve(__dirname, '../dist')));
-
+app.use(express.static(path.resolve(__dirname, '../app')));
 // Basic routes
 app.get('/', (req, res) => res.sendFile(path.resolve(__dirname, '../public/index.html')));
 app.get('/app', (req, res) => res.sendFile(path.resolve(__dirname, '../app/index.html')));
