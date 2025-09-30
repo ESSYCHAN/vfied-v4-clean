@@ -16,13 +16,14 @@ import { setupFoodRoutes } from './routes/food.js';
 import { setupEventsRoutes } from './routes/events.js';
 import { setupTravelRoutes } from './routes/travel.js';
 import { setupUtilityRoutes } from './routes/utility.js';
-
+import { setupRestaurantRoutes } from './routes/restaurants.js';
 // Environment variables
 const PORT =  process.env.PORT || process.env.MCP_PORT || 3048;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+const dataDir = path.resolve(__dirname, '../data');
+fs.promises.mkdir(dataDir, { recursive: true }).catch(console.error);
 const app = express();
 
 // Middleware
@@ -148,6 +149,8 @@ setupFoodRoutes(app, upload);
 setupEventsRoutes(app, upload);
 setupTravelRoutes(app);
 setupUtilityRoutes(app);
+setupRestaurantRoutes(app);
+
 
 // Error handler
 app.use((err, _req, res, _next) => {

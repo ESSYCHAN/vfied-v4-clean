@@ -829,14 +829,20 @@ app.post('/v1/quick_decision', async (req, res) => {
     });
     const menuSuggestions = await recommendFromMenus({
       location: loc,
-      target_location: v.search_location, // NEW: User can specify different area
-      search_radius: v.search_radius || 5, // NEW: Customizable radius
+      target_location: v.search_location,
+      search_radius: v.search_radius || 5,
       mood_text,
       dietary,
       meal_period: timeContext?.meal_period,
       cravingAttributes: parseCravings(mood_text).attributes,
-      timeContext,
-      prioritize_hidden_gems: v.show_hidden_gems // NEW: Toggle for gem hunters
+      timeContext, // Pass this so off-peak logic works
+      prioritize_hidden_gems: v.show_hidden_gems,
+      // NEW: Signal what type of search this is
+      search_context: {
+        has_mood: mood_text.length > 0,
+        has_dietary: dietary.length > 0,
+        is_off_peak: timeContext?.current_hour >= 14 && timeContext?.current_hour < 17
+      }
     });
     
     if (menuSuggestions && menuSuggestions.length > 0) {
@@ -2222,35 +2228,77 @@ app.use((err, _req, res, _next) => {
 });
 
 
+// In your restaurant routes
 app.post('/v1/restaurants/signup', async (req, res) => {
   try {
-    const { restaurant, contact, plan = 'free', terms_accepted } = req.body;
-    
-    if (!restaurant || !contact || !terms_accepted) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: restaurant, contact, terms_accepted'
-      });
-    }
+    const { 
+      restaurant_name,
+      email,
+      phone,
+      location,
+      approximate_menu_items,
+      current_pos_systems,
+      goals // Changed from goals_with_vfied (now array from checkboxes)
+    } = req.body;
 
-    // Generate credentials
-    const restaurant_id = `rest_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
-    const api_key = `vf_${Math.random().toString(36).slice(2,15)}${Date.now().toString(36)}`;
-    const secret = `sec_${Math.random().toString(36).slice(2,20)}`;
+    // Generate unique ID
+    const restaurant_id = restaurant_name.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_|_$/g, '') + '_' + Date.now();
 
-    // In production, save to database
-    console.log('[restaurant signup]', { restaurant_id, restaurant, contact, plan });
+    // Determine onboarding tier
+    const currentCount = menuManager.getRestaurantCount();
+    let tier = 'self_serve';
+    if (currentCount < 20) tier = 'white_glove';
+    else if (currentCount < 50) tier = 'assisted';
 
-    res.status(201).json({
-      success: true,
+    const restaurantProfile = {
       restaurant_id,
-      credentials: {
-        api_key,
-        secret
+      restaurant_name,
+      email,
+      phone,
+      location,
+      metadata: {
+        menu_size: approximate_menu_items,
+        pos_systems: current_pos_systems?.split(',').map(s => s.trim()) || [],
+        goals: Array.isArray(goals) ? goals : [goals].filter(Boolean),
+        signup_date: new Date().toISOString()
       },
-      next_steps: "Check your email for setup instructions. Use your API key to upload menus."
+      tier,
+      status: tier === 'white_glove' ? 'pending_contact' : 'pending_menu_upload'
+    };
+
+    // Save to file-based storage for now (upgrade to DB later)
+    const profilesPath = path.resolve(__dirname, '../data/restaurant_profiles.json');
+    let profiles = {};
+    try {
+      const data = await fs.readFile(profilesPath, 'utf8');
+      profiles = JSON.parse(data);
+    } catch (err) {
+      // File doesn't exist yet, start fresh
+    }
+    
+    profiles[restaurant_id] = restaurantProfile;
+    await fs.writeFile(profilesPath, JSON.stringify(profiles, null, 2));
+
+    console.log(`✅ Restaurant signup: ${restaurant_name} (tier: ${tier})`);
+
+    // Return different messages based on tier
+    const messages = {
+      white_glove: 'As one of our first partners, you\'ll get personalized onboarding. We\'ll email you within 24 hours to schedule your setup call.',
+      assisted: 'Welcome! Check your email for dashboard access. Need help? Book an optional support call.',
+      self_serve: 'You\'re in! Check your email for instant dashboard access.'
+    };
+
+    res.json({ 
+      success: true, 
+      message: messages[tier],
+      tier,
+      restaurant_id
     });
+
   } catch (error) {
+    console.error('Signup error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

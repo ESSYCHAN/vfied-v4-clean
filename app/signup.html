@@ -388,46 +388,6 @@
             </div>
 
             <div class="form-section">
-                <h3>💰 Choose Your Plan</h3>
-                <div class="pricing-tiers">
-                    <div class="tier" data-plan="free">
-                        <h4>Free</h4>
-                        <div class="price">£0<span style="font-size: 1rem;">/month</span></div>
-                        <ul>
-                            <li>1,000 API calls/month</li>
-                            <li>Global food database</li>
-                            <li>Basic recommendations</li>
-                            <li>Email support</li>
-                        </ul>
-                    </div>
-                    <div class="tier recommended" data-plan="growth">
-                        <h4>Growth</h4>
-                        <div class="price">£49<span style="font-size: 1rem;">/month</span></div>
-                        <ul>
-                            <li>50,000 API calls/month</li>
-                            <li>Menu upload (500 items)</li>
-                            <li>Advanced recommendations</li>
-                            <li>Priority support</li>
-                            <li>Analytics dashboard</li>
-                        </ul>
-                    </div>
-                    <div class="tier" data-plan="scale">
-                        <h4>Scale</h4>
-                        <div class="price">£299<span style="font-size: 1rem;">/month</span></div>
-                        <ul>
-                            <li>500,000 API calls/month</li>
-                            <li>Unlimited menu items</li>
-                            <li>Webhooks</li>
-                            <li>Custom analytics</li>
-                            <li>Dedicated support</li>
-                        </ul>
-                    </div>
-                </div>
-                <input type="hidden" id="selectedPlan" name="selectedPlan" value="free">
-                <div class="error" id="plan-error"></div>
-            </div>
-
-            <div class="form-section">
                 <h3>📋 Additional Information</h3>
                 <div class="form-group">
                     <label for="menuSize">Approximate number of menu items</label>
@@ -445,8 +405,16 @@
                     <input type="text" id="currentSystems" name="currentSystems" placeholder="e.g., Square, Toast, Deliveroo">
                 </div>
                 <div class="form-group">
-                    <label for="goals">What are your main goals with VFIED? (optional)</label>
-                    <textarea id="goals" name="goals" placeholder="e.g., Increase online orders, reach new customers, showcase authentic cuisine"></textarea>
+                    <label>What are your main goals with VFIED? (Select all that apply)</label>
+                    <div class="goals-checkboxes">
+                        <label><input type="checkbox" name="goals" value="increase_visibility"> Increase visibility & discovery</label>
+                        <label><input type="checkbox" name="goals" value="target_specific_moods"> Reach customers in specific moods/moments</label>
+                        <label><input type="checkbox" name="goals" value="highlight_specialties"> Highlight signature dishes</label>
+                        <label><input type="checkbox" name="goals" value="attract_dietary"> Attract dietary-specific customers (vegan, gluten-free, etc.)</label>
+                        <label><input type="checkbox" name="goals" value="fill_off_peak"> Fill tables during off-peak hours</label>
+                        <label><input type="checkbox" name="goals" value="compete_chains"> Compete with chain restaurants</label>
+                        <label><input type="checkbox" name="goals" value="build_loyalty"> Build regular customer base</label>
+                    </div>
                 </div>
             </div>
 
@@ -524,66 +492,61 @@
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
 
-            try {
-                // Send to your backend
-                const response = await fetch(`${API_BASE}/v1/restaurants/signup`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
+                    try {
+            // Collect goals from checkboxes
+            const goals = Array.from(document.querySelectorAll('input[name="goals"]:checked'))
+                .map(cb => cb.value);
+
+            const response = await fetch(`${API_BASE}/v1/restaurants/signup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    restaurant_name: data.restaurantName,
+                    email: data.email,
+                    phone: data.phone,
+                    location: {
+                        city: data.city,
+                        country_code: data.country,
+                        address: data.address
                     },
-                    body: JSON.stringify({
-                        restaurant: {
-                            name: data.restaurantName,
-                            cuisineType: data.cuisineType,
-                            city: data.city,
-                            country: data.country,
-                            country_code: data.country, // Use the country code
-                            address: data.address,
-                            website: data.website,
-                            phone: data.phone
-                        },
-                        contact: {
-                            name: `${data.firstName} ${data.lastName}`, // Backend expects single 'name' field
-                            email: data.email,
-                            phone: data.phone,
-                            position: data.role
-                        },
-                        plan: data.selectedPlan,
-                        terms_accepted: true, // Add this required field
-                        marketing_consent: false // Add this optional field
-                    })
-                });
+                    cuisine_type: data.cuisineType,
+                    website: data.website,
+                    approximate_menu_items: data.menuSize,
+                    current_pos_systems: data.currentSystems,
+                    goals: goals, // Array of selected goals
+                    contact: {
+                        first_name: data.firstName,
+                        last_name: data.lastName,
+                        role: data.role
+                    }
+                })
+            });
 
-                const result = await response.json();
+            const result = await response.json();
 
-                if (response.ok) {
-                    // Store credentials for dashboard
-                    localStorage.setItem('vfied_api_key', result.credentials.api_key);
-                    localStorage.setItem('vfied_restaurant_id', result.restaurant_id);
-                    
-                    // Update success message with working link
-                    const successDiv = document.getElementById('success-message');
-                    successDiv.innerHTML = `
-                        <h4>🎉 Welcome to VFIED!</h4>
-                        <p>Your account has been created successfully.</p>
-                        <p><strong>Restaurant ID:</strong> ${result.restaurant_id}</p>
-                        <p><strong>API Key:</strong> ${result.credentials.api_key}</p>
-                        <div style="margin-top: 1rem;">
-                            <button onclick="window.location.href='dashboard.html'" style="background:#667eea;color:white;padding:12px 24px;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
-                                Access Your Dashboard →
-                            </button>
-                        </div>
-                    `;
-                    successDiv.style.display = 'block';
-                    document.getElementById('signupForm').style.display = 'none';
-                } else {
-                    throw new Error(result.error || 'Failed to create account');
-                }
-
-            } catch (error) {
-                console.error('Signup error:', error);
-                alert('Sorry, there was an error creating your account. Please try again or contact support.');
-            } finally {
+            if (result.success) {
+                // Store for potential redirect
+                sessionStorage.setItem('signup_tier', result.tier);
+                sessionStorage.setItem('signup_message', result.message);
+                
+                // Show success and redirect
+                document.getElementById('success-message').innerHTML = `
+                    <h4>🎉 ${result.message}</h4>
+                    <p>Restaurant ID: <strong>${result.restaurant_id}</strong></p>
+                `;
+                document.getElementById('success-message').style.display = 'block';
+                
+                // Redirect after 3 seconds
+                setTimeout(() => {
+                    window.location.href = '/signup-success.html';
+                }, 3000);
+            } else {
+                throw new Error(result.error || 'Signup failed');
+            }
+        } catch (error) {
+            console.error('Signup error:', error);
+            alert(`Error: ${error.message}`);
+        } finally {
                 // Reset button state
                 submitBtn.disabled = false;
                 submitText.textContent = 'Create My Restaurant Account';

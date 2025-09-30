@@ -99,50 +99,79 @@ class MenuManager {
 
   // NEW: Calculate hidden gem score
   calculateHiddenGemScore(restaurant, item) {
-    let score = 0;
-    
-    // 1. Limited availability (30 points)
-    if (item.availability === 'weekends_only') score += 30;
-    if (item.availability === 'seasonal') score += 25;
-    if (item.availability === 'chef_special') score += 20;
-    if (item.availability === 'limited_daily') score += 15;
-    
-    // 2. Small batch / preparation time (25 points)
-    if (item.daily_limit && item.daily_limit < 20) score += 25;
-    if (item.preparation_time && item.preparation_time > 60) score += 15;
-    
-    // 3. Family recipe / traditional (20 points)
-    if (item.tags?.includes('family_recipe')) score += 20;
-    if (item.tags?.includes('generational')) score += 15;
-    if (item.tags?.includes('traditional')) score += 10;
-    if (item.tags?.includes('secret_recipe')) score += 25;
-    
-    // 4. Restaurant size / reviews (15 points)
-    if (restaurant.review_count && restaurant.review_count < 50) score += 15;
-    if (restaurant.seating_capacity && restaurant.seating_capacity < 30) score += 10;
-    if (restaurant.type === 'family_owned') score += 10;
-    
-    // 5. Not on delivery apps (10 points)
-    const deliveryPlatforms = restaurant.delivery_platforms || {};
-    const onPlatforms = Object.keys(deliveryPlatforms).filter(k => k.endsWith('_id')).length;
-    if (onPlatforms === 0) score += 10;
-    if (onPlatforms === 1) score += 5;
-    
-    // 6. High rating but low visibility (bonus 15 points)
-    if (restaurant.rating && restaurant.rating > 4.5 && 
-        restaurant.review_count && restaurant.review_count < 100) {
-      score += 15;
-    }
-    
-    // 7. Unique/rare cuisine or technique
-    if (item.tags?.includes('rare')) score += 20;
-    if (item.tags?.includes('unique')) score += 15;
-    if (item.cooking_method === 'wood_fired' || 
-        item.cooking_method === 'charcoal' ||
-        item.cooking_method === 'traditional') score += 10;
-    
-    return Math.min(score, 100); // Cap at 100
+  let score = 0;
+  
+  // 1. Limited availability (30 points)
+  if (item.availability === 'weekends_only') score += 30;
+  if (item.availability === 'seasonal') score += 25;
+  if (item.availability === 'chef_special') score += 20;
+  if (item.availability === 'limited_daily') score += 15;
+  
+  // 2. Small batch / preparation time (25 points)
+  if (item.daily_limit && item.daily_limit < 20) score += 25;
+  if (item.preparation_time && item.preparation_time > 60) score += 15;
+  
+  // 3. Family recipe / traditional (20 points)
+  if (item.tags?.includes('family_recipe')) score += 20;
+  if (item.tags?.includes('generational')) score += 15;
+  if (item.tags?.includes('traditional')) score += 10;
+  if (item.tags?.includes('secret_recipe')) score += 25;
+  
+  // 4. Restaurant size / reviews (15 points)
+  if (restaurant.review_count && restaurant.review_count < 50) score += 15;
+  if (restaurant.seating_capacity && restaurant.seating_capacity < 30) score += 10;
+  if (restaurant.type === 'family_owned') score += 10;
+  
+  // 5. Not on delivery apps (10 points)
+  const deliveryPlatforms = restaurant.delivery_platforms || {};
+  const onPlatforms = Object.keys(deliveryPlatforms).filter(k => k.endsWith('_id')).length;
+  if (onPlatforms === 0) score += 10;
+  if (onPlatforms === 1) score += 5;
+  
+  // 6. High rating but low visibility (bonus 15 points)
+  if (restaurant.rating && restaurant.rating > 4.5 && 
+      restaurant.review_count && restaurant.review_count < 100) {
+    score += 15;
   }
+  
+  // 7. Unique/rare cuisine or technique
+  if (item.tags?.includes('rare')) score += 20;
+  if (item.tags?.includes('unique')) score += 15;
+  if (item.cooking_method === 'wood_fired' || 
+      item.cooking_method === 'charcoal' ||
+      item.cooking_method === 'traditional') score += 10;
+  
+  // NEW: Use signup metadata goals
+  const goals = restaurant.metadata?.goals || [];
+  
+  // If NOT seeking visibility, they're more of a hidden gem
+  if (!goals.includes('increase_visibility')) {
+    score += 12; // They're not actively marketing = hidden
+  }
+  
+  // If highlighting specialties, signature dishes get gem status
+  if (goals.includes('highlight_specialties') && item.tags?.includes('signature')) {
+    score += 10;
+  }
+  
+  // Competing with chains = underdog/gem quality
+  if (goals.includes('compete_chains')) {
+    score += 8;
+  }
+  
+  // Menu size from signup
+  const menuSize = restaurant.metadata?.menu_size;
+  if (menuSize === '21-50 items') score += 15; // Small, curated menu
+  if (menuSize === '1-20 items') score += 20; // Very focused
+  if (menuSize === '51-100 items') score += 5;
+  
+  // POS systems - fewer = more traditional
+  const posSystems = restaurant.metadata?.pos_systems || [];
+  if (posSystems.length === 0) score += 10; // No tech = traditional
+  if (posSystems.length === 1) score += 5;
+  
+  return Math.min(score, 100); // Cap at 100
+}
 
   // NEW: Get hidden gem badge
   getHiddenGemBadge(score) {
@@ -289,7 +318,7 @@ class MenuManager {
         let score = Math.random() * 5; // Base randomness
         const itemText = `${item.name} ${item.description || ''} ${(item.search_tags || []).join(' ')}`.toLowerCase();
         
-        // Mood matching
+        // Existing mood matching...
         if (mood_text) {
           const moodWords = mood_text.toLowerCase().split(/\s+/);
           for (const word of moodWords) {
@@ -299,34 +328,45 @@ class MenuManager {
           }
         }
         
-        // Attribute matching
-        for (const attr of attributes) {
-          if (itemText.includes(attr.toLowerCase())) {
-            score += 8;
+        // NEW: Boost based on restaurant goals
+        const goals = menu.metadata?.goals || [];
+        
+        // If restaurant wants visibility, boost all their items slightly
+        if (goals.includes('increase_visibility')) {
+          score += 3;
+        }
+        
+        // If they want to highlight specialties and item is tagged as signature
+        if (goals.includes('highlight_specialties') && item.tags?.includes('signature')) {
+          score += 15;
+        }
+        
+        // If targeting dietary customers and this matches user's dietary needs
+        if (goals.includes('attract_dietary') && dietary.length > 0) {
+          const matchesDietary = dietary.some(d => item.dietary?.[d.replace('-','_')]);
+          if (matchesDietary) score += 12;
+        }
+        
+        // If filling off-peak hours, boost during those times
+        if (goals.includes('fill_off_peak') && timeContext) {
+          const hour = timeContext.current_hour;
+          if ((hour >= 14 && hour < 17) || (hour >= 21)) { // Afternoon & late night
+            score += 10;
           }
         }
         
-        // Calculate hidden gem score
-        const hiddenGemScore = this.calculateHiddenGemScore(menu, item);
-        const badge = this.getHiddenGemBadge(hiddenGemScore);
+        // If competing with chains, boost for mood-based searches (more personal)
+        if (goals.includes('compete_chains') && mood_text?.length > 10) {
+          score += 8;
+        }
         
-        results.push({
-          ...item,
-          restaurant_name: menu.restaurant_name,
-          restaurant_id: menu.restaurant_id,
-          restaurant_link: this.buildRestaurantLink(menu),
-          delivery_platforms: menu.delivery_platforms,
-          location: menu.location,
-          cuisine_type: menu.cuisine_type,
-          distance_km: menu.distance_km,
-          match_score: score,
-          hidden_gem_score: hiddenGemScore,
-          hidden_gem_badge: badge,
-          // NEW: Enhanced metadata
-          restaurant_rating: menu.rating,
-          restaurant_review_count: menu.review_count,
-          restaurant_type: menu.type
-        });
+        // If targeting specific moods, boost when mood keywords match their cuisine
+        if (goals.includes('target_specific_moods') && mood_text) {
+          const cuisineMatch = itemText.includes(menu.cuisine_type);
+          if (cuisineMatch) score += 7;
+        }
+        
+        item.match_score = score;
       });
     }
     
