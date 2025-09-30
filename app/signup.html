@@ -521,9 +521,8 @@
                 document.getElementById('success-message').style.display = 'block';
                 
                 // Redirect after 3 seconds
-                setTimeout(() => {
-                    window.location.href = '/signup-success.html';
-                }, 3000);
+                // Just show success message, no redirect
+// User can close the tab or navigate away
             } else {
                 throw new Error(result.error || 'Signup failed');
             }
