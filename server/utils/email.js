@@ -1,20 +1,26 @@
 // server/utils/email.js
-import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend = null;
+
+// Only initialize Resend if API key exists
+if (process.env.RESEND_API_KEY) {
+  const { Resend } = await import('resend');
+  resend = new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function sendEmail({ to, subject, html, from = 'VFIED <onboarding@vfied.com>' }) {
   try {
-    // If no API key, log to console instead (development fallback)
-    if (!process.env.RESEND_API_KEY) {
-      console.log('\n=== EMAIL (no API key, logging only) ===');
+    // If no Resend client (no API key), log to console instead
+    if (!resend) {
+      console.log('\n=== EMAIL (Development Mode - No API Key) ===');
       console.log('To:', to);
       console.log('Subject:', subject);
-      console.log('Body:', html.substring(0, 200) + '...');
-      console.log('=====================================\n');
+      console.log('Preview:', html.substring(0, 150).replace(/<[^>]*>/g, '') + '...');
+      console.log('===========================================\n');
       return { success: true, id: 'dev-mode', simulated: true };
     }
 
+    // Send real email
     const data = await resend.emails.send({
       from,
       to,
