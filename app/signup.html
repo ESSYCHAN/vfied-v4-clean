@@ -427,19 +427,8 @@
     <script>
         const API_BASE = window.location.hostname === 'localhost' 
             ? 'http://localhost:3048' 
-            : 'https://vfied-v3.onrender.com';
+            : 'https://vfied-v4-clean.onrender.com';
 
-        // Plan selection
-        document.querySelectorAll('.tier').forEach(tier => {
-            tier.addEventListener('click', () => {
-                document.querySelectorAll('.tier').forEach(t => t.classList.remove('selected'));
-                tier.classList.add('selected');
-                document.getElementById('selectedPlan').value = tier.dataset.plan;
-            });
-        });
-
-        // Set default selection
-        document.querySelector('[data-plan="free"]').classList.add('selected');
 
         // Form validation
         function validateForm() {
@@ -463,12 +452,7 @@
                 document.getElementById('email-error').textContent = 'Please enter a valid email address';
                 isValid = false;
             }
-
-            // Plan selection validation
-            if (!document.getElementById('selectedPlan').value) {
-                document.getElementById('plan-error').textContent = 'Please select a plan';
-                isValid = false;
-            }
+            
 
             return isValid;
         }
