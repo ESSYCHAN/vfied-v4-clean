@@ -3,7 +3,7 @@ const isDevelopment = window.location.hostname === 'localhost' ||
                      window.location.hostname === '127.0.0.1' ||
                      window.location.protocol === 'capacitor:'; // Add this for Capacitor
 
-const API_PORT = 3049;
+const API_PORT = 3048;
 
 export const CONFIG = {
   API_BASE: isDevelopment 
