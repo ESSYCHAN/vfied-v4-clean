@@ -607,87 +607,87 @@ class MenuManager {
     return categoryEmojis[category] || item.emoji || '🍽️';
   }
 
-  async searchMenus({ location, mood_text = '', dietary = [], meal_period = 'all_day', attributes = [], limit = 10, timeContext = null }) {
-    const results = [];
-    const locationKey = `${(location && location.country_code ? location.country_code : 'GB').toLowerCase()}_${(location && location.city ? location.city : '').toLowerCase()}`;
+  // async searchMenus({ location, mood_text = '', dietary = [], meal_period = 'all_day', attributes = [], limit = 10, timeContext = null }) {
+  //   const results = [];
+  //   const locationKey = `${(location && location.country_code ? location.country_code : 'GB').toLowerCase()}_${(location && location.city ? location.city : '').toLowerCase()}`;
     
-    console.log(`🔍 Searching menus for location: ${locationKey}, meal: ${meal_period}`);
+  //   console.log(`🔍 Searching menus for location: ${locationKey}, meal: ${meal_period}`);
     
-    for (const [key, menu] of this.menus) {
-      const menuLocation = `${menu.location.country_code.toLowerCase()}_${menu.location.city.toLowerCase()}`;
-      if (!menuLocation.includes(location && location.country_code ? location.country_code.toLowerCase() : '') && 
-          !key.includes(location && location.city ? location.city.toLowerCase() : '')) {
-        continue;
-      }
-     if (timeContext && menu.opening_hours) {
-    const now = new Date();
-    const currentDay = now.toLocaleDateString('en', {weekday: 'long'}).toLowerCase();
-    const currentTime = now.toTimeString().slice(0,5);
+  //   for (const [key, menu] of this.menus) {
+  //     const menuLocation = `${menu.location.country_code.toLowerCase()}_${menu.location.city.toLowerCase()}`;
+  //     if (!menuLocation.includes(location && location.country_code ? location.country_code.toLowerCase() : '') && 
+  //         !key.includes(location && location.city ? location.city.toLowerCase() : '')) {
+  //       continue;
+  //     }
+  //    if (timeContext && menu.opening_hours) {
+  //   const now = new Date();
+  //   const currentDay = now.toLocaleDateString('en', {weekday: 'long'}).toLowerCase();
+  //   const currentTime = now.toTimeString().slice(0,5);
     
-    const todayHours = menu.opening_hours[currentDay];
-    if (!todayHours || currentTime < todayHours.open || currentTime > todayHours.close) {
-      console.log(`⏰ Skipping ${menu.restaurant_name} - closed (${currentTime} not between ${todayHours?.open}-${todayHours?.close})`);
-      continue; // Skip closed restaurants
-    }
-  } 
-      const matchingItems = menu.menu_items.filter(item => {
-        if (!item.available) return false;
+  //   const todayHours = menu.opening_hours[currentDay];
+  //   if (!todayHours || currentTime < todayHours.open || currentTime > todayHours.close) {
+  //     console.log(`⏰ Skipping ${menu.restaurant_name} - closed (${currentTime} not between ${todayHours?.open}-${todayHours?.close})`);
+  //     continue; // Skip closed restaurants
+  //   }
+  // } 
+  //     const matchingItems = menu.menu_items.filter(item => {
+  //       if (!item.available) return false;
         
-        if (meal_period !== 'all_day' && 
-            item.meal_period !== 'all_day' && 
-            item.meal_period !== meal_period) {
-          return false;
-        }
+  //       if (meal_period !== 'all_day' && 
+  //           item.meal_period !== 'all_day' && 
+  //           item.meal_period !== meal_period) {
+  //         return false;
+  //       }
         
-        if (dietary.length > 0) {
-          for (const restriction of dietary) {
-            const normalizedRestriction = restriction.replace('-', '_');
-            if (!item.dietary || !item.dietary[normalizedRestriction]) {
-              return false;
-            }
-          }
-        }
+  //       if (dietary.length > 0) {
+  //         for (const restriction of dietary) {
+  //           const normalizedRestriction = restriction.replace('-', '_');
+  //           if (!item.dietary || !item.dietary[normalizedRestriction]) {
+  //             return false;
+  //           }
+  //         }
+  //       }
         
-        let score = Math.random() * 5;
-        const itemText = `${item.name} ${item.description || ''} ${(item.search_tags || []).join(' ')}`.toLowerCase();
+  //       let score = Math.random() * 5;
+  //       const itemText = `${item.name} ${item.description || ''} ${(item.search_tags || []).join(' ')}`.toLowerCase();
         
-        if (mood_text) {
-          const moodWords = mood_text.toLowerCase().split(/\s+/);
-          for (const word of moodWords) {
-            if (word.length > 2 && itemText.includes(word)) {
-              score += 10;
-            }
-          }
-        }
+  //       if (mood_text) {
+  //         const moodWords = mood_text.toLowerCase().split(/\s+/);
+  //         for (const word of moodWords) {
+  //           if (word.length > 2 && itemText.includes(word)) {
+  //             score += 10;
+  //           }
+  //         }
+  //       }
         
-        for (const attr of attributes) {
-          if (itemText.includes(attr.toLowerCase())) {
-            score += 8;
-          }
-        }
+  //       for (const attr of attributes) {
+  //         if (itemText.includes(attr.toLowerCase())) {
+  //           score += 8;
+  //         }
+  //       }
         
-        item.match_score = score;
-        return true;
-      });
+  //       item.match_score = score;
+  //       return true;
+  //     });
       
-      matchingItems.forEach(item => {
-        results.push({
-          ...item,
-          restaurant_name: menu.restaurant_name,
-          restaurant_id: menu.restaurant_id,
-          delivery_platforms: menu.delivery_platforms,
-          location: menu.location,
-          cuisine_type: menu.cuisine_type
-        });
-      });
-    }
+  //     matchingItems.forEach(item => {
+  //       results.push({
+  //         ...item,
+  //         restaurant_name: menu.restaurant_name,
+  //         restaurant_id: menu.restaurant_id,
+  //         delivery_platforms: menu.delivery_platforms,
+  //         location: menu.location,
+  //         cuisine_type: menu.cuisine_type
+  //       });
+  //     });
+  //   }
     
-    results.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
-    const topResults = results.slice(0, limit);
+  //   results.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+  //   const topResults = results.slice(0, limit);
     
-    console.log(`✅ Found ${results.length} items, returning top ${topResults.length}`);
-    return topResults;
-  }
+  //   console.log(`✅ Found ${results.length} items, returning top ${topResults.length}`);
+  //   return topResults;
+  // }
 
   getAllMenuItems() {
     const allItems = [];
