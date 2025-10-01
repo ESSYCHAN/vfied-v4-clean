@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { sendEmail } from '../utils/email.js';
+import { menuManager } from '../menu_manager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -68,6 +69,30 @@ export function setupRestaurantRoutes(app) {
       await fs.writeFile(profilesPath, JSON.stringify(profiles, null, 2));
 
       console.log(`✅ Restaurant signup #${currentCount + 1}: ${restaurant_name} (tier: ${tier})`);
+
+      // Create empty menu entry in MenuManager
+    await menuManager.addRestaurantMenu({
+    restaurant_id,
+    restaurant_name,
+    location: {
+        city: location.city,
+        country_code: location.country_code,
+        address: location.address || ''
+    },
+    cuisine_type,
+    website,
+    phone,
+    metadata: {
+        goals: Array.isArray(goals) ? goals : [],
+        menu_size: approximate_menu_items,
+        pos_systems: current_pos_systems?.split(',').map(s => s.trim()) || []
+    },
+    menu_items: [], // Empty - they'll add via dashboard
+    delivery_platforms: {},
+    opening_hours: {}
+    });
+
+    console.log(`📋 Created empty menu entry for ${restaurant_name}`);
 
       // === EMAIL NOTIFICATIONS ===
       
@@ -216,4 +241,106 @@ export function setupRestaurantRoutes(app) {
       res.status(500).json({ success: false, error: error.message });
     }
   });
+  // Add menu item endpoint
+app.post('/v1/restaurants/:restaurant_id/menu-items', async (req, res) => {
+  try {
+    const { restaurant_id } = req.params;
+    const { menu_items } = req.body;
+
+    if (!Array.isArray(menu_items) || menu_items.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'menu_items must be a non-empty array' 
+      });
+    }
+
+    // Find restaurant in MenuManager
+    const restaurantKey = Array.from(menuManager.menus.keys())
+      .find(key => key.includes(restaurant_id));
+
+    if (!restaurantKey) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Restaurant not found' 
+      });
+    }
+
+    // Add menu items
+    const restaurant = menuManager.menus.get(restaurantKey);
+    
+    for (const item of menu_items) {
+      const processedItem = {
+        menu_item_id: `${restaurant_id}_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+        name: item.name.trim(),
+        emoji: item.emoji || menuManager.getEmoji(item),
+        price: item.price || '—',
+        description: item.description || '',
+        category: item.category || 'main',
+        tags: Array.isArray(item.tags) ? item.tags : [],
+        meal_period: item.meal_period || menuManager.detectMealPeriod(item),
+        search_tags: menuManager.generateSearchTags(item),
+        dietary: {
+          vegetarian: Boolean(item.dietary?.vegetarian),
+          vegan: Boolean(item.dietary?.vegan),
+          gluten_free: Boolean(item.dietary?.gluten_free),
+          dairy_free: Boolean(item.dietary?.dairy_free),
+          halal: Boolean(item.dietary?.halal)
+        },
+        available: item.available !== false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      restaurant.menu_items.push(processedItem);
+    }
+
+    restaurant.updated_at = new Date().toISOString();
+    menuManager.updateStats();
+    await menuManager.saveMenus();
+
+    res.json({ 
+      success: true, 
+      message: `Added ${menu_items.length} items`,
+      total_items: restaurant.menu_items.length
+    });
+
+  } catch (error) {
+    console.error('Menu upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get restaurant menu
+app.get('/v1/restaurants/:restaurant_id/menu', async (req, res) => {
+  try {
+    const { restaurant_id } = req.params;
+
+    const restaurantKey = Array.from(menuManager.menus.keys())
+      .find(key => key.includes(restaurant_id));
+
+    if (!restaurantKey) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Restaurant not found' 
+      });
+    }
+
+    const restaurant = menuManager.menus.get(restaurantKey);
+
+    res.json({ 
+      success: true, 
+      restaurant: {
+        id: restaurant.restaurant_id,
+        name: restaurant.restaurant_name,
+        location: restaurant.location,
+        cuisine_type: restaurant.cuisine_type,
+        menu_items: restaurant.menu_items,
+        total_items: restaurant.menu_items.length
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 }
