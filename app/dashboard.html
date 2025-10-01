@@ -565,7 +565,7 @@
       <div class="connection-form">
         <div class="form-group">
           <label>API Endpoint</label>
-          <input id="baseUrl" value="https://vfied-v3.onrender.com" placeholder="https://api.vfied.com"/>
+          <input id="baseUrl" value='https://vfied-v4-clean.onrender.com' placeholder="https://api.vfied.com"/>
         </div>
         <div class="form-group">
           <label>API Key</label>
@@ -1244,7 +1244,7 @@
 
       // Detect environment
       const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-      $('baseUrl').value = isLocal ? 'http://localhost:3048' : 'https://vfied-v3.onrender.com';
+      $('baseUrl').value = isLocal ? 'http://localhost:3048' : 'https://vfied-v4-clean.onrender.com';
 
       // Generate demo key if needed
       if (!storedKey && !urlKey) {
