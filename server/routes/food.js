@@ -1349,4 +1349,18 @@ export function setupFoodRoutes(app, upload) {
       expires_in: 3600
     });
   });
-}
+app.get('/v1/debug/menus', (req, res) => {
+  const allMenus = Array.from(menuManager.menus.entries()).map(([key, menu]) => ({
+    key,
+    restaurant_id: menu.restaurant_id,
+    name: menu.restaurant_name,
+    location: menu.location,
+    items_count: menu.menu_items?.length || 0,
+    sample_items: menu.menu_items?.slice(0, 3).map(i => i.name) || []
+  }));
+  
+  res.json({
+    total_restaurants: allMenus.length,
+    restaurants: allMenus
+  });
+});}
