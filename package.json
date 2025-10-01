@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "node server/mcp-server.js",
-    "dev:server": "node --watch server/mcp-server.js",
+    "start": "node server/app.js",
+    "dev:server": "node --watch server/app.js",
     "dev:app": "vite",
     "dev": "npm-run-all -p dev:server dev:app",
     "build": "vite build",
@@ -47,5 +47,5 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "main": "server/mcp-server.js"
+  "main": "server/app.js"
 }
