@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "node server/app.js",
-    "dev:server": "node --watch server/app.js",
+    "start": "node server/mcp-server.js",
+    "dev:server": "node --watch server/mcp-server.js",
     "dev:app": "vite",
     "dev": "npm-run-all -p dev:server dev:app",
     "build": "vite build",
