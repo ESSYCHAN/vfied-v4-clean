@@ -106,7 +106,7 @@ export const upload = multer({
 });
 
 // Static files
-app.use('/src', express.static(path.resolve(__dirname, '../src')));
+// app.use('/src', express.static(path.resolve(__dirname, '../src')));
 app.use('/assets', express.static(path.resolve(__dirname, '../assets')));
 app.use(express.static(path.resolve(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
