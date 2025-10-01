@@ -343,4 +343,37 @@ app.get('/v1/restaurants/:restaurant_id/menu', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+// List all restaurants in MenuManager
+app.get('/v1/restaurants/list', async (req, res) => {
+  try {
+    const allRestaurants = Array.from(menuManager.menus.keys()).map(key => {
+      const menu = menuManager.menus.get(key);
+      return {
+        key,
+        restaurant_id: menu.restaurant_id,
+        name: menu.restaurant_name,
+        location: menu.location,
+        menu_items_count: menu.menu_items.length
+      };
+    });
+    
+    res.json({ 
+      success: true, 
+      count: allRestaurants.length,
+      restaurants: allRestaurants 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get MenuManager stats
+app.get('/v1/restaurants/stats', async (req, res) => {
+  try {
+    const stats = menuManager.getStats();
+    res.json({ success: true, stats });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 }
