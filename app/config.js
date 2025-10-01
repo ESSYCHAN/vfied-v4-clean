@@ -8,7 +8,7 @@ const API_PORT = 3049;
 export const CONFIG = {
   API_BASE: isDevelopment 
     ? `http://localhost:${API_PORT}` 
-    : 'https://vfied-v3.onrender.com',
+    : 'https://vfied-v4-clean.onrender.com',
   
   TIMEOUT: 10000, // Increase to 10s for mobile networks
   ENABLE_AI: true,
