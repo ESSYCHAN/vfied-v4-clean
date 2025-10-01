@@ -367,6 +367,19 @@ class MenuManager {
         }
         
         item.match_score = score;
+        const link = this.buildRestaurantLink(menu);
+        const gemScore = this.calculateHiddenGemScore(menu, item);
+        const gemBadge = this.getHiddenGemBadge(gemScore);
+        
+        results.push({
+          ...item,
+          restaurant_name: menu.restaurant_name,
+          restaurant_id: menu.restaurant_id,
+          restaurant_link: link,
+          hidden_gem_score: gemScore,
+          hidden_gem_badge: gemBadge,
+          location: menu.location,
+          cuisine_type: menu.cuisine_type});
       });
     }
     
