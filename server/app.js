@@ -114,7 +114,7 @@ app.use(express.static(path.resolve(__dirname, '../dist')));
 app.use(express.static(path.resolve(__dirname, '../app')));
 // Basic routes
 app.get('/', (req, res) => res.sendFile(path.resolve(__dirname, '../public/index.html')));
-app.get('/app', (req, res) => res.sendFile(path.resolve(__dirname, '../index.html')));
+app.get('/', (req, res) => res.sendFile(path.resolve(__dirname, '../index.html')));
 app.get('/docs', (req, res) => res.sendFile(path.resolve(__dirname, '../app/docs.html')));
 app.get('/demo', (req, res) => res.sendFile(path.resolve(__dirname, '../app/demo.html')));
 app.get('/dashboard', (req, res) => res.sendFile(path.resolve(__dirname, '../app/dashboard.html')));
