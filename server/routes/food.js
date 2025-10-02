@@ -1364,19 +1364,3 @@ app.get('/v1/debug/menus', (req, res) => {
     restaurants: allMenus
   });
 });}
-app.get('/v1/debug/menu-status', (req, res) => {
-  const stats = menuManager.getStats();
-  const allMenus = Array.from(menuManager.menus.entries()).map(([key, menu]) => ({
-    key,
-    name: menu.restaurant_name,
-    items: menu.menu_items?.length || 0,
-    sample_items: menu.menu_items?.slice(0, 3).map(i => i.name) || []
-  }));
-  
-  res.json({
-    database_size: stats.total_restaurants,
-    total_items: stats.total_items,
-    restaurants: allMenus,
-    is_empty: stats.total_restaurants === 0
-  });
-});
