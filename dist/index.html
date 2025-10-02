@@ -1,3 +1,4 @@
+\\ VFIED-v4\index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -355,7 +356,11 @@
     }
     class VFIEDApp {
       constructor() {
-        this.API_BASE = location.hostname === 'localhost' ? 'http://localhost:3048' : 'https://vfied-v4-clean.onrender.com';
+        this.API_BASE = window.location.protocol === 'capacitor:' 
+        ? 'https://vfied-v4-clean.onrender.com'
+        : location.hostname === 'localhost' 
+          ? 'http://localhost:3048' 
+          : 'https://vfied-v4-clean.onrender.com';
 
         this.currentLocation = { city: 'London', country: 'United Kingdom', country_code: 'GB', confidence: 'high' };
         this.selectedDietary = new Set();
