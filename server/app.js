@@ -10,6 +10,9 @@ import 'dotenv/config';
 import fs from 'fs';
 import multer from 'multer';
 import { randomUUID } from 'crypto';
+import { menuManager } from './menu_manager.js';
+
+
 
 // Import route modules
 import { setupFoodRoutes } from './routes/food.js';
