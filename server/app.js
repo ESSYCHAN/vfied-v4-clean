@@ -161,7 +161,18 @@ app.use((err, _req, res, _next) => {
     message: err.message 
   });
 });
-
+// Force reload sample data if database is empty
+setTimeout(async () => {
+  const stats = menuManager.getStats();
+  console.log(`📊 Startup check: ${stats.total_restaurants} restaurants, ${stats.total_items} items`);
+  
+  if (stats.total_restaurants === 0) {
+    console.log('🔄 Database empty on startup, loading samples...');
+    const { addSampleRestaurants } = await import('./menu_manager.js');
+    await addSampleRestaurants();
+    console.log('✅ Sample data loaded');
+  }
+}, 3000);
 // Start server
 app.listen(PORT, () => {
   console.log(`🌦️ VFIED Complete API Server running on port ${PORT}`);

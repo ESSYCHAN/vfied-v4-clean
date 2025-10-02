@@ -69,10 +69,14 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') {
     return;
   }
-  
+
+  if (url.pathname.startsWith('/v1/')) {
+      return;
+    } 
+
   // Skip external domains (except our API)
   if (!url.origin.includes(self.location.origin) && 
-      !url.origin.includes('vfied-v3.onrender.com') &&
+      !url.origin.includes('vfied-v4-clean.onrender.com') &&
       !url.origin.includes('localhost:3001')) {
     return;
   }
