@@ -33,24 +33,19 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use(cors({
-  origin: [
-    'http://localhost:5168',
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'http://localhost:3049', 
-    'http://localhost:3922',
-    /^http:\/\/10\.\d+\.\d+\.\d+:5168$/,
-    /^http:\/\/192\.168\.\d+\.\d+:5168$/,
-    'https://vfied.vercel.app',
-    'https://vfied-v3.vercel.app',
-    'https://vfied-v3-frontend.onrender.com',
-    /^https:\/\/.*\.vercel\.app$/,
-    /^https:\/\/.*\.onrender\.com$/
-  ],
+  origin(origin, cb) {
+    if (!origin) return cb(null, true);
+    if (origin === 'capacitor://localhost' || origin === 'ionic://localhost') return cb(null, true);
+    if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) return cb(null, true);
+    if (origin.includes('vercel.app') || origin.includes('onrender.com')) return cb(null, true);
+    return cb(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+app.options('*', cors());
 
 app.use(helmet({
   contentSecurityPolicy: {
