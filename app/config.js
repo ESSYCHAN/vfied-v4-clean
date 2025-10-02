@@ -13,11 +13,15 @@ console.log('🔍 Config Debug:', {
 
 const API_PORT = 3048;
 export const CONFIG = {
-  API_BASE: 'https://vfied-v4-clean.onrender.com', // Force production
+  API_BASE: isDevelopment 
+    ? `http://localhost:${API_PORT}` 
+    : 'https://vfied-v4-clean.onrender.com',
+  
   TIMEOUT: 10000,
   ENABLE_AI: true,
   ENABLE_WEATHER: true,
   DEFAULT_LOCATION: { city: 'London', country_code: 'GB' },
+  
   RETRY_ATTEMPTS: 3,
   CACHE_DURATION: 300000
 };
