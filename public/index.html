@@ -82,6 +82,13 @@
             .cta-buttons { flex-direction: column; }
         }
     </style>
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(reg => console.log('SW registered:', reg))
+    .catch(err => console.log('SW registration failed:', err));
+}
+</script>
 </head>
 <body>
     <nav style="position: absolute; top: 2rem; right: 2rem; display: flex; gap: 1rem;">
