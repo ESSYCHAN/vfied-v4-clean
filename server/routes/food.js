@@ -658,14 +658,6 @@ export function setupFoodRoutes(app, upload) {
   // Quick decision endpoint
   app.post('/v1/quick_decision', async (req, res) => {
 
-    // Add this at the start of your food recommendation function
-    console.log('🔍 Food Module Debug:', {
-      API_BASE: CONFIG.API_BASE,
-      making_request_to: `${CONFIG.API_BASE}/v1/quick_decision`,
-      location_data: location,
-      mood_text: mood_text
-    });
-
     const t0 = Date.now();
     try {
       console.log('📥 Quick decision request:', req.body);
