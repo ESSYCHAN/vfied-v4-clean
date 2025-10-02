@@ -12,16 +12,15 @@ import multer from 'multer';
 import { randomUUID } from 'crypto';
 import { menuManager } from './menu_manager.js';
 
-
-
 // Import route modules
 import { setupFoodRoutes } from './routes/food.js';
 import { setupEventsRoutes } from './routes/events.js';
 import { setupTravelRoutes } from './routes/travel.js';
 import { setupUtilityRoutes } from './routes/utility.js';
 import { setupRestaurantRoutes } from './routes/restaurants.js';
+
 // Environment variables
-const PORT =  process.env.PORT || process.env.MCP_PORT || 3048;
+const PORT = process.env.PORT || process.env.MCP_PORT || 3048;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,19 +31,46 @@ const app = express();
 // Middleware
 app.set('trust proxy', 1);
 
+// Updated CORS configuration for mobile app support
 app.use(cors({
   origin(origin, cb) {
-    if (!origin) return cb(null, true);
-    if (origin === 'capacitor://localhost' || origin === 'ionic://localhost') return cb(null, true);
-    if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) return cb(null, true);
-    if (origin.includes('vercel.app') || origin.includes('onrender.com')) return cb(null, true);
+    console.log('CORS check for origin:', origin);
+    
+    // Always allow requests with no origin (mobile apps, server-to-server, Postman)
+    if (!origin) {
+      console.log('✅ No origin - allowing (mobile app or direct request)');
+      return cb(null, true);
+    }
+    
+    // Allow Capacitor origins (mobile apps)
+    if (origin.startsWith('capacitor://') || origin.startsWith('ionic://')) {
+      console.log('✅ Capacitor/Ionic origin - allowing mobile app');
+      return cb(null, true);
+    }
+    
+    // Allow localhost development
+    if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+      console.log('✅ Local development origin - allowing');
+      return cb(null, true);
+    }
+    
+    // Allow production domains
+    if (origin.includes('vercel.app') || origin.includes('onrender.com')) {
+      console.log('✅ Production domain - allowing');
+      return cb(null, true);
+    }
+    
+    // Allow all for now (you can restrict this later for security)
+    console.log('✅ Other origin - allowing (permissive mode)');
     return cb(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['X-Request-ID']
 }));
 
+// Handle preflight requests
 app.options('*', cors());
 
 app.use(helmet({
@@ -60,9 +86,10 @@ app.use(helmet({
         "api.openai.com",
         "api.openweathermap.org",
         "localhost:*",
+        "127.0.0.1:*",
         "https://*.vercel.app",
         "https://*.onrender.com",
-        "https://vfied-v3.onrender.com"
+        "https://vfied-v4-clean.onrender.com"
       ],
       imgSrc: ["'self'", "data:", "blob:"]
     }
@@ -110,6 +137,7 @@ app.use(express.static(path.resolve(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.static(path.resolve(__dirname, '../dist')));
 app.use(express.static(path.resolve(__dirname, '../app')));
+
 // Basic routes
 app.get('/', (req, res) => res.sendFile(path.resolve(__dirname, '../public/index.html')));
 app.get('/app', (req, res) => res.sendFile(path.resolve(__dirname, '../index.html')));
@@ -126,7 +154,7 @@ app.get('/openapi.json', (_req, res) => {
   res.send(fs.readFileSync(path.resolve(__dirname, './openapi.json'), 'utf8'));
 });
 
-// Health endpoint
+// Health endpoint with enhanced mobile diagnostics
 app.get('/health', async (req, res) => {
   const services = {
     gpt: process.env.USE_GPT && process.env.OPENAI_API_KEY ? 'on' : 'off',
@@ -134,31 +162,74 @@ app.get('/health', async (req, res) => {
     menu_manager: 'on'
   };
   
+  const headers = req.headers;
+  const origin = headers.origin || 'none';
+  const userAgent = headers['user-agent'] || 'unknown';
+  
   res.json({
     status: services.gpt === 'on' ? 'healthy' : 'degraded',
     timestamp: new Date().toISOString(),
     version: '2.3.0',
-    services
+    services,
+    request_info: {
+      origin: origin,
+      is_mobile: userAgent.toLowerCase().includes('mobile'),
+      is_capacitor: origin.startsWith('capacitor://'),
+      user_agent: userAgent.substring(0, 100)
+    },
+    cors_status: 'enabled_permissive'
+  });
+});
+
+// Debug endpoint for mobile troubleshooting
+app.get('/v1/debug/mobile', (req, res) => {
+  const headers = req.headers;
+  res.json({
+    success: true,
+    debug_info: {
+      origin: headers.origin || 'none',
+      user_agent: headers['user-agent'] || 'unknown',
+      referer: headers.referer || 'none',
+      host: headers.host || 'unknown',
+      x_forwarded_for: headers['x-forwarded-for'] || 'none',
+      all_headers: headers
+    },
+    server_time: new Date().toISOString(),
+    message: 'Mobile debug endpoint working'
   });
 });
 
 // Setup route modules
-
 setupEventsRoutes(app, upload);
 setupTravelRoutes(app);
 setupUtilityRoutes(app);
 setupRestaurantRoutes(app);
 setupFoodRoutes(app, upload);
 
-// Error handler
-app.use((err, _req, res, _next) => {
-  console.error('Server error:', err);
+// Enhanced error handler with mobile-specific logging
+app.use((err, req, res, _next) => {
+  const origin = req.headers.origin || 'unknown';
+  const userAgent = req.headers['user-agent'] || 'unknown';
+  
+  console.error('Server error:', {
+    error: err.message,
+    origin: origin,
+    is_mobile: userAgent.toLowerCase().includes('mobile'),
+    is_capacitor: origin.startsWith('capacitor://'),
+    stack: err.stack
+  });
+  
   res.status(500).json({ 
     success: false,
     error: 'Internal server error', 
-    message: err.message 
+    message: err.message,
+    debug: {
+      origin: origin,
+      timestamp: new Date().toISOString()
+    }
   });
 });
+
 // Force reload sample data if database is empty
 setTimeout(async () => {
   const stats = menuManager.getStats();
@@ -171,11 +242,14 @@ setTimeout(async () => {
     console.log('✅ Sample data loaded');
   }
 }, 3000);
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🌦️ VFIED Complete API Server running on port ${PORT}`);
   console.log(`📖 OpenAPI docs available at http://localhost:${PORT}/openapi.json`);
   console.log(`🔧 Features: ${process.env.USE_GPT && process.env.OPENAI_API_KEY ? '✅ GPT' : '❌ GPT'} | ${process.env.OPENWEATHER_API_KEY ? '✅ Weather' : '❌ Weather'}`);
+  console.log(`📱 CORS: Enabled for mobile apps (Capacitor/Ionic)`);
+  console.log(`🔍 Debug endpoint: /v1/debug/mobile`);
 });
 
 export default app;
