@@ -198,7 +198,41 @@ app.get('/v1/debug/mobile', (req, res) => {
     message: 'Mobile debug endpoint working'
   });
 });
-
+app.get('/support', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>VFIED Support</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        h1 { color: #333; }
+        .contact { background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; }
+      </style>
+    </head>
+    <body>
+      <h1>VFIED Support</h1>
+      <p>Need help with VFIED? We're here to assist you.</p>
+      
+      <div class="contact">
+        <h3>Contact Information</h3>
+        <p><strong>Email:</strong> support@vfied.io</p>
+        <p><strong>Response Time:</strong> Within 24 hours</p>
+      </div>
+      
+      <h3>Common Questions</h3>
+      <p><strong>How do I change my location?</strong><br>
+      Tap "Change" next to your current location at the top of the app.</p>
+      
+      <p><strong>Why aren't I getting recommendations?</strong><br>
+      Check your internet connection and ensure location services are enabled.</p>
+      
+      <p><strong>Can I suggest a restaurant?</strong><br>
+      Yes! Email us with restaurant details and we'll consider adding it.</p>
+    </body>
+    </html>
+  `);
+});
 // Setup route modules
 setupEventsRoutes(app, upload);
 setupTravelRoutes(app);
