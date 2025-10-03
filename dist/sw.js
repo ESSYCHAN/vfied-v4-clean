@@ -1,5 +1,5 @@
 // VFIED Service Worker - Cache Management & Offline Support
-const VERSION = 'vfied-v8';  // Bumped version to bust cache
+const VERSION = 'vfied-v9';  // Bumped version to bust cache
 const CACHE_NAME = `vfied-${VERSION}`;
 
 const STATIC_CACHE_FILES = [
