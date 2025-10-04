@@ -1,4 +1,4 @@
-// app.js - Main entry point
+// app.js - Main entry point with Firebase integration
 
 import express from 'express';
 import cors from 'cors';
@@ -18,6 +18,17 @@ import { setupEventsRoutes } from './routes/events.js';
 import { setupTravelRoutes } from './routes/travel.js';
 import { setupUtilityRoutes } from './routes/utility.js';
 import { setupRestaurantRoutes } from './routes/restaurants.js';
+
+// Import Firebase admin
+let adminDb = null;
+let adminAuth = null;
+try {
+  const firebaseAdmin = await import('./firebase-admin.js');
+  adminDb = firebaseAdmin.adminDb;
+  adminAuth = firebaseAdmin.adminAuth;
+} catch (error) {
+  console.log('Firebase Admin SDK not available:', error.message);
+}
 
 // Environment variables
 const PORT = process.env.PORT || process.env.MCP_PORT || 3048;
@@ -89,7 +100,9 @@ app.use(helmet({
         "127.0.0.1:*",
         "https://*.vercel.app",
         "https://*.onrender.com",
-        "https://vfied-v4-clean.onrender.com"
+        "https://vfied-v4-clean.onrender.com",
+        "https://firestore.googleapis.com",
+        "https://firebase.googleapis.com"
       ],
       imgSrc: ["'self'", "data:", "blob:"]
     }
@@ -154,22 +167,46 @@ app.get('/openapi.json', (_req, res) => {
   res.send(fs.readFileSync(path.resolve(__dirname, './openapi.json'), 'utf8'));
 });
 
-// Health endpoint with enhanced mobile diagnostics
+// Enhanced health endpoint with Firebase status
 app.get('/health', async (req, res) => {
   const services = {
-    gpt: process.env.USE_GPT && process.env.OPENAI_API_KEY ? 'on' : 'off',
-    weather: process.env.OPENWEATHER_API_KEY ? 'on' : 'off',
-    menu_manager: 'on'
+    gpt: process.env.USE_GPT && process.env.OPENAI_API_KEY ? 'operational' : 'disabled',
+    weather: process.env.OPENWEATHER_API_KEY ? 'operational' : 'disabled',
+    menu_manager: 'operational',
+    firebase: 'checking'
   };
+  
+  // Check Firebase connection
+  try {
+    if (adminDb) {
+      // Simple Firebase connectivity test
+      await adminDb.collection('restaurants').limit(1).get();
+      services.firebase = 'operational';
+    } else {
+      services.firebase = 'unavailable';
+    }
+  } catch (error) {
+    services.firebase = 'degraded';
+    console.error('Firebase health check failed:', error.message);
+  }
   
   const headers = req.headers;
   const origin = headers.origin || 'none';
   const userAgent = headers['user-agent'] || 'unknown';
   
+  // Determine overall status
+  let overallStatus = 'healthy';
+  if (services.firebase === 'unavailable' || services.firebase === 'degraded') {
+    overallStatus = 'degraded';
+  }
+  if (!services.gpt || services.menu_manager !== 'operational') {
+    overallStatus = 'degraded';
+  }
+  
   res.json({
-    status: services.gpt === 'on' ? 'healthy' : 'degraded',
+    status: overallStatus,
     timestamp: new Date().toISOString(),
-    version: '2.3.0',
+    version: '4.0.0-firebase',
     services,
     request_info: {
       origin: origin,
@@ -177,8 +214,260 @@ app.get('/health', async (req, res) => {
       is_capacitor: origin.startsWith('capacitor://'),
       user_agent: userAgent.substring(0, 100)
     },
-    cors_status: 'enabled_permissive'
+    cors_status: 'enabled_permissive',
+    firebase_project: adminDb ? 'vfiedv3' : 'not_configured'
   });
+});
+
+// Firebase-enhanced endpoints
+app.get('/v1/admin/summary', async (req, res) => {
+  try {
+    const localStats = menuManager.getStats();
+    let firebaseStats = null;
+    
+    if (adminDb) {
+      try {
+        const restaurantsSnapshot = await adminDb.collection('restaurants').get();
+        const menuItemsSnapshot = await adminDb.collection('menu_items').get();
+        const eventsSnapshot = await adminDb.collection('events').get();
+        
+        firebaseStats = {
+          total_restaurants: restaurantsSnapshot.size,
+          total_menu_items: menuItemsSnapshot.size,
+          total_events: eventsSnapshot.size,
+          pending_events: 0
+        };
+        
+        // Count pending events
+        eventsSnapshot.forEach((doc) => {
+          const event = doc.data();
+          if (event.moderation?.status === 'pending') {
+            firebaseStats.pending_events++;
+          }
+        });
+      } catch (error) {
+        console.error('Firebase stats error:', error);
+      }
+    }
+    
+    res.json({
+      vendor_id: 'vfied_system',
+      menu_items: firebaseStats ? firebaseStats.total_menu_items : localStats.total_items,
+      restaurants: firebaseStats ? firebaseStats.total_restaurants : localStats.total_restaurants,
+      menu_version: '4.0_firebase_hybrid',
+      data_sources: {
+        firebase_enabled: Boolean(adminDb),
+        firebase_stats: firebaseStats,
+        local_stats: localStats
+      },
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Enhanced restaurant menu endpoint with Firebase integration
+app.post('/v1/restaurant/menu', async (req, res) => {
+  try {
+    const {
+      restaurant_name,
+      location,
+      menu_items,
+      delivery_platforms,
+      opening_hours,
+      metadata,
+      data_source = 'hybrid'
+    } = req.body;
+
+    // Validate required fields
+    if (!restaurant_name || !location || !location.city || !location.country_code) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: restaurant_name, location.city, location.country_code'
+      });
+    }
+
+    // Generate restaurant ID if not provided
+    const restaurant_id = req.body.restaurant_id || 
+      `${restaurant_name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+
+    const restaurantData = {
+      restaurant_id,
+      restaurant_name,
+      location,
+      menu_items: menu_items || [],
+      delivery_platforms: delivery_platforms || {},
+      opening_hours: opening_hours || {},
+      metadata: {
+        ...metadata,
+        api_source: data_source,
+        created_via: 'api'
+      }
+    };
+
+    let results = [];
+
+    // Try Firebase first if available and requested
+    if (adminDb && (data_source === 'firebase' || data_source === 'hybrid')) {
+      try {
+        const batch = adminDb.batch();
+        
+        // Create restaurant document
+        const restaurantRef = adminDb.collection('restaurants').doc(restaurant_id);
+        batch.set(restaurantRef, {
+          ...restaurantData,
+          created_at: new Date(),
+          updated_at: new Date()
+        });
+
+        // Create menu items
+        if (menu_items && menu_items.length > 0) {
+          for (const item of menu_items) {
+            const itemRef = adminDb.collection('menu_items').doc();
+            batch.set(itemRef, {
+              ...item,
+              menu_item_id: itemRef.id,
+              restaurant_id: restaurant_id,
+              created_at: new Date(),
+              updated_at: new Date()
+            });
+          }
+        }
+
+        await batch.commit();
+        results.push('firebase');
+        console.log(`Firebase: Added restaurant ${restaurant_name} with ${menu_items?.length || 0} items`);
+      } catch (error) {
+        console.error('Firebase add failed:', error);
+        if (data_source === 'firebase') {
+          return res.status(500).json({
+            success: false,
+            error: 'Firebase operation failed: ' + error.message
+          });
+        }
+      }
+    }
+
+    // Add to local storage if hybrid mode or Firebase failed
+    if (data_source === 'local' || data_source === 'hybrid') {
+      try {
+        await menuManager.addRestaurantMenu(restaurantData);
+        results.push('local');
+        console.log(`Local: Added restaurant ${restaurant_name}`);
+      } catch (error) {
+        console.error('Local storage failed:', error);
+        if (results.length === 0) {
+          return res.status(500).json({
+            success: false,
+            error: 'Both Firebase and local storage failed'
+          });
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Restaurant ${restaurant_name} added successfully`,
+      restaurant_id: restaurant_id,
+      items_added: menu_items?.length || 0,
+      data_sources: results
+    });
+
+  } catch (error) {
+    console.error('Restaurant menu add error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to add restaurant menu'
+    });
+  }
+});
+
+// Enhanced menu listing with Firebase integration
+app.get('/v1/menus', async (req, res) => {
+  try {
+    const { 
+      limit = 50, 
+      data_source = 'hybrid',
+      restaurant_id 
+    } = req.query;
+
+    let menuItems = [];
+
+    // Get from Firebase if available
+    if (adminDb && (data_source === 'firebase' || data_source === 'hybrid')) {
+      try {
+        let query = adminDb.collection('menu_items');
+        
+        if (restaurant_id) {
+          query = query.where('restaurant_id', '==', restaurant_id);
+        }
+        
+        query = query.limit(parseInt(limit));
+        const snapshot = await query.get();
+        
+        for (const doc of snapshot.docs) {
+          const item = { id: doc.id, ...doc.data(), data_source: 'firebase' };
+          
+          // Get restaurant info
+          if (item.restaurant_id) {
+            try {
+              const restaurantDoc = await adminDb.collection('restaurants').doc(item.restaurant_id).get();
+              if (restaurantDoc.exists) {
+                const restaurantData = restaurantDoc.data();
+                item.restaurant_name = restaurantData.restaurant_name || restaurantData.basic_info?.name;
+              }
+            } catch (error) {
+              console.error('Error fetching restaurant data:', error);
+            }
+          }
+          
+          menuItems.push(item);
+        }
+      } catch (error) {
+        console.error('Firebase menu fetch failed:', error);
+      }
+    }
+
+    // Get from local storage if needed
+    if ((data_source === 'local' || data_source === 'hybrid') && 
+        (menuItems.length === 0 || data_source === 'local')) {
+      try {
+        const localItems = menuManager.getAllMenuItems();
+        const localItemsWithSource = localItems.map(item => ({
+          ...item,
+          data_source: 'local'
+        }));
+        
+        if (data_source === 'local') {
+          menuItems = localItemsWithSource.slice(0, parseInt(limit));
+        } else {
+          // Hybrid mode - add local items if we have space
+          const remaining = parseInt(limit) - menuItems.length;
+          if (remaining > 0) {
+            menuItems = menuItems.concat(localItemsWithSource.slice(0, remaining));
+          }
+        }
+      } catch (error) {
+        console.error('Local menu fetch failed:', error);
+      }
+    }
+
+    res.json({
+      success: true,
+      items: menuItems,
+      total_found: menuItems.length,
+      data_source_used: data_source,
+      firebase_available: Boolean(adminDb)
+    });
+
+  } catch (error) {
+    console.error('Menu listing error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch menu items'
+    });
+  }
 });
 
 // Debug endpoint for mobile troubleshooting
@@ -195,9 +484,11 @@ app.get('/v1/debug/mobile', (req, res) => {
       all_headers: headers
     },
     server_time: new Date().toISOString(),
+    firebase_status: adminDb ? 'available' : 'unavailable',
     message: 'Mobile debug endpoint working'
   });
 });
+
 app.get('/support', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -233,6 +524,7 @@ app.get('/support', (req, res) => {
     </html>
   `);
 });
+
 // Setup route modules
 setupEventsRoutes(app, upload);
 setupTravelRoutes(app);
@@ -281,9 +573,10 @@ setTimeout(async () => {
 app.listen(PORT, () => {
   console.log(`🌦️ VFIED Complete API Server running on port ${PORT}`);
   console.log(`📖 OpenAPI docs available at http://localhost:${PORT}/openapi.json`);
-  console.log(`🔧 Features: ${process.env.USE_GPT && process.env.OPENAI_API_KEY ? '✅ GPT' : '❌ GPT'} | ${process.env.OPENWEATHER_API_KEY ? '✅ Weather' : '❌ Weather'}`);
+  console.log(`🔧 Features: ${process.env.USE_GPT && process.env.OPENAI_API_KEY ? '✅ GPT' : '❌ GPT'} | ${process.env.OPENWEATHER_API_KEY ? '✅ Weather' : '❌ Weather'} | ${adminDb ? '✅ Firebase' : '❌ Firebase'}`);
   console.log(`📱 CORS: Enabled for mobile apps (Capacitor/Ionic)`);
   console.log(`🔍 Debug endpoint: /v1/debug/mobile`);
+  console.log(`🔥 Firebase: ${adminDb ? 'Connected to vfiedv3' : 'Not configured'}`);
 });
 
 export default app;

@@ -6,6 +6,13 @@ import { getFirestore, enableNetwork, disableNetwork } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth';
 import { getAnalytics } from 'firebase/analytics';
 
+// Debug logging - remove after fixing
+console.log('Environment variables check:', {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? 'Present' : 'Missing',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  allEnvVars: import.meta.env
+});
+
 // Firebase configuration using environment variables
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
