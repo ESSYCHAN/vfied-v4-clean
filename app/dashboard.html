@@ -1868,6 +1868,11 @@
       document.addEventListener('DOMContentLoaded', init);
       
     })();
+    console.log('Dashboard env check:', {
+  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  apiKeyStart: import.meta.env.VITE_FIREBASE_API_KEY?.substring(0, 10)
+});
   </script>
 </body>
 </html>
