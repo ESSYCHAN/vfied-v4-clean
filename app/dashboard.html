@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>VFIED • Vendor Dashboard</title>
+  <title>VFIED • Enhanced Vendor Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -78,6 +78,27 @@
       margin-top: 0.5rem;
     }
     
+    .firebase-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+    }
+    
+    .firebase-status.connected {
+      border-color: var(--success);
+      color: var(--success);
+    }
+    
+    .firebase-status.disconnected {
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+    
     .back-link {
       display: inline-flex;
       align-items: center;
@@ -109,7 +130,7 @@
     
     .connection-form {
       display: grid;
-      grid-template-columns: 1fr 1fr auto;
+      grid-template-columns: 1fr 1fr auto auto;
       gap: 1.5rem;
       align-items: end;
     }
@@ -126,7 +147,7 @@
       margin-bottom: 0.5rem;
     }
     
-    .form-group input {
+    .form-group input, .form-group select {
       background: var(--bg-tertiary);
       border: 1px solid var(--border-light);
       border-radius: var(--radius);
@@ -136,7 +157,7 @@
       transition: all 0.2s ease;
     }
     
-    .form-group input:focus {
+    .form-group input:focus, .form-group select:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
@@ -312,44 +333,6 @@
       border: 1px solid rgba(239, 68, 68, 0.2);
     }
     
-    .checklist {
-      list-style: none;
-      margin-top: 1rem;
-    }
-    
-    .checklist-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .checklist-item:last-child {
-      border-bottom: none;
-    }
-    
-    .checklist-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    
-    .checklist-icon.pass {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--success);
-    }
-    
-    .checklist-icon.fail {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--danger);
-    }
-    
     .upload-zone {
       border: 2px dashed var(--border-light);
       border-radius: var(--radius-lg);
@@ -384,6 +367,8 @@
       overflow: hidden;
       margin-top: 1.5rem;
       border: 1px solid var(--border);
+      max-height: 600px;
+      overflow-y: auto;
     }
     
     .table {
@@ -399,6 +384,9 @@
       font-size: 0.875rem;
       color: var(--text-secondary);
       border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     
     .table td {
@@ -409,6 +397,163 @@
     
     .table tr:hover {
       background: var(--bg-hover);
+    }
+
+    .restaurant-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .restaurant-header {
+      background: var(--bg-secondary);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .restaurant-header:hover {
+      background: var(--bg-hover);
+    }
+
+    .restaurant-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .restaurant-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .restaurant-items {
+      display: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .restaurant-items.expanded {
+      display: block;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-light);
+      transition: background 0.2s;
+    }
+
+    .item-row:hover {
+      background: var(--bg-hover);
+    }
+
+    .item-row:last-child {
+      border-bottom: none;
+    }
+
+    .item-info {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 2fr;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .toggle-icon {
+      transition: transform 0.2s;
+    }
+
+    .toggle-icon.rotated {
+      transform: rotate(180deg);
+    }
+
+    .confirmation-dialog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .confirmation-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .confirmation-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .confirmation-message {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .confirmation-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .bulk-actions {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-filter {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 0.5rem 1rem;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      min-width: 200px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
     
     .textarea {
@@ -534,6 +679,24 @@
       border: 1px solid rgba(239, 68, 68, 0.2);
     }
     
+    .badge-firebase {
+      background: rgba(255, 87, 34, 0.1);
+      color: #ff5722;
+      border: 1px solid rgba(255, 87, 34, 0.2);
+    }
+    
+    .badge-local {
+      background: rgba(96, 165, 250, 0.1);
+      color: #60a5fa;
+      border: 1px solid rgba(96, 165, 250, 0.2);
+    }
+    
+    .badge-info {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--info);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
     @media (max-width: 768px) {
       .container { padding: 1rem; }
       .header h1 { font-size: 2rem; }
@@ -550,14 +713,20 @@
     <header class="header">
       <div>
         <h1>🍽️ VFIED</h1>
-        <div class="subtitle">Vendor Dashboard</div>
+        <div class="subtitle">Enhanced Vendor Dashboard with Firebase Integration</div>
       </div>
-      <a href="/" class="back-link">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM5.354 4.646a.5.5 0 1 0-.708.708L7.793 8.5l-3.147 3.146a.5.5 0 0 0 .708.708L8.5 9.207l3.146 3.147a.5.5 0 0 0 .708-.708L9.207 8.5l3.147-3.146a.5.5 0 0 0-.708-.708L8.5 7.793 5.354 4.646Z"/>
-        </svg>
-        Back to App
-      </a>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div class="firebase-status" id="firebaseStatus">
+          <div class="status-dot"></div>
+          <span>Firebase: Checking...</span>
+        </div>
+        <a href="/" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM5.354 4.646a.5.5 0 1 0-.708.708L7.793 8.5l-3.147 3.146a.5.5 0 0 0 .708.708L8.5 9.207l3.146 3.147a.5.5 0 0 0 .708-.708L9.207 8.5l3.147-3.146a.5.5 0 0 0-.708-.708L8.5 7.793 5.354 4.646Z"/>
+          </svg>
+          Back to App
+        </a>
+      </div>
     </header>
 
     <!-- Connection Panel -->
@@ -570,6 +739,14 @@
         <div class="form-group">
           <label>API Key</label>
           <input id="apiKey" value="" placeholder="vf_..."/>
+        </div>
+        <div class="form-group">
+          <label>Data Source</label>
+          <select id="dataSource">
+            <option value="hybrid">Hybrid (Firebase + Local)</option>
+            <option value="firebase">Firebase Only</option>
+            <option value="local">Local Only</option>
+          </select>
         </div>
         <button id="refreshBtn" class="btn btn-primary">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -585,7 +762,7 @@
       </div>
     </div>
 
-    <!-- Metrics Grid -->
+    <!-- Enhanced Metrics Grid -->
     <div class="grid grid-4">
       <div class="card">
         <div class="card-header">
@@ -601,25 +778,25 @@
 
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Usage Stats</h3>
-          <button id="loadUsageBtn" class="btn btn-secondary btn-sm">Load</button>
+          <h3 class="card-title">Data Sources</h3>
+          <button id="loadDataSourcesBtn" class="btn btn-secondary btn-sm">Load</button>
         </div>
-        <div class="metric-grid" id="usageMetrics">
+        <div class="metric-grid" id="dataSourcesMetrics">
           <div class="metric">
             <div class="metric-value">—</div>
-            <div class="metric-label">Plan</div>
+            <div class="metric-label">Firebase</div>
           </div>
           <div class="metric">
             <div class="metric-value">—</div>
-            <div class="metric-label">Usage</div>
+            <div class="metric-label">Local</div>
           </div>
           <div class="metric">
             <div class="metric-value">—</div>
-            <div class="metric-label">Limit</div>
+            <div class="metric-label">Combined</div>
           </div>
           <div class="metric">
             <div class="metric-value">—</div>
-            <div class="metric-label">Percent</div>
+            <div class="metric-label">Events</div>
           </div>
         </div>
       </div>
@@ -632,11 +809,11 @@
         <div class="metric-grid" id="summaryMetrics">
           <div class="metric">
             <div class="metric-value">—</div>
-            <div class="metric-label">Vendor</div>
+            <div class="metric-label">Restaurants</div>
           </div>
           <div class="metric">
             <div class="metric-value">—</div>
-            <div class="metric-label">Items</div>
+            <div class="metric-label">Menu Items</div>
           </div>
           <div class="metric">
             <div class="metric-value">—</div>
@@ -651,95 +828,131 @@
 
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Analytics</h3>
-          <button id="loadStatsBtn" class="btn btn-secondary btn-sm">Load</button>
+          <h3 class="card-title">Events & Analytics</h3>
+          <button id="loadEventsBtn" class="btn btn-secondary btn-sm">Load</button>
         </div>
-        <div class="metric-grid" id="analyticsMetrics">
+        <div class="metric-grid" id="eventsMetrics">
           <div class="metric">
             <div class="metric-value">—</div>
-            <div class="metric-label">Requests</div>
+            <div class="metric-label">Pending</div>
           </div>
           <div class="metric">
             <div class="metric-value">—</div>
-            <div class="metric-label">Users</div>
+            <div class="metric-label">Approved</div>
           </div>
           <div class="metric">
             <div class="metric-value">—</div>
-            <div class="metric-label">Success</div>
+            <div class="metric-label">Total</div>
           </div>
           <div class="metric">
             <div class="metric-value">—</div>
-            <div class="metric-label">Popular</div>
+            <div class="metric-label">This Week</div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MVP Checklist -->
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">System Checklist</h3>
-        <button id="loadChecklistBtn" class="btn btn-secondary">Load Checklist</button>
-      </div>
-      <div id="checklistContent">
-        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-          Click "Load Checklist" to verify system components
         </div>
       </div>
     </div>
 
-    <!-- Menu Management -->
+    <!-- Enhanced Menu Management -->
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Menu Management</h3>
+        <h3 class="card-title">Menu Management with Firebase</h3>
         <div style="display: flex; gap: 0.75rem;">
           <button id="loadMenuBtn" class="btn btn-secondary">Load Menu</button>
           <button id="exportMenuBtn" class="btn btn-secondary">Export JSON</button>
           <button id="addSampleBtn" class="btn btn-success">Add Sample</button>
+          <button id="testFirebaseBtn" class="btn btn-primary">Test Firebase</button>
         </div>
       </div>
 
-      <!-- Upload Zone -->
+      <!-- Search and Filter Controls -->
+      <div class="search-filter">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search restaurants or menu items...">
+        <select id="restaurantFilter" class="search-input" style="min-width: 150px;">
+          <option value="">All Restaurants</option>
+        </select>
+        <select id="sourceFilter" class="search-input" style="min-width: 120px;">
+          <option value="">All Sources</option>
+          <option value="firebase">Firebase</option>
+          <option value="local">Local</option>
+        </select>
+        <button id="clearFilters" class="btn btn-secondary btn-sm">Clear</button>
+      </div>
+
+      <!-- Bulk Actions -->
+      <div class="bulk-actions">
+        <label style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" id="selectAll"> Select All
+        </label>
+        <button id="bulkDeleteItems" class="btn btn-danger btn-sm" disabled>Delete Selected Items</button>
+        <button id="bulkExportItems" class="btn btn-secondary btn-sm" disabled>Export Selected</button>
+        <span id="selectionCount" style="color: var(--text-muted); font-size: 0.875rem;">0 items selected</span>
+      </div>
+
+      <!-- Enhanced Upload Zone -->
       <div class="upload-zone" id="uploadZone">
-        <div class="upload-zone-icon">📋</div>
+        <div class="upload-zone-icon">🔥</div>
         <h4 style="margin-bottom: 0.5rem; font-weight: 600;">Upload Restaurant Menu</h4>
         <p style="color: var(--text-muted); margin-bottom: 1rem;">Drop JSON file here or click to browse</p>
+        <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">Data will be stored in Firebase (if available) and local backup</p>
         <input type="file" id="fileInput" accept=".json" style="display: none;">
         <button class="btn btn-secondary btn-sm">Choose File</button>
       </div>
 
-      <!-- JSON Editor -->
+      <!-- Enhanced JSON Editor -->
       <div>
-        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Or paste menu JSON:</label>
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Restaurant JSON Data:</label>
         <textarea 
           id="menuJsonInput" 
           class="textarea"
-          placeholder='{"restaurant_name": "My Restaurant", "location": {"city": "London", "country_code": "GB"}, "menu_items": [{"name": "Dish Name", "price": "£10", "description": "Delicious dish"}]}'
+          placeholder='{"restaurant_name": "My Restaurant", "location": {"city": "London", "country_code": "GB", "coordinates": {"lat": 51.5074, "lng": -0.1278}}, "metadata": {"goals": ["increase_visibility", "highlight_specialties"]}, "menu_items": [{"name": "Dish Name", "price": "£10", "description": "Delicious dish", "tags": ["signature"]}]}'
         ></textarea>
-        <button id="submitMenuBtn" class="btn btn-success">Submit Menu Data</button>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <button id="submitMenuBtn" class="btn btn-success">Submit to Firebase & Local</button>
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+            <input type="checkbox" id="firebaseOnlyMode"> Firebase Only
+          </label>
+        </div>
       </div>
 
       <div id="menuMessages"></div>
 
-      <!-- Menu Items Table -->
-      <div class="table-container">
-        <table class="table" id="menuTable">
-          <thead>
-            <tr>
-              <th>Dish Name</th>
-              <th>Restaurant</th>
-              <th>Price</th>
-              <th>Meal Period</th>
-              <th>Tags</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <!-- Enhanced Menu Items Display - Restaurant Grouped -->
+      <div id="menuContainer">
+        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+          Click "Load Menu" to view restaurants and menu items
+        </div>
       </div>
     </div>
 
-    <!-- Activity Feed -->
+    <!-- Confirmation Dialog -->
+    <div class="confirmation-dialog" id="confirmationDialog">
+      <div class="confirmation-content">
+        <div class="confirmation-title" id="confirmationTitle">Confirm Action</div>
+        <div class="confirmation-message" id="confirmationMessage">Are you sure?</div>
+        <div class="confirmation-actions">
+          <button id="confirmCancel" class="btn btn-secondary">Cancel</button>
+          <button id="confirmDelete" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Management Section -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Event Management</h3>
+        <div style="display: flex; gap: 0.75rem;">
+          <button id="loadPendingEventsBtn" class="btn btn-secondary">Load Pending</button>
+          <a href="/admin.html" class="btn btn-primary" target="_blank">Admin Panel</a>
+        </div>
+      </div>
+      <div id="pendingEventsContainer">
+        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+          Click "Load Pending" to view events awaiting approval
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Activity Feed -->
     <div class="card">
       <div class="card-header">
         <h3 class="card-title">Recent Activity</h3>
@@ -749,6 +962,7 @@
             <option value="feedback">Feedback</option>
             <option value="recommendation">Recommendations</option>
             <option value="telemetry">System Events</option>
+            <option value="firebase">Firebase Events</option>
           </select>
           <input id="telemetrySince" type="datetime-local" style="padding: 0.5rem; border-radius: var(--radius); background: var(--bg-tertiary); border: 1px solid var(--border-light); color: var(--text-primary);">
           <select id="telemetryLimit" style="padding: 0.5rem; border-radius: var(--radius); background: var(--bg-tertiary); border: 1px solid var(--border-light); color: var(--text-primary);">
@@ -766,504 +980,894 @@
     </div>
   </div>
 
-  <script type="module">
-    // Utility functions
-    const $ = (id) => document.getElementById(id);
-    const api = () => ({ 
-      base: $('baseUrl').value.trim().replace(/\/+$/, ''), 
-      key: $('apiKey').value.trim() 
-    });
-
-    // Update connection status
-    const updateStatus = (message, type = 'info') => {
-      const status = $('connectionStatus');
-      const dot = $('statusDot');
+  <script>
+    (function() {
+      'use strict';
       
-      status.textContent = message;
-      dot.className = 'status-dot ' + type;
-      
-      if (type === 'connected') {
-        dot.classList.add('connected');
-      } else if (type === 'error') {
-        dot.classList.add('error');
-      }
-    };
+      const $ = (id) => document.getElementById(id);
+      const api = () => ({ 
+        base: $('baseUrl').value.trim().replace(/\/+$/, ''), 
+        key: $('apiKey').value.trim(),
+        dataSource: $('dataSource').value
+      });
 
-    // Show message
-    const showMessage = (containerId, message, type = 'info') => {
-      const container = $(containerId);
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message message-${type} fade-in`;
-      messageDiv.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          ${type === 'success' ? 
-            '<path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>' :
-            '<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>'
-          }
-        </svg>
-        ${message}
-      `;
-      
-      container.innerHTML = '';
-      container.appendChild(messageDiv);
-      
-      setTimeout(() => messageDiv.remove(), 5000);
-    };
+      let firebaseAvailable = false;
+      let systemHealth = {};
+      let allMenuData = [];
+      let selectedItems = new Set();
+      let currentConfirmCallback = null;
+      let telemetryInterval = null;
 
-    // API helpers
-    async function apiGet(path) {
-      try {
-        const { base, key } = api();
-        updateStatus(`Connecting to ${base}${path}...`);
+      function updateStatus(message, type = 'info') {
+        const status = $('connectionStatus');
+        const dot = $('statusDot');
         
-        const response = await fetch(base + path, {
-          headers: key ? { 'Authorization': 'Bearer ' + key } : {}
-        });
+        status.textContent = message;
+        dot.className = 'status-dot ' + type;
         
-        const data = await response.json();
-        updateStatus('Connected successfully', 'connected');
-        return data;
-      } catch (error) {
-        updateStatus(`Connection failed: ${error.message}`, 'error');
-        throw error;
-      }
-    }
-
-    async function apiPost(path, body) {
-      try {
-        const { base, key } = api();
-        const response = await fetch(base + path, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(key ? { 'Authorization': 'Bearer ' + key } : {})
-          },
-          body: JSON.stringify(body || {})
-        });
-        return await response.json();
-      } catch (error) {
-        updateStatus(`Request failed: ${error.message}`, 'error');
-        throw error;
-      }
-    }
-
-    // Dashboard functions
-    async function loadHealth() {
-      try {
-        const { base } = api();
-        const startTime = performance.now();
-        
-        const response = await fetch(base + '/health');
-        const data = await response.json();
-        const responseTime = Math.round(performance.now() - startTime);
-        
-        const pill = $('healthPill');
-        const details = $('healthDetails');
-        
-        pill.className = 'status-pill';
-        
-        if (data.status === 'healthy' && responseTime < 1000) {
-          pill.classList.add('healthy');
-          pill.innerHTML = `<div class="status-dot"></div>Healthy (${responseTime}ms)`;
-        } else if (data.status === 'degraded' || responseTime > 1000) {
-          pill.classList.add('degraded');
-          pill.innerHTML = `<div class="status-dot"></div>Degraded (${responseTime}ms)`;
-        } else {
-          pill.classList.add('unhealthy');
-          pill.innerHTML = `<div class="status-dot"></div>Unhealthy (${responseTime}ms)`;
+        if (type === 'connected') {
+          dot.classList.add('connected');
+        } else if (type === 'error') {
+          dot.classList.add('error');
         }
-        
-        details.textContent = JSON.stringify(data, null, 2);
-      } catch (error) {
-        const pill = $('healthPill');
-        pill.className = 'status-pill unhealthy';
-        pill.innerHTML = '<div class="status-dot"></div>Unreachable';
-        $('healthDetails').textContent = `Error: ${error.message}`;
       }
-    }
 
-    async function loadUsage() {
-      try {
-        const data = await apiGet('/v1/analytics');
-        const container = $('usageMetrics');
+      function updateFirebaseStatus(available, details = '') {
+        firebaseAvailable = available;
+        const status = $('firebaseStatus');
+        const dot = status.querySelector('.status-dot');
+        const text = status.querySelector('span');
         
-        container.innerHTML = `
-          <div class="metric">
-            <div class="metric-value">${data.plan || '—'}</div>
-            <div class="metric-label">Plan</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">${data.usage?.current_period || '—'}</div>
-            <div class="metric-label">Usage</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">${data.usage?.limit || '—'}</div>
-            <div class="metric-label">Limit</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">${data.usage?.percentage ? data.usage.percentage + '%' : '—'}</div>
-            <div class="metric-label">Percent</div>
-          </div>
-        `;
-      } catch (error) {
-        showMessage('usageMetrics', 'Failed to load usage data', 'error');
+        if (available) {
+          status.className = 'firebase-status connected';
+          text.textContent = `Firebase: Connected ${details}`;
+        } else {
+          status.className = 'firebase-status disconnected';
+          text.textContent = `Firebase: Unavailable ${details}`;
+        }
       }
-    }
 
-    async function loadSummary() {
-      try {
-        const data = await apiGet('/v1/admin/summary');
-        const container = $('summaryMetrics');
+      function showMessage(containerId, message, type = 'info') {
+        const container = $(containerId);
+        if (!container) return;
         
-        container.innerHTML = `
-          <div class="metric">
-            <div class="metric-value">${data.vendor_id || '—'}</div>
-            <div class="metric-label">Vendor</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">${data.menu_items ?? '—'}</div>
-            <div class="metric-label">Items</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">${data.menu_version || '—'}</div>
-            <div class="metric-label">Version</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : '—'}</div>
-            <div class="metric-label">Updated</div>
-          </div>
-        `;
-      } catch (error) {
-        showMessage('summaryMetrics', 'Failed to load summary', 'error');
-      }
-    }
-
-    async function loadStats() {
-      try {
-        const data = await apiGet('/v1/analytics/stats');
-        const container = $('analyticsMetrics');
-        
-        container.innerHTML = `
-          <div class="metric">
-            <div class="metric-value">${data.total_events || '—'}</div>
-            <div class="metric-label">Requests</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">${data.unique_users || '—'}</div>
-            <div class="metric-label">Users</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">${data.success_rate || '—'}%</div>
-            <div class="metric-label">Success</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value">${data.popular_foods?.[0]?.[0] || '—'}</div>
-            <div class="metric-label">Popular</div>
-          </div>
-        `;
-      } catch (error) {
-        showMessage('analyticsMetrics', 'Stats unavailable', 'error');
-      }
-    }
-
-    async function loadChecklist() {
-      try {
-        const data = await apiGet('/v1/admin/checklist');
-        const container = $('checklistContent');
-        
-        const summaryBadges = `
-          <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
-            <span class="badge ${data.summary?.phase1_pass ? 'badge-success' : 'badge-danger'}">
-              Phase 1: ${data.summary?.phase1_pass ? 'PASS' : 'FAIL'}
-            </span>
-            <span class="badge ${data.summary?.phase2_seed_pass ? 'badge-success' : 'badge-warning'}">
-              Phase 2: ${data.summary?.phase2_seed_pass ? 'PASS' : 'PARTIAL'}
-            </span>
-            <span class="badge badge-info">Countries: ${data.counts?.countries || '—'}</span>
-            <span class="badge badge-info">Menu Items: ${data.counts?.menu_items || '—'}</span>
-          </div>
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message message-${type} fade-in`;
+        messageDiv.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            ${type === 'success' ? 
+              '<path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>' :
+              '<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>'
+            }
+          </svg>
+          ${message}
         `;
         
-        const checklistItems = (data.items || []).map(item => `
-          <div class="checklist-item">
-            <div class="checklist-icon ${item.ok ? 'pass' : 'fail'}">
-              ${item.ok ? '✓' : '✗'}
+        container.innerHTML = '';
+        container.appendChild(messageDiv);
+        
+        setTimeout(() => messageDiv.remove(), 5000);
+      }
+
+      function showConfirmation(title, message, callback) {
+        $('confirmationTitle').textContent = title;
+        $('confirmationMessage').textContent = message;
+        $('confirmationDialog').style.display = 'flex';
+        currentConfirmCallback = callback;
+      }
+
+      function hideConfirmation() {
+        $('confirmationDialog').style.display = 'none';
+        currentConfirmCallback = null;
+      }
+
+      function updateSelectionCount() {
+        const count = selectedItems.size;
+        $('selectionCount').textContent = `${count} items selected`;
+        $('bulkDeleteItems').disabled = count === 0;
+        $('bulkExportItems').disabled = count === 0;
+      }
+
+      function filterMenuData() {
+        const searchTerm = $('searchInput').value.toLowerCase();
+        const restaurantFilter = $('restaurantFilter').value;
+        const sourceFilter = $('sourceFilter').value;
+
+        return allMenuData.filter(item => {
+          const matchesSearch = !searchTerm || 
+            item.name.toLowerCase().includes(searchTerm) ||
+            item.restaurant_name.toLowerCase().includes(searchTerm) ||
+            (item.description && item.description.toLowerCase().includes(searchTerm));
+          
+          const matchesRestaurant = !restaurantFilter || item.restaurant_name === restaurantFilter;
+          const matchesSource = !sourceFilter || item.data_source === sourceFilter;
+          
+          return matchesSearch && matchesRestaurant && matchesSource;
+        });
+      }
+
+      function groupByRestaurant(items) {
+        const grouped = {};
+        items.forEach(item => {
+          const key = item.restaurant_name;
+          if (!grouped[key]) {
+            grouped[key] = {
+              restaurant_name: key,
+              restaurant_id: item.restaurant_id || key.replace(/\s+/g, '_').toLowerCase(),
+              data_source: item.data_source,
+              items: []
+            };
+          }
+          grouped[key].items.push(item);
+        });
+        return Object.values(grouped);
+      }
+
+      function updateRestaurantFilter(groups) {
+        const filter = $('restaurantFilter');
+        const currentValue = filter.value;
+        
+        filter.innerHTML = '<option value="">All Restaurants</option>' +
+          groups.map(group => `<option value="${group.restaurant_name}">${group.restaurant_name}</option>`).join('');
+        
+        if (currentValue) {
+          filter.value = currentValue;
+        }
+      }
+
+      function renderRestaurantGroups(groups) {
+        const container = $('menuContainer');
+        
+        if (groups.length === 0) {
+          container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No menu items found</div>';
+          return;
+        }
+
+        container.innerHTML = groups.map(group => `
+          <div class="restaurant-group">
+            <div class="restaurant-header" onclick="window.dashboardApp.toggleRestaurant('${group.restaurant_id}')">
+              <div class="restaurant-info">
+                <svg class="toggle-icon" id="toggle-${group.restaurant_id}" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 12l-5-5h10l-5 5z"/>
+                </svg>
+                <strong>${group.restaurant_name}</strong>
+                <span class="badge badge-${group.data_source === 'firebase' ? 'firebase' : 'local'}">${group.data_source || 'local'}</span>
+                <span style="color: var(--text-muted);">(${group.items.length} items)</span>
+              </div>
+              <div class="restaurant-actions" onclick="event.stopPropagation()">
+                <button class="btn btn-secondary btn-sm" onclick="window.dashboardApp.exportRestaurant('${group.restaurant_id}')">Export</button>
+                <button class="btn btn-danger btn-sm" onclick="window.dashboardApp.deleteRestaurant('${group.restaurant_id}', '${group.restaurant_name}')">Delete Restaurant</button>
+              </div>
             </div>
-            <div>
-              <div style="font-weight: 500;">${item.label}</div>
-              ${!item.ok ? '<div style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem;">Needs attention</div>' : ''}
+            <div class="restaurant-items" id="items-${group.restaurant_id}">
+              ${group.items.map(item => `
+                <div class="item-row">
+                  <label style="margin-right: 1rem;">
+                    <input type="checkbox" onchange="window.dashboardApp.toggleItemSelection('${item.menu_item_id || item.name}')" ${selectedItems.has(item.menu_item_id || item.name) ? 'checked' : ''}>
+                  </label>
+                  <div class="item-info">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <span style="font-size: 1.1rem;">${item.emoji || '🍽️'}</span>
+                      <strong>${item.name}</strong>
+                    </div>
+                    <div style="color: var(--text-muted);">${item.price || '—'}</div>
+                    <div>
+                      <span class="badge badge-info">${item.meal_period || 'all_day'}</span>
+                    </div>
+                    <div>
+                      ${(item.tags || []).slice(0, 2).map(tag => 
+                        `<span class="badge badge-success" style="margin-right: 0.25rem;">${tag}</span>`
+                      ).join('')}
+                    </div>
+                  </div>
+                  <div class="item-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="window.dashboardApp.editMenuItem('${item.menu_item_id || item.name}')">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="window.dashboardApp.deleteMenuItem('${item.menu_item_id || item.name}', '${item.name}')">Delete</button>
+                  </div>
+                </div>
+              `).join('')}
             </div>
           </div>
         `).join('');
-        
-        container.innerHTML = summaryBadges + '<ul class="checklist">' + checklistItems + '</ul>';
-      } catch (error) {
-        showMessage('checklistContent', 'Failed to load checklist', 'error');
-      }
-    }
 
-    async function loadMenu() {
-      try {
-        const data = await apiGet('/v1/menus');
-        const tbody = $('menuTable').querySelector('tbody');
+        updateRestaurantFilter(groups);
+      }
+
+      function refreshMenuDisplay() {
+        const filteredData = filterMenuData();
+        const grouped = groupByRestaurant(filteredData);
+        renderRestaurantGroups(grouped);
+      }
+
+      function toggleRestaurant(restaurantId) {
+        const items = $(`items-${restaurantId}`);
+        const icon = $(`toggle-${restaurantId}`);
         
-        if (!data.items || data.items.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">No menu items found</td></tr>';
+        if (items && icon) {
+          if (items.classList.contains('expanded')) {
+            items.classList.remove('expanded');
+            icon.classList.remove('rotated');
+          } else {
+            items.classList.add('expanded');
+            icon.classList.add('rotated');
+          }
+        }
+      }
+
+      function toggleItemSelection(itemId) {
+        if (selectedItems.has(itemId)) {
+          selectedItems.delete(itemId);
+        } else {
+          selectedItems.add(itemId);
+        }
+        updateSelectionCount();
+      }
+
+      function toggleSelectAll() {
+        const selectAll = $('selectAll');
+        const filteredData = filterMenuData();
+        
+        if (selectAll.checked) {
+          filteredData.forEach(item => selectedItems.add(item.menu_item_id || item.name));
+        } else {
+          selectedItems.clear();
+        }
+        
+        updateSelectionCount();
+        refreshMenuDisplay();
+      }
+
+      function deleteMenuItem(itemId, itemName) {
+        showConfirmation(
+          'Delete Menu Item',
+          `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
+          async () => {
+            try {
+              allMenuData = allMenuData.filter(item => (item.menu_item_id || item.name) !== itemId);
+              selectedItems.delete(itemId);
+              updateSelectionCount();
+              refreshMenuDisplay();
+              showMessage('menuMessages', `Deleted "${itemName}"`, 'success');
+              hideConfirmation();
+            } catch (error) {
+              showMessage('menuMessages', `Failed to delete "${itemName}": ${error.message}`, 'error');
+              hideConfirmation();
+            }
+          }
+        );
+      }
+
+      function deleteRestaurant(restaurantId, restaurantName) {
+        const itemCount = allMenuData.filter(item => item.restaurant_id === restaurantId).length;
+        
+        showConfirmation(
+          'Delete Restaurant',
+          `Are you sure you want to delete "${restaurantName}" and all ${itemCount} menu items? This action cannot be undone.`,
+          async () => {
+            try {
+              allMenuData = allMenuData.filter(item => item.restaurant_id !== restaurantId);
+              allMenuData.forEach(item => {
+                if (item.restaurant_id === restaurantId) {
+                  selectedItems.delete(item.menu_item_id || item.name);
+                }
+              });
+              updateSelectionCount();
+              refreshMenuDisplay();
+              showMessage('menuMessages', `Deleted restaurant "${restaurantName}" and ${itemCount} items`, 'success');
+              hideConfirmation();
+            } catch (error) {
+              showMessage('menuMessages', `Failed to delete restaurant "${restaurantName}": ${error.message}`, 'error');
+              hideConfirmation();
+            }
+          }
+        );
+      }
+
+      function bulkDeleteItems() {
+        const count = selectedItems.size;
+        if (count === 0) return;
+        
+        showConfirmation(
+          'Delete Selected Items',
+          `Are you sure you want to delete ${count} selected menu items? This action cannot be undone.`,
+          async () => {
+            try {
+              allMenuData = allMenuData.filter(item => !selectedItems.has(item.menu_item_id || item.name));
+              selectedItems.clear();
+              updateSelectionCount();
+              refreshMenuDisplay();
+              showMessage('menuMessages', `Deleted ${count} menu items`, 'success');
+              hideConfirmation();
+            } catch (error) {
+              showMessage('menuMessages', `Failed to delete items: ${error.message}`, 'error');
+              hideConfirmation();
+            }
+          }
+        );
+      }
+
+      function exportRestaurant(restaurantId) {
+        const restaurantItems = allMenuData.filter(item => item.restaurant_id === restaurantId);
+        if (restaurantItems.length === 0) return;
+        
+        const restaurantData = {
+          restaurant_name: restaurantItems[0].restaurant_name,
+          restaurant_id: restaurantId,
+          menu_items: restaurantItems,
+          exported_at: new Date().toISOString()
+        };
+        
+        const json = JSON.stringify(restaurantData, null, 2);
+        copyToClipboard(json, `Exported ${restaurantItems[0].restaurant_name} (${restaurantItems.length} items)`);
+      }
+
+      function bulkExportItems() {
+        const selectedData = allMenuData.filter(item => selectedItems.has(item.menu_item_id || item.name));
+        if (selectedData.length === 0) return;
+        
+        const exportData = {
+          selected_items: selectedData,
+          exported_at: new Date().toISOString(),
+          total_items: selectedData.length
+        };
+        
+        const json = JSON.stringify(exportData, null, 2);
+        copyToClipboard(json, `Exported ${selectedData.length} selected items`);
+      }
+
+      function editMenuItem(itemId) {
+        const item = allMenuData.find(item => (item.menu_item_id || item.name) === itemId);
+        if (item) {
+          const itemData = {
+            restaurant_name: item.restaurant_name,
+            location: { city: 'London', country_code: 'GB' },
+            menu_items: [item]
+          };
+          $('menuJsonInput').value = JSON.stringify(itemData, null, 2);
+          showMessage('menuMessages', `Item "${item.name}" loaded for editing. Modify and submit to update.`, 'info');
+        }
+      }
+
+      function clearFilters() {
+        $('searchInput').value = '';
+        $('restaurantFilter').value = '';
+        $('sourceFilter').value = '';
+        refreshMenuDisplay();
+      }
+
+      async function copyToClipboard(text, successMessage) {
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+          }
+          showMessage('menuMessages', successMessage, 'success');
+        } catch (error) {
+          showMessage('menuMessages', 'Failed to copy to clipboard', 'error');
+        }
+      }
+
+      async function apiGet(path) {
+        try {
+          const { base, key, dataSource } = api();
+          updateStatus(`Connecting to ${base}${path}...`);
+          
+          const url = new URL(base + path);
+          if (dataSource && dataSource !== 'hybrid') {
+            url.searchParams.set('data_source', dataSource);
+          }
+          
+          const response = await fetch(url.toString(), {
+            headers: key ? { 'Authorization': 'Bearer ' + key } : {}
+          });
+          
+          const data = await response.json();
+          updateStatus('Connected successfully', 'connected');
+          return data;
+        } catch (error) {
+          updateStatus(`Connection failed: ${error.message}`, 'error');
+          throw error;
+        }
+      }
+
+      async function apiPost(path, body) {
+        try {
+          const { base, key, dataSource } = api();
+          const requestBody = { ...body };
+          
+          if (dataSource && dataSource !== 'hybrid') {
+            requestBody.data_source = dataSource;
+          }
+          
+          const response = await fetch(base + path, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(key ? { 'Authorization': 'Bearer ' + key } : {})
+            },
+            body: JSON.stringify(requestBody)
+          });
+          return await response.json();
+        } catch (error) {
+          updateStatus(`Request failed: ${error.message}`, 'error');
+          throw error;
+        }
+      }
+
+      async function loadHealth() {
+        try {
+          const { base } = api();
+          const startTime = performance.now();
+          
+          const response = await fetch(base + '/health');
+          const data = await response.json();
+          const responseTime = Math.round(performance.now() - startTime);
+          
+          systemHealth = data;
+          
+          const pill = $('healthPill');
+          const details = $('healthDetails');
+          
+          pill.className = 'status-pill';
+          
+          const firebaseStatus = data.services?.firebase || 'unavailable';
+          updateFirebaseStatus(
+            firebaseStatus === 'connected' || firebaseStatus === 'operational',
+            `(${firebaseStatus})`
+          );
+          
+          if (data.status === 'healthy' && responseTime < 1000) {
+            pill.classList.add('healthy');
+            pill.innerHTML = `<div class="status-dot"></div>Healthy (${responseTime}ms)`;
+          } else if (data.status === 'degraded' || responseTime > 1000) {
+            pill.classList.add('degraded');
+            pill.innerHTML = `<div class="status-dot"></div>Degraded (${responseTime}ms)`;
+          } else {
+            pill.classList.add('unhealthy');
+            pill.innerHTML = `<div class="status-dot"></div>Unhealthy (${responseTime}ms)`;
+          }
+          
+          details.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          const pill = $('healthPill');
+          pill.className = 'status-pill unhealthy';
+          pill.innerHTML = '<div class="status-dot"></div>Unreachable';
+          $('healthDetails').textContent = `Error: ${error.message}`;
+          updateFirebaseStatus(false, '(health check failed)');
+        }
+      }
+
+      async function loadDataSources() {
+        try {
+          const data = await apiGet('/v1/admin/summary');
+          const container = $('dataSourcesMetrics');
+          
+          const dataSources = data.data_sources || {};
+          const firebaseStats = dataSources.firebase_stats || {};
+          const localStats = dataSources.local_stats || {};
+          
+          container.innerHTML = `
+            <div class="metric">
+              <div class="metric-value">${firebaseStats.total_restaurants || 0}</div>
+              <div class="metric-label">Firebase</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${localStats.total_restaurants || 0}</div>
+              <div class="metric-label">Local</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${data.restaurants || '—'}</div>
+              <div class="metric-label">Combined</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${firebaseStats.total_events || 0}</div>
+              <div class="metric-label">Events</div>
+            </div>
+          `;
+        } catch (error) {
+          showMessage('dataSourcesMetrics', 'Failed to load data source stats', 'error');
+        }
+      }
+
+      async function loadSummary() {
+        try {
+          const data = await apiGet('/v1/admin/summary');
+          const container = $('summaryMetrics');
+          
+          container.innerHTML = `
+            <div class="metric">
+              <div class="metric-value">${data.restaurants || '—'}</div>
+              <div class="metric-label">Restaurants</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${data.menu_items ?? '—'}</div>
+              <div class="metric-label">Menu Items</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${data.menu_version || '—'}</div>
+              <div class="metric-label">Version</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : '—'}</div>
+              <div class="metric-label">Updated</div>
+            </div>
+          `;
+        } catch (error) {
+          showMessage('summaryMetrics', 'Failed to load summary', 'error');
+        }
+      }
+
+      async function loadEvents() {
+        try {
+          const data = await apiGet('/v1/admin/events/pending');
+          const container = $('eventsMetrics');
+          
+          container.innerHTML = `
+            <div class="metric">
+              <div class="metric-value">${data.total || 0}</div>
+              <div class="metric-label">Pending</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">—</div>
+              <div class="metric-label">Approved</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${data.total || 0}</div>
+              <div class="metric-label">Total</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">—</div>
+              <div class="metric-label">This Week</div>
+            </div>
+          `;
+        } catch (error) {
+          showMessage('eventsMetrics', 'Failed to load events', 'error');
+        }
+      }
+
+      async function loadMenu() {
+        try {
+          const data = await apiGet('/v1/menu');
+          allMenuData = data.menu_items || [];
+          
+          allMenuData = allMenuData.map(item => ({
+            ...item,
+            restaurant_id: item.restaurant_id || item.restaurant_name?.replace(/\s+/g, '_').toLowerCase() || 'unknown'
+          }));
+          
+          refreshMenuDisplay();
+          showMessage('menuMessages', `Loaded ${allMenuData.length} menu items`, 'success');
+        } catch (error) {
+          showMessage('menuMessages', `Failed to load menu: ${error.message}`, 'error');
+        }
+      }
+
+      async function exportMenu() {
+        if (allMenuData.length === 0) {
+          showMessage('menuMessages', 'No menu data to export. Load menu first.', 'error');
           return;
         }
         
-        tbody.innerHTML = data.items.map(item => `
-          <tr>
-            <td>
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span style="font-size: 1.25rem;">${item.emoji || '🍽️'}</span>
-                <span style="font-weight: 500;">${item.name || '—'}</span>
-              </div>
-            </td>
-            <td>${item.restaurant_name || '—'}</td>
-            <td style="font-weight: 500;">${item.price || '—'}</td>
-            <td>
-              <span class="badge badge-info">${item.meal_period || 'all_day'}</span>
-            </td>
-            <td>
-              ${(item.search_tags || item.tags || []).slice(0, 3).map(tag => 
-                `<span class="badge badge-success" style="margin-right: 0.25rem;">${tag}</span>`
-              ).join('')}
-            </td>
-            <td>
-              <button class="btn btn-danger btn-sm" onclick="removeMenuItem('${item.menu_item_id || item.name}')">
-                Remove
-              </button>
-            </td>
-          </tr>
-        `).join('');
-      } catch (error) {
-        showMessage('menuMessages', 'Failed to load menu', 'error');
-      }
-    }
-
-    async function exportMenu() {
-      try {
-        const data = await apiGet('/v1/menus');
-        const json = JSON.stringify(data.items || [], null, 2);
+        const exportData = {
+          restaurants: groupByRestaurant(allMenuData),
+          total_items: allMenuData.length,
+          exported_at: new Date().toISOString(),
+          data_source: api().dataSource
+        };
         
-        if (navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(json);
-          showMessage('menuMessages', 'Menu JSON copied to clipboard!', 'success');
-        } else {
-          const textarea = document.createElement('textarea');
-          textarea.value = json;
-          document.body.appendChild(textarea);
-          textarea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textarea);
-          showMessage('menuMessages', 'Menu JSON copied!', 'success');
-        }
-      } catch (error) {
-        showMessage('menuMessages', 'Failed to export menu', 'error');
+        const json = JSON.stringify(exportData, null, 2);
+        await copyToClipboard(json, `Exported ${allMenuData.length} menu items`);
       }
-    }
 
-    async function addSampleMenu() {
-      const sampleData = {
-        restaurant_id: 'demo_restaurant_' + Date.now(),
-        restaurant_name: 'Demo Restaurant',
-        location: { city: 'London', country_code: 'GB' },
-        menu_items: [
-          {
-            name: 'Margherita Pizza',
-            emoji: '🍕',
-            price: '£12.50',
-            description: 'Fresh mozzarella, tomato sauce, basil',
-            tags: ['vegetarian', 'popular'],
-            meal_period: 'lunch',
-            dietary: { vegetarian: true }
+      async function addSampleMenu() {
+        const sampleData = {
+          restaurant_name: "Sample Restaurant",
+          location: {
+            city: "London",
+            country_code: "GB",
+            coordinates: { lat: 51.5074, lng: -0.1278 }
           },
-          {
-            name: 'Fish & Chips',
-            emoji: '🍟',
-            price: '£14.90',
-            description: 'Beer battered cod with chunky chips',
-            tags: ['british', 'classic'],
-            meal_period: 'dinner'
+          metadata: {
+            goals: ["increase_visibility", "highlight_specialties"]
+          },
+          menu_items: [
+            {
+              name: "Fish & Chips",
+              price: "£12.50",
+              description: "Fresh cod in crispy batter with hand-cut chips",
+              tags: ["signature", "british"],
+              meal_period: "lunch",
+              emoji: "🐟"
+            },
+            {
+              name: "Shepherd's Pie",
+              price: "£14.00",
+              description: "Traditional lamb mince with mashed potato topping",
+              tags: ["comfort_food", "homemade"],
+              meal_period: "dinner",
+              emoji: "🥧"
+            }
+          ]
+        };
+        
+        $('menuJsonInput').value = JSON.stringify(sampleData, null, 2);
+        showMessage('menuMessages', 'Sample menu data loaded. Click "Submit" to add it.', 'info');
+      }
+
+      async function testFirebase() {
+        try {
+          const testData = {
+            test_timestamp: new Date().toISOString(),
+            test_type: "dashboard_connectivity"
+          };
+          
+          const data = await apiPost('/v1/admin/test/firebase', testData);
+          showMessage('menuMessages', `Firebase test: ${data.status || 'Success'}`, 'success');
+        } catch (error) {
+          showMessage('menuMessages', `Firebase test failed: ${error.message}`, 'error');
+        }
+      }
+
+      async function submitMenu() {
+        try {
+          const menuData = JSON.parse($('menuJsonInput').value);
+          const firebaseOnly = $('firebaseOnlyMode').checked;
+          
+          if (firebaseOnly) {
+            menuData.data_source = 'firebase';
           }
-        ]
+          
+          const data = await apiPost('/v1/menu', menuData);
+          showMessage('menuMessages', data.message || 'Menu submitted successfully', 'success');
+          
+          await loadMenu();
+        } catch (error) {
+          if (error instanceof SyntaxError) {
+            showMessage('menuMessages', 'Invalid JSON format. Please check your syntax.', 'error');
+          } else {
+            showMessage('menuMessages', `Failed to submit menu: ${error.message}`, 'error');
+          }
+        }
+      }
+
+      async function loadPendingEvents() {
+        try {
+          const data = await apiGet('/v1/admin/events/pending');
+          const container = $('pendingEventsContainer');
+          
+          if (!data.events || data.events.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No pending events</div>';
+            return;
+          }
+          
+          container.innerHTML = `
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Restaurant</th>
+                    <th>Details</th>
+                    <th>Submitted</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.events.map(event => `
+                    <tr>
+                      <td><span class="badge badge-warning">${event.type || 'unknown'}</span></td>
+                      <td>${event.restaurant_name || 'N/A'}</td>
+                      <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                        ${event.description || JSON.stringify(event.data).substring(0, 100) + '...'}
+                      </td>
+                      <td>${event.created_at ? new Date(event.created_at).toLocaleDateString() : 'N/A'}</td>
+                      <td>
+                        <button class="btn btn-success btn-sm" onclick="window.dashboardApp.approveEvent('${event.id}')">Approve</button>
+                        <button class="btn btn-danger btn-sm" onclick="window.dashboardApp.rejectEvent('${event.id}')">Reject</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        } catch (error) {
+          showMessage('pendingEventsContainer', `Failed to load pending events: ${error.message}`, 'error');
+        }
+      }
+
+      async function approveEvent(eventId) {
+        try {
+          const data = await apiPost(`/v1/admin/events/${eventId}/approve`, {});
+          showMessage('pendingEventsContainer', data.message || 'Event approved', 'success');
+          await loadPendingEvents();
+        } catch (error) {
+          showMessage('pendingEventsContainer', `Failed to approve event: ${error.message}`, 'error');
+        }
+      }
+
+      async function rejectEvent(eventId) {
+        try {
+          const data = await apiPost(`/v1/admin/events/${eventId}/reject`, {});
+          showMessage('pendingEventsContainer', data.message || 'Event rejected', 'success');
+          await loadPendingEvents();
+        } catch (error) {
+          showMessage('pendingEventsContainer', `Failed to reject event: ${error.message}`, 'error');
+        }
+      }
+
+      async function loadTelemetry() {
+        try {
+          const { base, key } = api();
+          const type = $('telemetryType').value;
+          const since = $('telemetrySince').value;
+          const limit = $('telemetryLimit').value;
+          
+          const params = new URLSearchParams();
+          if (type) params.set('type', type);
+          if (since) params.set('since', since);
+          if (limit) params.set('limit', limit);
+          
+          const url = `${base}/v1/admin/telemetry?${params.toString()}`;
+          const response = await fetch(url, {
+            headers: key ? { 'Authorization': 'Bearer ' + key } : {}
+          });
+          
+          const data = await response.json();
+          const container = $('telemetryFeed');
+          
+          if (!data.events || data.events.length === 0) {
+            container.textContent = 'No recent activity';
+            return;
+          }
+          
+          container.textContent = data.events.map(event => 
+            `[${new Date(event.timestamp).toLocaleString()}] ${event.type}: ${event.message || JSON.stringify(event.data)}`
+          ).join('\n');
+          
+        } catch (error) {
+          $('telemetryFeed').textContent = `Error loading telemetry: ${error.message}`;
+        }
+      }
+
+      function startTelemetryAutoRefresh() {
+        if (telemetryInterval) {
+          clearInterval(telemetryInterval);
+        }
+        
+        if ($('telemetryAuto').checked) {
+          telemetryInterval = setInterval(loadTelemetry, 30000);
+        }
+      }
+
+      async function refreshAll() {
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(btn => btn.classList.add('loading'));
+        
+        try {
+          await Promise.allSettled([
+            loadHealth(),
+            loadDataSources(),
+            loadSummary(),
+            loadEvents()
+          ]);
+        } finally {
+          buttons.forEach(btn => btn.classList.remove('loading'));
+        }
+      }
+
+      function handleFileUpload(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const content = e.target.result;
+            JSON.parse(content);
+            $('menuJsonInput').value = content;
+            showMessage('menuMessages', `File "${file.name}" loaded successfully`, 'success');
+          } catch (error) {
+            showMessage('menuMessages', `Invalid JSON file: ${error.message}`, 'error');
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function setupEventListeners() {
+        $('refreshBtn').onclick = refreshAll;
+        $('loadHealthBtn').onclick = loadHealth;
+        $('loadDataSourcesBtn').onclick = loadDataSources;
+        $('loadSummaryBtn').onclick = loadSummary;
+        $('loadEventsBtn').onclick = loadEvents;
+        $('loadMenuBtn').onclick = loadMenu;
+        $('exportMenuBtn').onclick = exportMenu;
+        $('addSampleBtn').onclick = addSampleMenu;
+        $('testFirebaseBtn').onclick = testFirebase;
+        $('submitMenuBtn').onclick = submitMenu;
+        $('selectAll').onchange = toggleSelectAll;
+        $('bulkDeleteItems').onclick = bulkDeleteItems;
+        $('bulkExportItems').onclick = bulkExportItems;
+        $('clearFilters').onclick = clearFilters;
+        $('searchInput').oninput = refreshMenuDisplay;
+        $('restaurantFilter').onchange = refreshMenuDisplay;
+        $('sourceFilter').onchange = refreshMenuDisplay;
+        
+        const uploadZone = $('uploadZone');
+        const fileInput = $('fileInput');
+        
+        uploadZone.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => {
+          if (e.target.files[0]) {
+            handleFileUpload(e.target.files[0]);
+          }
+        };
+        
+        uploadZone.ondragover = (e) => {
+          e.preventDefault();
+          uploadZone.classList.add('dragover');
+        };
+        
+        uploadZone.ondragleave = () => {
+          uploadZone.classList.remove('dragover');
+        };
+        
+        uploadZone.ondrop = (e) => {
+          e.preventDefault();
+          uploadZone.classList.remove('dragover');
+          const file = e.dataTransfer.files[0];
+          if (file && file.type === 'application/json') {
+            handleFileUpload(file);
+          } else {
+            showMessage('menuMessages', 'Please drop a valid JSON file', 'error');
+          }
+        };
+        
+        $('loadPendingEventsBtn').onclick = loadPendingEvents;
+        $('loadTelemetryBtn').onclick = loadTelemetry;
+        $('telemetryAuto').onchange = startTelemetryAutoRefresh;
+        $('confirmCancel').onclick = hideConfirmation;
+        $('confirmDelete').onclick = () => {
+          if (currentConfirmCallback) {
+            currentConfirmCallback();
+          }
+        };
+        
+        $('confirmationDialog').onclick = (e) => {
+          if (e.target === $('confirmationDialog')) {
+            hideConfirmation();
+          }
+        };
+      }
+
+      window.dashboardApp = {
+        toggleRestaurant,
+        toggleItemSelection,
+        deleteMenuItem,
+        deleteRestaurant,
+        exportRestaurant,
+        editMenuItem,
+        approveEvent,
+        rejectEvent
       };
 
-      try {
-        const result = await apiPost('/v1/restaurant/menu', sampleData);
-        if (result.success) {
-          showMessage('menuMessages', `Added ${result.items_added || 2} sample items!`, 'success');
-          loadMenu();
-        } else {
-          showMessage('menuMessages', 'Failed to add sample menu', 'error');
-        }
-      } catch (error) {
-        showMessage('menuMessages', 'Error adding sample menu', 'error');
-      }
-    }
-
-    async function submitMenuData() {
-      const jsonData = $('menuJsonInput').value.trim();
-      if (!jsonData) {
-        showMessage('menuMessages', 'Please enter menu JSON data', 'error');
-        return;
-      }
-
-      try {
-        const data = JSON.parse(jsonData);
-        const result = await apiPost('/v1/restaurant/menu', data);
-        
-        if (result.success) {
-          showMessage('menuMessages', `Successfully processed: ${result.items_added} items added`, 'success');
-          $('menuJsonInput').value = '';
-          loadMenu();
-        } else {
-          showMessage('menuMessages', result.error || 'Failed to process menu', 'error');
-        }
-      } catch (error) {
-        showMessage('menuMessages', 'Invalid JSON format', 'error');
-      }
-    }
-
-    async function loadTelemetry() {
-      try {
-        const params = new URLSearchParams();
-        const type = $('telemetryType').value;
-        const since = $('telemetrySince').value;
-        const limit = $('telemetryLimit').value;
-        
-        if (type) params.set('type', type);
-        if (since) params.set('since', new Date(since).toISOString());
-        if (limit) params.set('limit', limit);
-        
-        const data = await apiGet('/v1/admin/telemetry?' + params.toString());
-        const feed = $('telemetryFeed');
-        
-        if (!data.items || data.items.length === 0) {
-          feed.textContent = 'No recent activity';
-        } else {
-          feed.textContent = data.items.map(item => JSON.stringify(item)).join('\n');
-        }
-      } catch (error) {
-        $('telemetryFeed').textContent = `Error loading activity: ${error.message}`;
-      }
-    }
-
-    // File upload handling
-    const uploadZone = $('uploadZone');
-    const fileInput = $('fileInput');
-    
-    uploadZone.addEventListener('click', () => fileInput.click());
-    uploadZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadZone.classList.add('dragover');
-    });
-    uploadZone.addEventListener('dragleave', () => {
-      uploadZone.classList.remove('dragover');
-    });
-    uploadZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadZone.classList.remove('dragover');
-      const files = e.dataTransfer.files;
-      if (files.length > 0) handleFileUpload(files[0]);
-    });
-    
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) handleFileUpload(e.target.files[0]);
-    });
-
-    async function handleFileUpload(file) {
-      if (!file.name.endsWith('.json')) {
-        showMessage('menuMessages', 'Please upload a JSON file', 'error');
-        return;
-      }
-
-      try {
-        const text = await file.text();
-        const data = JSON.parse(text);
-        $('menuJsonInput').value = JSON.stringify(data, null, 2);
-        showMessage('menuMessages', 'File loaded successfully! Review and submit.', 'success');
-      } catch (error) {
-        showMessage('menuMessages', 'Invalid JSON file', 'error');
-      }
-    }
-
-    // Auto-refresh telemetry
-    let telemetryTimer = null;
-    function toggleAutoRefresh() {
-      clearInterval(telemetryTimer);
-      if ($('telemetryAuto').checked) {
-        telemetryTimer = setInterval(loadTelemetry, 10000);
-      }
-    }
-
-    // Event listeners
-    $('refreshBtn').addEventListener('click', () => {
-      loadHealth();
-      loadUsage();
-      loadSummary();
-      loadStats();
-      loadMenu();
-      loadTelemetry();
-      loadChecklist();
-    });
-    
-    $('loadHealthBtn').addEventListener('click', loadHealth);
-    $('loadUsageBtn').addEventListener('click', loadUsage);
-    $('loadSummaryBtn').addEventListener('click', loadSummary);
-    $('loadStatsBtn').addEventListener('click', loadStats);
-    $('loadChecklistBtn').addEventListener('click', loadChecklist);
-    $('loadMenuBtn').addEventListener('click', loadMenu);
-    $('exportMenuBtn').addEventListener('click', exportMenu);
-    $('addSampleBtn').addEventListener('click', addSampleMenu);
-    $('submitMenuBtn').addEventListener('click', submitMenuData);
-    $('loadTelemetryBtn').addEventListener('click', loadTelemetry);
-    $('telemetryAuto').addEventListener('change', toggleAutoRefresh);
-
-    // Global function for remove buttons
-    window.removeMenuItem = async (itemId) => {
-      if (confirm('Remove this menu item?')) {
-        showMessage('menuMessages', 'Remove functionality coming soon...', 'info');
-      }
-    };
-
-    // Initialize dashboard
-    document.addEventListener('DOMContentLoaded', () => {
-      // Load stored credentials
-      const storedKey = localStorage.getItem('vfied_api_key');
-      if (storedKey) $('apiKey').value = storedKey;
-
-      // Check URL params
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlKey = urlParams.get('key');
-      if (urlKey) {
-        $('apiKey').value = urlKey;
-        localStorage.setItem('vfied_api_key', urlKey);
-      }
-
-      // Detect environment
-      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-      $('baseUrl').value = isLocal ? 'http://localhost:3048' : 'https://vfied-v4-clean.onrender.com';
-
-      // Generate demo key if needed
-      if (!storedKey && !urlKey) {
-        const demoKey = `vf_demo_${Math.random().toString(36).slice(2,15)}`;
-        $('apiKey').value = demoKey;
-        localStorage.setItem('vfied_api_key', demoKey);
-      }
-
-      // Auto-load all sections after a brief delay
-      setTimeout(() => {
+      function init() {
+        setupEventListeners();
         loadHealth();
-        loadUsage();
-        loadSummary();
-        loadStats();
-        loadMenu();
-        loadTelemetry();
-        loadChecklist();
-      }, 1000);
-    });
+        
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        $('telemetrySince').value = yesterday.toISOString().slice(0, 16);
+        
+        updateStatus('Dashboard ready', 'connected');
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+      
+    })();
   </script>
 </body>
 </html>

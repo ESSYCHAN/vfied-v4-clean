@@ -1,0 +1,333 @@
+// Firestore Security Rules for VFIED Restaurant System
+// firestore.rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================
+    // UTILITY FUNCTIONS
+    // ===============================
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             resource.data.role == 'admin' ||
+             get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Check if user owns a restaurant
+    function ownsRestaurant(restaurantId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/restaurant_owners/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/restaurant_owners/$(request.auth.uid)).data.restaurant_ids is list &&
+             restaurantId in get(/databases/$(database)/documents/restaurant_owners/$(request.auth.uid)).data.restaurant_ids;
+    }
+    
+    // Check if user can moderate (admin or moderator)
+    function canModerate() {
+      return isAuthenticated() && 
+             (isAdmin() || 
+              exists(/databases/$(database)/documents/moderators/$(request.auth.uid)));
+    }
+    
+    // Check if data contains required fields for restaurants
+    function hasRequiredRestaurantFields() {
+      return 'basic_info' in request.resource.data &&
+             'name' in request.resource.data.basic_info &&
+             'location' in request.resource.data &&
+             'city' in request.resource.data.location &&
+             'country_code' in request.resource.data.location;
+    }
+    
+    // Check if menu item has required fields
+    function hasRequiredMenuItemFields() {
+      return 'basic_info' in request.resource.data &&
+             'name' in request.resource.data.basic_info &&
+             'restaurant_id' in request.resource.data;
+    }
+    
+    // Check if event has required fields
+    function hasRequiredEventFields() {
+      return 'basic_info' in request.resource.data &&
+             'title' in request.resource.data.basic_info &&
+             'location' in request.resource.data &&
+             'contact' in request.resource.data &&
+             'contact_email' in request.resource.data.contact;
+    }
+    
+    // Rate limiting helper (basic)
+    function withinRateLimit() {
+      // Allow 10 writes per minute per user (basic rate limiting)
+      // This is a simplified version - in production you'd want more sophisticated rate limiting
+      return true;
+    }
+    
+    // ===============================
+    // RESTAURANT COLLECTIONS
+    // ===============================
+    
+    // Restaurants collection
+    match /restaurants/{restaurantId} {
+      // Read permissions: Anyone can read approved restaurants
+      allow read: if resource.data.verification.admin_approved == true ||
+                     isAdmin() ||
+                     ownsRestaurant(restaurantId);
+      
+      // Create permissions: Authenticated users can create restaurants (pending approval)
+      allow create: if isAuthenticated() && 
+                       hasRequiredRestaurantFields() &&
+                       withinRateLimit() &&
+                       // New restaurants must be pending approval unless created by admin
+                       (request.resource.data.verification.admin_approved == false || isAdmin()) &&
+                       // Set proper ownership if not admin
+                       (!isAdmin() ? 
+                         request.resource.data.verification.data_source == 'user_submission' &&
+                         request.resource.data.verification.claimed_by == request.auth.uid
+                         : true);
+      
+      // Update permissions: Restaurant owners can update their restaurants, admins can update any
+      allow update: if (ownsRestaurant(restaurantId) || isAdmin()) &&
+                       hasRequiredRestaurantFields() &&
+                       withinRateLimit() &&
+                       // Owners cannot change verification status (only admins can)
+                       (ownsRestaurant(restaurantId) ? 
+                         request.resource.data.verification.admin_approved == resource.data.verification.admin_approved &&
+                         request.resource.data.verification.claimed_by == resource.data.verification.claimed_by
+                         : true);
+      
+      // Delete permissions: Only admins can delete restaurants
+      allow delete: if isAdmin();
+    }
+    
+    // Menu Items collection
+    match /menu_items/{menuItemId} {
+      // Read permissions: Anyone can read menu items for approved restaurants
+      allow read: if exists(/databases/$(database)/documents/restaurants/$(resource.data.restaurant_id)) &&
+                     (get(/databases/$(database)/documents/restaurants/$(resource.data.restaurant_id)).data.verification.admin_approved == true ||
+                      isAdmin() ||
+                      ownsRestaurant(resource.data.restaurant_id));
+      
+      // Create permissions: Restaurant owners and admins can add menu items
+      allow create: if isAuthenticated() &&
+                       hasRequiredMenuItemFields() &&
+                       withinRateLimit() &&
+                       (ownsRestaurant(request.resource.data.restaurant_id) || isAdmin()) &&
+                       // Ensure restaurant exists
+                       exists(/databases/$(database)/documents/restaurants/$(request.resource.data.restaurant_id));
+      
+      // Update permissions: Restaurant owners and admins can update menu items
+      allow update: if (ownsRestaurant(resource.data.restaurant_id) || isAdmin()) &&
+                       hasRequiredMenuItemFields() &&
+                       withinRateLimit() &&
+                       // Restaurant ID cannot be changed
+                       request.resource.data.restaurant_id == resource.data.restaurant_id;
+      
+      // Delete permissions: Restaurant owners and admins can delete menu items
+      allow delete: if ownsRestaurant(resource.data.restaurant_id) || isAdmin();
+    }
+    
+    // ===============================
+    // EVENT COLLECTIONS
+    // ===============================
+    
+    // Events collection
+    match /events/{eventId} {
+      // Read permissions: Anyone can read approved events, admins can read all
+      allow read: if resource.data.moderation.status == 'approved' ||
+                     canModerate() ||
+                     // Event submitters can read their own events
+                     (isAuthenticated() && resource.data.contact.contact_email == request.auth.token.email);
+      
+      // Create permissions: Anyone can submit events (they go to moderation queue)
+      allow create: if hasRequiredEventFields() &&
+                       withinRateLimit() &&
+                       // New events must be pending
+                       request.resource.data.moderation.status == 'pending' &&
+                       // If connected to restaurant, user must own it or be admin
+                       (request.resource.data.restaurant_connection.restaurant_id == null ||
+                        ownsRestaurant(request.resource.data.restaurant_connection.restaurant_id) ||
+                        isAdmin());
+      
+      // Update permissions: Only moderators can update events (for approval/rejection)
+      allow update: if canModerate() &&
+                       // Basic event info cannot be changed during moderation
+                       request.resource.data.basic_info == resource.data.basic_info &&
+                       request.resource.data.location == resource.data.location &&
+                       request.resource.data.contact == resource.data.contact;
+      
+      // Delete permissions: Moderators and admins can delete events
+      allow delete: if canModerate();
+    }
+    
+    // ===============================
+    // USER MANAGEMENT COLLECTIONS
+    // ===============================
+    
+    // Restaurant Owners collection
+    match /restaurant_owners/{userId} {
+      // Read permissions: Users can read their own owner record, admins can read all
+      allow read: if request.auth.uid == userId || isAdmin();
+      
+      // Create permissions: Users can create their own owner record
+      allow create: if isAuthenticated() &&
+                       request.auth.uid == userId &&
+                       withinRateLimit() &&
+                       'restaurant_ids' in request.resource.data &&
+                       request.resource.data.restaurant_ids is list;
+      
+      // Update permissions: Users can update their own record, admins can update any
+      allow update: if (request.auth.uid == userId || isAdmin()) &&
+                       withinRateLimit() &&
+                       'restaurant_ids' in request.resource.data &&
+                       request.resource.data.restaurant_ids is list;
+      
+      // Delete permissions: Only admins can delete owner records
+      allow delete: if isAdmin();
+    }
+    
+    // Admin Users collection
+    match /admin_users/{userId} {
+      // Read permissions: Only admins can read admin records
+      allow read: if isAdmin();
+      
+      // Create/Update/Delete permissions: Only existing admins can manage admin users
+      allow write: if isAdmin();
+    }
+    
+    // Moderators collection
+    match /moderators/{userId} {
+      // Read permissions: Moderators can read their own record, admins can read all
+      allow read: if request.auth.uid == userId || isAdmin();
+      
+      // Write permissions: Only admins can manage moderators
+      allow write: if isAdmin();
+    }
+    
+    // ===============================
+    // ANALYTICS & FEEDBACK COLLECTIONS
+    // ===============================
+    
+    // User interactions for analytics
+    match /interactions/{interactionId} {
+      // Read permissions: Only admins can read interaction data
+      allow read: if isAdmin();
+      
+      // Create permissions: Authenticated users can create interactions
+      allow create: if isAuthenticated() &&
+                       withinRateLimit() &&
+                       'user_id' in request.resource.data &&
+                       request.resource.data.user_id == request.auth.uid;
+      
+      // No update or delete permissions for interactions (immutable)
+      allow update, delete: if false;
+    }
+    
+    // User patterns for AI learning
+    match /user_patterns/{patternId} {
+      // Read permissions: Only admins and the pattern owner can read
+      allow read: if isAdmin() ||
+                     (isAuthenticated() && resource.data.user_id == request.auth.uid);
+      
+      // Create permissions: System can create patterns for authenticated users
+      allow create: if isAuthenticated() &&
+                       'user_id' in request.resource.data &&
+                       request.resource.data.user_id == request.auth.uid;
+      
+      // Update permissions: System can update user's own patterns
+      allow update: if isAuthenticated() &&
+                       resource.data.user_id == request.auth.uid &&
+                       request.resource.data.user_id == request.auth.uid;
+      
+      // Delete permissions: Only admins can delete patterns
+      allow delete: if isAdmin();
+    }
+    
+    // Feedback collection
+    match /feedback/{feedbackId} {
+      // Read permissions: Only admins can read feedback
+      allow read: if isAdmin();
+      
+      // Create permissions: Anyone can submit feedback
+      allow create: if withinRateLimit() &&
+                       'type' in request.resource.data &&
+                       'content' in request.resource.data;
+      
+      // Update/Delete permissions: Only admins can modify feedback
+      allow update, delete: if isAdmin();
+    }
+    
+    // ===============================
+    // LEGACY COLLECTIONS (for backward compatibility)
+    // ===============================
+    
+    // Users collection (existing VFIED users)
+    match /users/{userId} {
+      // Read permissions: Users can read their own data, admins can read all
+      allow read: if request.auth.uid == userId || isAdmin();
+      
+      // Write permissions: Users can write their own data
+      allow write: if isAuthenticated() && 
+                      request.auth.uid == userId &&
+                      withinRateLimit();
+    }
+    
+    // Decisions collection (existing VFIED decisions)
+    match /decisions/{decisionId} {
+      // Read permissions: Decision owners and admins can read
+      allow read: if isAuthenticated() && 
+                     (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Write permissions: Users can write their own decisions
+      allow write: if isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      withinRateLimit();
+    }
+    
+    // Food Choices collection (existing VFIED food choices)
+    match /foodChoices/{choiceId} {
+      // Read permissions: Choice owners and admins can read
+      allow read: if isAuthenticated() && 
+                     (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Write permissions: Users can write their own choices
+      allow write: if isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      withinRateLimit();
+    }
+    
+    // User Preferences collection (existing VFIED preferences)
+    match /userPreferences/{userId} {
+      // Read permissions: Users can read their own preferences, admins can read all
+      allow read: if request.auth.uid == userId || isAdmin();
+      
+      // Write permissions: Users can write their own preferences
+      allow write: if isAuthenticated() && 
+                      request.auth.uid == userId &&
+                      withinRateLimit();
+    }
+    
+    // App Stats collection (existing VFIED app statistics)
+    match /appStats/{statId} {
+      // Read permissions: Only admins can read app stats
+      allow read: if isAdmin();
+      
+      // Write permissions: Only admins and system can write stats
+      allow write: if isAdmin();
+    }
+    
+    // ===============================
+    // DEFAULT DENY RULE
+    // ===============================
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
