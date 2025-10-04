@@ -2,3 +2,12 @@ node_modules/
 ios/
 android/
 .env
+# Firebase
+firebase-adminsdk-*.json
+.credentials/
+*.key.json
+
+# Environment files
+
+.env.local
+.env.production
