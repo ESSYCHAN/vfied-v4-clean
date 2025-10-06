@@ -1549,79 +1549,6 @@
       "updated_at": "2025-09-25T19:33:00.900Z",
       "created_at": "2025-09-25T18:55:55.646Z"
     },
-    "gb_london_demo_restaurant_1758826827430": {
-      "restaurant_id": "demo_restaurant_1758826827430",
-      "restaurant_name": "Demo Restaurant",
-      "location": {
-        "city": "London",
-        "country_code": "GB",
-        "address": ""
-      },
-      "menu_items": [
-        {
-          "menu_item_id": "demo_restaurant_1758826827430_0_1758826827432",
-          "name": "Margherita Pizza",
-          "emoji": "🍕",
-          "price": "£12.50",
-          "description": "Fresh mozzarella, tomato sauce, basil",
-          "category": "main",
-          "tags": [
-            "vegetarian",
-            "popular"
-          ],
-          "meal_period": "lunch",
-          "search_tags": [
-            "vegetarian",
-            "popular",
-            "italian",
-            "healthy",
-            "fresh"
-          ],
-          "dietary": {
-            "vegetarian": true,
-            "vegan": false,
-            "gluten_free": false,
-            "dairy_free": false,
-            "halal": false
-          },
-          "available": true,
-          "created_at": "2025-09-25T19:00:27.432Z",
-          "updated_at": "2025-09-25T19:00:27.432Z"
-        },
-        {
-          "menu_item_id": "demo_restaurant_1758826827430_1_1758826827432",
-          "name": "Fish & Chips",
-          "emoji": "🍟",
-          "price": "£14.90",
-          "description": "Beer battered cod with chunky chips",
-          "category": "main",
-          "tags": [
-            "british",
-            "classic"
-          ],
-          "meal_period": "dinner",
-          "search_tags": [
-            "british",
-            "classic"
-          ],
-          "dietary": {
-            "vegetarian": false,
-            "vegan": false,
-            "gluten_free": false,
-            "dairy_free": false,
-            "halal": false
-          },
-          "available": true,
-          "created_at": "2025-09-25T19:00:27.432Z",
-          "updated_at": "2025-09-25T19:00:27.432Z"
-        }
-      ],
-      "delivery_platforms": {},
-      "opening_hours": {},
-      "cuisine_type": "italian",
-      "updated_at": "2025-09-25T19:00:27.433Z",
-      "created_at": "2025-09-25T19:00:27.433Z"
-    },
     "gb_london_canto73_newington_green": {
       "restaurant_id": "canto73_newington_green",
       "restaurant_name": "CANTO 73",
@@ -2043,9 +1970,9 @@
     }
   },
   "stats": {
-    "total_items": 64,
-    "total_restaurants": 4,
-    "last_updated": "2025-09-25T20:01:38.348Z"
+    "total_items": 62,
+    "total_restaurants": 3,
+    "last_updated": "2025-10-06T00:00:00.000Z"
   },
   "last_saved": "2025-09-25T20:01:38.348Z"
 }

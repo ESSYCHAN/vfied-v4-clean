@@ -1,6 +1,10 @@
 // setup-firestore-collections.js
 // Script to populate initial Firestore collections for VFIED
 
+import dotenv from 'dotenv';
+dotenv.config();
+
+import admin from 'firebase-admin';
 import { adminDb } from './server/firebase-admin.js';
 
 const sampleRestaurants = [
@@ -17,7 +21,7 @@ const sampleRestaurants = [
       city: 'London',
       country_code: 'GB',
       address: '12 Upper St Martin\'s Lane, London WC2H 9FB',
-      coordinates: new adminDb.GeoPoint(51.5101, -0.1280)
+      coordinates: new admin.firestore.GeoPoint(51.5101, -0.1280)
     },
     verification: {
       admin_approved: true,
@@ -47,8 +51,8 @@ const sampleRestaurants = [
       views: 0,
       recommendations_count: 0
     },
-    created_at: adminDb.FieldValue.serverTimestamp(),
-    updated_at: adminDb.FieldValue.serverTimestamp()
+    created_at: admin.firestore.FieldValue.serverTimestamp(),
+    updated_at: admin.firestore.FieldValue.serverTimestamp()
   },
   {
     restaurant_id: 'the_breakfast_club_soho',
@@ -63,7 +67,7 @@ const sampleRestaurants = [
       city: 'London',
       country_code: 'GB',
       address: '33 D\'Arblay Street, London W1F 8EU',
-      coordinates: new adminDb.GeoPoint(51.5154, -0.1371)
+      coordinates: new admin.firestore.GeoPoint(51.5154, -0.1371)
     },
     verification: {
       admin_approved: true,
@@ -89,8 +93,8 @@ const sampleRestaurants = [
       views: 0,
       recommendations_count: 0
     },
-    created_at: adminDb.FieldValue.serverTimestamp(),
-    updated_at: adminDb.FieldValue.serverTimestamp()
+    created_at: admin.firestore.FieldValue.serverTimestamp(),
+    updated_at: admin.firestore.FieldValue.serverTimestamp()
   }
 ];
 
@@ -124,7 +128,7 @@ const sampleMenuItems = [
       delivery_url: 'https://deliveroo.co.uk/menu/london/dishoom-covent-garden',
       booking_url: 'https://www.dishoom.com/book'
     },
-    created_at: adminDb.FieldValue.serverTimestamp()
+    created_at: admin.firestore.FieldValue.serverTimestamp()
   },
   {
     restaurant_id: 'dishoom_covent_garden',
@@ -154,7 +158,7 @@ const sampleMenuItems = [
       website: 'https://www.dishoom.com/menu',
       delivery_url: 'https://deliveroo.co.uk/menu/london/dishoom-covent-garden'
     },
-    created_at: adminDb.FieldValue.serverTimestamp()
+    created_at: admin.firestore.FieldValue.serverTimestamp()
   },
   {
     restaurant_id: 'the_breakfast_club_soho',
@@ -184,7 +188,7 @@ const sampleMenuItems = [
       website: 'https://thebreakfastclubcafes.com/menu',
       delivery_url: 'https://deliveroo.co.uk/menu/london/the-breakfast-club-soho'
     },
-    created_at: adminDb.FieldValue.serverTimestamp()
+    created_at: admin.firestore.FieldValue.serverTimestamp()
   },
   {
     restaurant_id: 'the_breakfast_club_soho',
@@ -213,7 +217,7 @@ const sampleMenuItems = [
     restaurant_link: {
       website: 'https://thebreakfastclubcafes.com/menu'
     },
-    created_at: adminDb.FieldValue.serverTimestamp()
+    created_at: admin.firestore.FieldValue.serverTimestamp()
   }
 ];
 
@@ -237,7 +241,7 @@ const sampleEvents = [
       address: 'Hyde Park, London W2 2UH',
       city: 'London',
       country_code: 'GB',
-      coordinates: new adminDb.GeoPoint(51.5074, -0.1658)
+      coordinates: new admin.firestore.GeoPoint(51.5074, -0.1658)
     },
     contact: {
       contact_name: 'London Food Festival Team',
@@ -269,7 +273,7 @@ const sampleEvents = [
       featured: true,
       target_audience: ['food_lovers', 'families', 'tourists']
     },
-    created_at: adminDb.FieldValue.serverTimestamp()
+    created_at: admin.firestore.FieldValue.serverTimestamp()
   },
   {
     basic_info: {
@@ -290,7 +294,7 @@ const sampleEvents = [
       address: '12 Upper St Martin\'s Lane, London WC2H 9FB',
       city: 'London',
       country_code: 'GB',
-      coordinates: new adminDb.GeoPoint(51.5101, -0.1280)
+      coordinates: new admin.firestore.GeoPoint(51.5101, -0.1280)
     },
     contact: {
       contact_name: 'Dishoom Events',
@@ -318,7 +322,7 @@ const sampleEvents = [
       featured: false,
       target_audience: ['cooking_enthusiasts', 'couples']
     },
-    created_at: adminDb.FieldValue.serverTimestamp()
+    created_at: admin.firestore.FieldValue.serverTimestamp()
   }
 ];
 

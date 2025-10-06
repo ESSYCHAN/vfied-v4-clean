@@ -1,5 +1,9 @@
 // server/firebase-admin.js
 import admin from 'firebase-admin';
+import dotenv from 'dotenv';
+
+// Load environment variables first
+dotenv.config();
 
 let firebaseAdmin = null;
 let adminDb = null;
@@ -8,12 +12,17 @@ let adminAuth = null;
 try {
   if (!admin.apps.length) {
     let serviceAccount;
-    
+
     // Try environment variable first (for production)
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-      serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-      console.log('Using Firebase service account from environment variable');
-    } 
+      try {
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        console.log('Using Firebase service account from environment variable');
+      } catch (parseError) {
+        console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', parseError.message);
+        throw new Error('Invalid FIREBASE_SERVICE_ACCOUNT JSON');
+      }
+    }
     // Try file path (for local development)
     else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
       const { readFileSync } = await import('fs');
@@ -27,7 +36,7 @@ try {
     
     firebaseAdmin = admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      projectId: 'vfiedv3'
+      projectId: serviceAccount.project_id
     });
     
     adminDb = admin.firestore();

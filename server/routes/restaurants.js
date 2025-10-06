@@ -376,4 +376,38 @@ app.get('/v1/restaurants/stats', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+// Delete restaurant
+app.delete('/v1/restaurants/:restaurant_id', async (req, res) => {
+  try {
+    const { restaurant_id } = req.params;
+
+    // Find restaurant key in MenuManager
+    const restaurantKey = Array.from(menuManager.menus.keys())
+      .find(key => key.includes(restaurant_id));
+
+    if (!restaurantKey) {
+      return res.status(404).json({
+        success: false,
+        error: 'Restaurant not found'
+      });
+    }
+
+    // Delete from MenuManager
+    menuManager.menus.delete(restaurantKey);
+    menuManager.updateStats();
+    await menuManager.saveMenus();
+
+    console.log(`✅ Deleted restaurant: ${restaurant_id}`);
+
+    res.json({
+      success: true,
+      message: `Restaurant ${restaurant_id} deleted successfully`
+    });
+
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 }
