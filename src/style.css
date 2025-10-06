@@ -803,3 +803,105 @@ div[style*="Why this choice"],
   font-weight: 700;
   color: #8b5cf6;
 }
+/* ===== RESPONSIVE DESKTOP LAYOUT ===== */
+
+/* Tablets and larger - responsive layout */
+@media (min-width: 431px) and (max-width: 1023px) {
+  #app {
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 0 40px rgba(0,0,0,0.3);
+  }
+}
+
+/* Desktop and large screens - full width adaptive */
+@media (min-width: 1024px) {
+  #app {
+    max-width: 1200px;
+    margin: 0 auto;
+    box-shadow: 0 0 60px rgba(0,0,0,0.4);
+  }
+
+  /* Make tabs horizontal on desktop */
+  .tab-bar {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem 2rem;
+  }
+
+  .tab-btn {
+    min-width: 150px;
+  }
+
+  /* Grid layouts for desktop */
+  #travel-grid,
+  #local-gems-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  /* Better modal sizing for desktop */
+  .modal-content {
+    max-width: 800px;
+    margin: 2rem auto;
+    border-radius: 24px;
+  }
+
+  /* Two-column layout for forms on desktop */
+  .diet-chips, .friend-chips {
+    max-width: 100%;
+  }
+
+  /* Better hover states for desktop */
+  .travel-card:hover,
+  .gem-card:hover,
+  .event-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(124,58,237,0.3);
+  }
+
+  /* Desktop-friendly input sizes */
+  #mood-input {
+    font-size: 18px !important;
+    padding: 1rem 1.5rem;
+  }
+
+  button, .cta-button, .decide-btn {
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  button:hover, .cta-button:hover, .decide-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(124,58,237,0.4);
+  }
+
+  /* Better spacing for desktop */
+  .tabpanel {
+    padding: 2rem;
+  }
+
+  header h1 {
+    font-size: 2rem;
+  }
+
+  /* Results section full width */
+  .results-section {
+    max-width: 100%;
+  }
+}
+
+/* Ultra-wide screens */
+@media (min-width: 1600px) {
+  #app {
+    max-width: 1400px;
+  }
+
+  #travel-grid,
+  #local-gems-grid {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 2rem;
+  }
+}
