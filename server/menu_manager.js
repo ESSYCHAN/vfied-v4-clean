@@ -1,5 +1,5 @@
 // server/menu_manager.js
-// Enhanced restaurant menu storage and retrieval for VFIED
+// Enhanced restaurant menu storage and retrieval for VFIED with Firebase Admin integration
 
 import fs from 'fs/promises';
 import path from 'path';
@@ -8,13 +8,29 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-class MenuManager {
+// Import Firebase Admin for server-side operations
+let adminDb = null;
+let useFirebaseAdmin = false;
+
+try {
+  const firebaseAdmin = await import('./firebase-admin.js');
+  adminDb = firebaseAdmin.adminDb;
+  useFirebaseAdmin = Boolean(adminDb);
+  console.log('🔥 Firebase Admin SDK loaded successfully');
+} catch (error) {
+  console.log('📋 Firebase Admin not available, using local storage only');
+}
+
+class EnhancedMenuManager {
   constructor() {
     this.menuDataPath = path.resolve(__dirname, '../data/restaurant_menus.json');
-    this.menus = new Map();
+    this.localMenus = new Map();
     this.menuStats = { total_items: 0, total_restaurants: 0, last_updated: null };
     this.initialized = false;
-    this.loadMenus().catch(console.error);
+    this.useFirebase = useFirebaseAdmin;
+    
+    // Initialize local storage
+    this.loadLocalMenus().catch(console.error);
   }
 
   async ensureDataDirectory() {
@@ -26,7 +42,7 @@ class MenuManager {
     }
   }
 
-  async loadMenus() {
+  async loadLocalMenus() {
     try {
       await this.ensureDataDirectory();
       const data = await fs.readFile(this.menuDataPath, 'utf8');
@@ -34,375 +50,329 @@ class MenuManager {
       
       if (parsed.menus) {
         Object.entries(parsed.menus).forEach(([key, menu]) => {
-          this.menus.set(key, menu);
+          this.localMenus.set(key, menu);
         });
         this.menuStats = parsed.stats || this.menuStats;
       } else {
         Object.entries(parsed).forEach(([key, menu]) => {
-          this.menus.set(key, menu);
+          this.localMenus.set(key, menu);
         });
       }
       
-      this.updateStats();
+      this.updateLocalStats();
       this.initialized = true;
-      console.log(`📋 Loaded ${this.menuStats.total_items} menu items from ${this.menuStats.total_restaurants} restaurants`);
+      console.log(`📋 Loaded ${this.menuStats.total_items} local menu items from ${this.menuStats.total_restaurants} restaurants`);
     } catch (error) {
-      console.log('📋 No existing menus found, starting fresh');
-      this.menus = new Map();
-      this.updateStats();
+      console.log('📋 No existing local menus found, starting fresh');
+      this.localMenus = new Map();
+      this.updateLocalStats();
       this.initialized = true;
     }
   }
 
-  async saveMenus() {
+  async saveLocalMenus() {
     if (!this.initialized) return;
     
     try {
       await this.ensureDataDirectory();
       const data = {
-        menus: Object.fromEntries(this.menus),
+        menus: Object.fromEntries(this.localMenus),
         stats: this.menuStats,
         last_saved: new Date().toISOString()
       };
       await fs.writeFile(this.menuDataPath, JSON.stringify(data, null, 2));
-      console.log(`💾 Saved ${this.menuStats.total_items} menu items`);
+      console.log(`💾 Saved ${this.menuStats.total_items} local menu items`);
     } catch (error) {
-      console.error('❌ Failed to save menus:', error.message);
+      console.error('❌ Failed to save local menus:', error.message);
     }
   }
 
-  updateStats() {
+  updateLocalStats() {
     let totalItems = 0;
-    for (const [, menu] of this.menus) {
+    for (const [, menu] of this.localMenus) {
       totalItems += (menu.menu_items || []).length;
     }
     
     this.menuStats = {
       total_items: totalItems,
-      total_restaurants: this.menus.size,
+      total_restaurants: this.localMenus.size,
       last_updated: new Date().toISOString()
     };
   }
 
-  // NEW: Calculate distance between two coordinates
-  calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c; // Distance in km
-  }
+  // ===============================
+  // FIREBASE ADMIN OPERATIONS
+  // ===============================
 
-  // NEW: Calculate hidden gem score
-  calculateHiddenGemScore(restaurant, item) {
-  let score = 0;
-  
-  // 1. Limited availability (30 points)
-  if (item.availability === 'weekends_only') score += 30;
-  if (item.availability === 'seasonal') score += 25;
-  if (item.availability === 'chef_special') score += 20;
-  if (item.availability === 'limited_daily') score += 15;
-  
-  // 2. Small batch / preparation time (25 points)
-  if (item.daily_limit && item.daily_limit < 20) score += 25;
-  if (item.preparation_time && item.preparation_time > 60) score += 15;
-  
-  // 3. Family recipe / traditional (20 points)
-  if (item.tags?.includes('family_recipe')) score += 20;
-  if (item.tags?.includes('generational')) score += 15;
-  if (item.tags?.includes('traditional')) score += 10;
-  if (item.tags?.includes('secret_recipe')) score += 25;
-  
-  // 4. Restaurant size / reviews (15 points)
-  if (restaurant.review_count && restaurant.review_count < 50) score += 15;
-  if (restaurant.seating_capacity && restaurant.seating_capacity < 30) score += 10;
-  if (restaurant.type === 'family_owned') score += 10;
-  
-  // 5. Not on delivery apps (10 points)
-  const deliveryPlatforms = restaurant.delivery_platforms || {};
-  const onPlatforms = Object.keys(deliveryPlatforms).filter(k => k.endsWith('_id')).length;
-  if (onPlatforms === 0) score += 10;
-  if (onPlatforms === 1) score += 5;
-  
-  // 6. High rating but low visibility (bonus 15 points)
-  if (restaurant.rating && restaurant.rating > 4.5 && 
-      restaurant.review_count && restaurant.review_count < 100) {
-    score += 15;
-  }
-  
-  // 7. Unique/rare cuisine or technique
-  if (item.tags?.includes('rare')) score += 20;
-  if (item.tags?.includes('unique')) score += 15;
-  if (item.cooking_method === 'wood_fired' || 
-      item.cooking_method === 'charcoal' ||
-      item.cooking_method === 'traditional') score += 10;
-  
-  // NEW: Use signup metadata goals
-  const goals = restaurant.metadata?.goals || [];
-  
-  // If NOT seeking visibility, they're more of a hidden gem
-  if (!goals.includes('increase_visibility')) {
-    score += 12; // They're not actively marketing = hidden
-  }
-  
-  // If highlighting specialties, signature dishes get gem status
-  if (goals.includes('highlight_specialties') && item.tags?.includes('signature')) {
-    score += 10;
-  }
-  
-  // Competing with chains = underdog/gem quality
-  if (goals.includes('compete_chains')) {
-    score += 8;
-  }
-  
-  // Menu size from signup
-  const menuSize = restaurant.metadata?.menu_size;
-  if (menuSize === '21-50 items') score += 15; // Small, curated menu
-  if (menuSize === '1-20 items') score += 20; // Very focused
-  if (menuSize === '51-100 items') score += 5;
-  
-  // POS systems - fewer = more traditional
-  const posSystems = restaurant.metadata?.pos_systems || [];
-  if (posSystems.length === 0) score += 10; // No tech = traditional
-  if (posSystems.length === 1) score += 5;
-  
-  return Math.min(score, 100); // Cap at 100
-}
+  async addRestaurantToFirebase(restaurantData) {
+    if (!adminDb) throw new Error('Firebase Admin not available');
+    
+    const {
+      restaurant_id,
+      restaurant_name,
+      location,
+      menu_items = [],
+      delivery_platforms = {},
+      opening_hours = {},
+      metadata = {}
+    } = restaurantData;
 
-  // NEW: Get hidden gem badge
-  getHiddenGemBadge(score) {
-    if (score >= 90) return { emoji: '🏆', label: 'Legendary Find', color: '#FFD700' };
-    if (score >= 70) return { emoji: '💎', label: 'Hidden Gem', color: '#9B59B6' };
-    if (score >= 50) return { emoji: '⭐', label: 'Local Favorite', color: '#3498DB' };
-    if (score >= 30) return { emoji: '🔍', label: 'Worth Discovering', color: '#95A5A6' };
-    return null;
-  }
-
-  // NEW: Build restaurant link with fallback chain
-  buildRestaurantLink(restaurant) {
-    const platforms = restaurant.delivery_platforms || {};
+    const batch = adminDb.batch();
     
-    // Priority: Direct website > Deliveroo > Uber Eats > Google Maps
-    if (restaurant.website) {
-      return {
-        url: restaurant.website,
-        type: 'website',
-        label: 'Visit Website'
-      };
-    }
+    // Create restaurant document
+    const restaurantRef = adminDb.collection('restaurants').doc(restaurant_id);
     
-    if (platforms.deliveroo_id) {
-      return {
-        url: `https://deliveroo.co.uk/menu/${platforms.deliveroo_id}`,
-        type: 'delivery',
-        label: 'Order on Deliveroo'
-      };
-    }
-    
-    if (platforms.ubereats_id) {
-      return {
-        url: `https://www.ubereats.com/store/${platforms.ubereats_id}`,
-        type: 'delivery',
-        label: 'Order on Uber Eats'
-      };
-    }
-    
-    if (platforms.doordash_id) {
-      return {
-        url: `https://www.doordash.com/store/${platforms.doordash_id}`,
-        type: 'delivery',
-        label: 'Order on DoorDash'
-      };
-    }
-    
-    // Fallback to Google Maps/Search
-    const address = restaurant.location?.address || 
-                   `${restaurant.restaurant_name}, ${restaurant.location?.city}`;
-    return {
-      url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
-      type: 'map',
-      label: 'View on Map'
+    const restaurantDoc = {
+      restaurant_id,
+      basic_info: {
+        name: restaurant_name,
+        cuisine_type: this.detectCuisineType(menu_items),
+        description: metadata.description || '',
+        website: metadata.website || '',
+        phone: metadata.phone || ''
+      },
+      location: {
+        city: location.city,
+        country_code: location.country_code,
+        address: location.address || '',
+        coordinates: location.coordinates ? 
+          new adminDb.GeoPoint(location.coordinates.lat, location.coordinates.lng) : null
+      },
+      business_info: {
+        opening_hours,
+        delivery_platforms,
+        price_range: metadata.price_range || '$$'
+      },
+      metadata: {
+        goals: metadata.goals || [],
+        menu_size: `${menu_items.length} items`,
+        signup_source: 'menu_manager'
+      },
+      verification: {
+        admin_approved: true,
+        data_source: 'menu_manager',
+        claimed_by: null
+      },
+      metrics: {
+        total_menu_items: menu_items.length,
+        views: 0,
+        recommendations_count: 0,
+        last_menu_update: adminDb.FieldValue.serverTimestamp()
+      },
+      created_at: adminDb.FieldValue.serverTimestamp(),
+      updated_at: adminDb.FieldValue.serverTimestamp()
     };
+    
+    batch.set(restaurantRef, restaurantDoc);
+    
+    // Add menu items
+    for (const [index, item] of menu_items.entries()) {
+      const itemId = `${restaurant_id}_${index}_${Date.now()}`;
+      const menuItemRef = adminDb.collection('menu_items').doc(itemId);
+      
+      const menuItemDoc = {
+        menu_item_id: itemId,
+        restaurant_id,
+        basic_info: {
+          name: item.name,
+          description: item.description || '',
+          price: item.price || '',
+          category: item.category || 'main',
+          emoji: item.emoji || this.getEmoji(item)
+        },
+        classification: {
+          meal_period: item.meal_period || this.detectMealPeriod(item),
+          cuisine_tags: item.tags || [],
+          dietary: {
+            vegetarian: Boolean(item.dietary?.vegetarian),
+            vegan: Boolean(item.dietary?.vegan),
+            gluten_free: Boolean(item.dietary?.gluten_free),
+            dairy_free: Boolean(item.dietary?.dairy_free),
+            halal: Boolean(item.dietary?.halal)
+          }
+        },
+        availability: {
+          available: item.available !== false,
+          seasonal: item.seasonal || false,
+          daily_limit: item.daily_limit || null
+        },
+        metrics: {
+          views: 0,
+          orders: 0,
+          recommendation_count: 0
+        },
+        created_at: adminDb.FieldValue.serverTimestamp(),
+        updated_at: adminDb.FieldValue.serverTimestamp()
+      };
+      
+      batch.set(menuItemRef, menuItemDoc);
+    }
+    
+    await batch.commit();
+    
+    console.log(`🔥 Added restaurant ${restaurant_id} to Firebase with ${menu_items.length} items`);
+    return { success: true, restaurant_id, items_added: menu_items.length };
   }
 
-  // ENHANCED: Search with location flexibility and distance
-  async searchMenus({ 
-    location, 
-    target_location = null, // NEW: Allow searching different area
-    search_radius = 10, // NEW: km radius (default 10km)
-    mood_text = '', 
-    dietary = [], 
-    meal_period = 'all_day', 
-    attributes = [], 
-    limit = 10, 
-    timeContext = null,
-    sort_by = 'relevance' // NEW: 'relevance', 'distance', 'hidden_gem'
-  }) {
-    const results = [];
-    const searchLoc = target_location || location;
-    const hasCoords = searchLoc?.latitude && searchLoc?.longitude;
+  async getFirebaseRestaurantsAdmin() {
+    if (!adminDb) return [];
     
-    console.log(`🔍 Searching ${search_radius}km radius around ${searchLoc?.city || 'location'}`);
-    
-    for (const [key, menu] of this.menus) {
-      // Filter by distance if coordinates available
-      if (hasCoords && menu.location?.latitude && menu.location?.longitude) {
-        const distance = this.calculateDistance(
-          searchLoc.latitude,
-          searchLoc.longitude,
-          menu.location.latitude,
-          menu.location.longitude
-        );
+    try {
+      const snapshot = await adminDb.collection('restaurants')
+        .where('verification.admin_approved', '==', true)
+        .limit(100)
+        .get();
+      
+      const restaurants = [];
+      
+      for (const doc of snapshot.docs) {
+        const restaurantData = { id: doc.id, ...doc.data() };
         
-        if (distance > search_radius) {
-          console.log(`📍 Skipping ${menu.restaurant_name} - ${distance.toFixed(1)}km away (outside ${search_radius}km radius)`);
-          continue;
-        }
+        // Get menu items for this restaurant
+        const menuSnapshot = await adminDb.collection('menu_items')
+          .where('restaurant_id', '==', doc.id)
+          .get();
         
-        menu.distance_km = distance;
-      } else {
-        // Fallback to city/country matching
-        const menuLocation = `${menu.location.country_code.toLowerCase()}_${menu.location.city.toLowerCase()}`;
-        const searchLocation = `${(searchLoc?.country_code || 'GB').toLowerCase()}_${(searchLoc?.city || '').toLowerCase()}`;
+        const menu_items = menuSnapshot.docs.map(menuDoc => {
+          const item = menuDoc.data();
+          return {
+            menu_item_id: item.menu_item_id,
+            name: item.basic_info?.name,
+            description: item.basic_info?.description,
+            price: item.basic_info?.price,
+            emoji: item.basic_info?.emoji,
+            category: item.basic_info?.category,
+            meal_period: item.classification?.meal_period,
+            dietary: item.classification?.dietary,
+            tags: item.classification?.cuisine_tags,
+            available: item.availability?.available
+          };
+        });
         
-        if (!menuLocation.includes(searchLocation) && !searchLocation.includes(menuLocation)) {
-          continue;
-        }
-        
-        menu.distance_km = null; // Unknown distance
+        // Convert to expected format
+        restaurants.push({
+          restaurant_id: restaurantData.restaurant_id || restaurantData.id,
+          restaurant_name: restaurantData.basic_info?.name,
+          location: restaurantData.location,
+          cuisine_type: restaurantData.basic_info?.cuisine_type,
+          opening_hours: restaurantData.business_info?.opening_hours || {},
+          delivery_platforms: restaurantData.business_info?.delivery_platforms || {},
+          metadata: restaurantData.metadata || {},
+          menu_items,
+          data_source: 'firebase'
+        });
       }
       
-      // Check opening hours
-      if (timeContext && menu.opening_hours) {
-        const now = new Date();
-        const currentDay = now.toLocaleDateString('en', {weekday: 'long'}).toLowerCase();
-        const currentTime = now.toTimeString().slice(0,5);
-        
-        const todayHours = menu.opening_hours[currentDay];
-        if (!todayHours || currentTime < todayHours.open || currentTime > todayHours.close) {
-          console.log(`⏰ Skipping ${menu.restaurant_name} - closed`);
-          continue;
-        }
-      }
-      
-      // Filter menu items
-      const matchingItems = menu.menu_items.filter(item => {
-        if (!item.available) return false;
-        
-        // Meal period filter
-        if (meal_period !== 'all_day' && 
-            item.meal_period !== 'all_day' && 
-            item.meal_period !== meal_period) {
-          return false;
-        }
-        
-        // Dietary restrictions
-        if (dietary.length > 0) {
-          for (const restriction of dietary) {
-            const normalizedRestriction = restriction.replace('-', '_');
-            if (!item.dietary || !item.dietary[normalizedRestriction]) {
-              return false;
-            }
-          }
-        }
-        
-        return true;
-      });
-      
-      // Score and add matching items
-      matchingItems.forEach(item => {
-        let score = Math.random() * 5; // Base randomness
-        const itemText = `${item.name} ${item.description || ''} ${(item.search_tags || []).join(' ')}`.toLowerCase();
-        
-        // Existing mood matching...
-        if (mood_text) {
-          const moodWords = mood_text.toLowerCase().split(/\s+/);
-          for (const word of moodWords) {
-            if (word.length > 2 && itemText.includes(word)) {
-              score += 10;
-            }
-          }
-        }
-        
-        // NEW: Boost based on restaurant goals
-        const goals = menu.metadata?.goals || [];
-        
-        // If restaurant wants visibility, boost all their items slightly
-        if (goals.includes('increase_visibility')) {
-          score += 3;
-        }
-        
-        // If they want to highlight specialties and item is tagged as signature
-        if (goals.includes('highlight_specialties') && item.tags?.includes('signature')) {
-          score += 15;
-        }
-        
-        // If targeting dietary customers and this matches user's dietary needs
-        if (goals.includes('attract_dietary') && dietary.length > 0) {
-          const matchesDietary = dietary.some(d => item.dietary?.[d.replace('-','_')]);
-          if (matchesDietary) score += 12;
-        }
-        
-        // If filling off-peak hours, boost during those times
-        if (goals.includes('fill_off_peak') && timeContext) {
-          const hour = timeContext.current_hour;
-          if ((hour >= 14 && hour < 17) || (hour >= 21)) { // Afternoon & late night
-            score += 10;
-          }
-        }
-        
-        // If competing with chains, boost for mood-based searches (more personal)
-        if (goals.includes('compete_chains') && mood_text?.length > 10) {
-          score += 8;
-        }
-        
-        // If targeting specific moods, boost when mood keywords match their cuisine
-        if (goals.includes('target_specific_moods') && mood_text) {
-          const cuisineMatch = itemText.includes(menu.cuisine_type);
-          if (cuisineMatch) score += 7;
-        }
-        
-        item.match_score = score;
-        const link = this.buildRestaurantLink(menu);
-        const gemScore = this.calculateHiddenGemScore(menu, item);
-        const gemBadge = this.getHiddenGemBadge(gemScore);
-        
-        results.push({
-          ...item,
-          restaurant_name: menu.restaurant_name,
-          restaurant_id: menu.restaurant_id,
-          restaurant_link: link,
-          hidden_gem_score: gemScore,
-          hidden_gem_badge: gemBadge,
-          location: menu.location,
-          cuisine_type: menu.cuisine_type});
-      });
+      console.log(`🔥 Retrieved ${restaurants.length} restaurants from Firebase Admin`);
+      return restaurants;
+    } catch (error) {
+      console.error('🔥 Firebase Admin fetch error:', error);
+      return [];
     }
-    
-    // Sort results
-    if (sort_by === 'distance' && results.some(r => r.distance_km !== null)) {
-      results.sort((a, b) => (a.distance_km || 999) - (b.distance_km || 999));
-    } else if (sort_by === 'hidden_gem') {
-      results.sort((a, b) => b.hidden_gem_score - a.hidden_gem_score);
-    } else {
-      // Default: relevance (match_score)
-      results.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
-    }
-    
-    const topResults = results.slice(0, limit);
-    
-    console.log(`✅ Found ${results.length} items, returning top ${topResults.length}`);
-    if (topResults.length > 0 && topResults[0].hidden_gem_badge) {
-      console.log(`💎 Top result is a ${topResults[0].hidden_gem_badge.label}!`);
-    }
-    
-    return topResults;
   }
 
+  async getFirebaseStatsAdmin() {
+    if (!adminDb) return null;
+    
+    try {
+      const [restaurantsSnapshot, menuItemsSnapshot, eventsSnapshot] = await Promise.all([
+        adminDb.collection('restaurants').get(),
+        adminDb.collection('menu_items').get(),
+        adminDb.collection('events').get()
+      ]);
+      
+      const pendingEventsSnapshot = await adminDb.collection('events')
+        .where('moderation.status', '==', 'pending')
+        .get();
+      
+      return {
+        total_restaurants: restaurantsSnapshot.size,
+        total_menu_items: menuItemsSnapshot.size,
+        total_events: eventsSnapshot.size,
+        pending_events: pendingEventsSnapshot.size
+      };
+    } catch (error) {
+      console.error('🔥 Firebase Admin stats error:', error);
+      return null;
+    }
+  }
+
+  // ===============================
+  // UNIFIED DATA ACCESS METHODS
+  // ===============================
+
+  async getMenuData(source = 'hybrid') {
+    switch(source) {
+      case 'firebase':
+        if (!this.useFirebase) {
+          throw new Error('Firebase not available');
+        }
+        return await this.getFirebaseMenus();
+      case 'local': 
+        return await this.getLocalMenus();
+      case 'hybrid':
+      default:
+        const firebase = this.useFirebase ? await this.getFirebaseMenus() : [];
+        const local = await this.getLocalMenus();
+        return this.mergeMenuSources(firebase, local);
+    }
+  }
+
+  async getFirebaseMenus() {
+    if (!this.useFirebase || !adminDb) {
+      return [];
+    }
+    
+    return await this.getFirebaseRestaurantsAdmin();
+  }
+
+  async getLocalMenus() {
+    const menus = [];
+    for (const [, menu] of this.localMenus) {
+      menus.push(menu);
+    }
+    return menus;
+  }
+
+  mergeMenuSources(firebaseRestaurants, localMenus) {
+    const merged = new Map();
+    
+    // Add Firebase restaurants (primary source)
+    firebaseRestaurants.forEach(restaurant => {
+      const key = this.generateRestaurantKey(restaurant);
+      merged.set(key, {
+        ...restaurant,
+        data_source: 'firebase',
+        priority: 1
+      });
+    });
+    
+    // Add local restaurants that don't conflict
+    localMenus.forEach(menu => {
+      const key = this.generateRestaurantKey(menu);
+      if (!merged.has(key)) {
+        merged.set(key, {
+          ...menu,
+          data_source: 'local',
+          priority: 2
+        });
+      }
+    });
+    
+    console.log(`🔄 Merged ${merged.size} restaurants (${firebaseRestaurants.length} from Firebase, ${localMenus.length} local)`);
+    return Array.from(merged.values());
+  }
+
+  generateRestaurantKey(restaurant) {
+    const name = (restaurant.basic_info?.name || restaurant.restaurant_name || '').toLowerCase();
+    const city = (restaurant.location?.city || '').toLowerCase();
+    const country = (restaurant.location?.country_code || 'GB').toLowerCase();
+    return `${country}_${city}_${name}`.replace(/\s+/g, '_');
+  }
+
+  // ===============================
+  // RESTAURANT MANAGEMENT
+  // ===============================
 
   async addRestaurantMenu(restaurantData) {
     const {
@@ -418,6 +388,36 @@ class MenuManager {
     if (!restaurant_id || !restaurant_name || !location) {
       throw new Error('Missing required fields: restaurant_id, restaurant_name, location');
     }
+
+    // Try Firebase Admin first if available
+    if (this.useFirebase && adminDb) {
+      try {
+        const result = await this.addRestaurantToFirebase(restaurantData);
+        console.log(`🔥 Added restaurant to Firebase: ${restaurant_name}`);
+        
+        // Also save locally as backup
+        await this.addToLocalStorage(restaurantData);
+        
+        return result;
+      } catch (error) {
+        console.error('🔥 Firebase Admin add failed, using local storage:', error);
+        return await this.addToLocalStorage(restaurantData);
+      }
+    } else {
+      return await this.addToLocalStorage(restaurantData);
+    }
+  }
+
+  async addToLocalStorage(restaurantData) {
+    const {
+      restaurant_id,
+      restaurant_name,
+      location,
+      menu_items = [],
+      delivery_platforms = {},
+      opening_hours = {},
+      replace_existing = false
+    } = restaurantData;
 
     const key = `${location.country_code}_${location.city}_${restaurant_id}`.replace(/\s+/g, '_').toLowerCase();
     
@@ -455,15 +455,16 @@ class MenuManager {
       delivery_platforms, 
       opening_hours,
       cuisine_type: this.detectCuisineType(processedItems),
+      metadata: restaurantData.metadata || {},
       updated_at: new Date().toISOString(),
-      created_at: this.menus.has(key) ? this.menus.get(key).created_at : new Date().toISOString()
+      created_at: this.localMenus.has(key) ? this.localMenus.get(key).created_at : new Date().toISOString()
     };
 
-    this.menus.set(key, menuEntry);
-    this.updateStats();
-    await this.saveMenus();
+    this.localMenus.set(key, menuEntry);
+    this.updateLocalStats();
+    await this.saveLocalMenus();
     
-    console.log(`✅ ${replace_existing ? 'Updated' : 'Added'} menu for ${restaurant_name}: ${processedItems.length} items`);
+    console.log(`✅ ${replace_existing ? 'Updated' : 'Added'} local menu for ${restaurant_name}: ${processedItems.length} items`);
     
     return { 
       success: true, 
@@ -473,40 +474,363 @@ class MenuManager {
     };
   }
 
-  async addMenuItem(itemData, restaurantId = 'default_restaurant') {
-    const restaurantKey = Array.from(this.menus.keys()).find(key => key.includes(restaurantId));
-    
-    if (restaurantKey) {
-      const restaurant = this.menus.get(restaurantKey);
-      const newItem = {
-        menu_item_id: itemData.menu_item_id || `${restaurantId}_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
-        name: itemData.name ? itemData.name.trim() : 'New Item',
-        emoji: itemData.emoji || this.getEmoji(itemData),
-        price: itemData.price || '—',
-        description: itemData.description || '',
-        tags: Array.isArray(itemData.tags) ? itemData.tags : [],
-        meal_period: itemData.meal_period || this.detectMealPeriod(itemData),
-        search_tags: this.generateSearchTags(itemData),
-        available: itemData.available !== false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+  // ===============================
+  // ENHANCED SEARCH WITH HYBRID SOURCES
+  // ===============================
 
-      restaurant.menu_items.push(newItem);
-      restaurant.updated_at = new Date().toISOString();
+  async searchMenus({ 
+    location, 
+    target_location = null,
+    search_radius = 10,
+    mood_text = '', 
+    dietary = [], 
+    meal_period = 'all_day', 
+    attributes = [], 
+    limit = 10, 
+    timeContext = null,
+    sort_by = 'relevance',
+    data_source = 'hybrid'
+  }) {
+    
+    try {
+      // Get menu data based on source preference
+      const restaurants = await this.getMenuData(data_source);
+      const results = [];
+      const searchLoc = target_location || location;
       
-      this.updateStats();
-      await this.saveMenus();
+      console.log(`🔍 Searching ${restaurants.length} restaurants (source: ${data_source})`);
       
-      return newItem;
-    } else {
-      return await this.addRestaurantMenu({
-        restaurant_id: restaurantId,
-        restaurant_name: `Restaurant ${restaurantId}`,
-        location: { city: 'London', country_code: 'GB' },
-        menu_items: [itemData]
-      });
+      for (const restaurant of restaurants) {
+        // Handle different data structures (Firebase vs local)
+        const menuItems = this.extractMenuItems(restaurant);
+        const restaurantInfo = this.normalizeRestaurantInfo(restaurant);
+        
+        // Location filtering
+        if (!this.matchesLocation(restaurantInfo, searchLoc, search_radius)) {
+          continue;
+        }
+        
+        // Opening hours check
+        if (timeContext && !this.isRestaurantOpen(restaurantInfo, timeContext)) {
+          continue;
+        }
+        
+        // Filter and score menu items
+        const matchingItems = menuItems.filter(item => {
+          return this.itemMatchesFilters(item, {
+            meal_period,
+            dietary,
+            attributes,
+            mood_text
+          });
+        });
+        
+        // Score and add matching items
+        matchingItems.forEach(item => {
+          const score = this.calculateItemScore(item, restaurantInfo, {
+            mood_text,
+            attributes,
+            timeContext
+          });
+          
+          const link = this.buildRestaurantLink(restaurantInfo);
+          const gemScore = this.calculateHiddenGemScore(restaurantInfo, item);
+          const gemBadge = this.getHiddenGemBadge(gemScore);
+          
+          results.push({
+            ...this.normalizeMenuItem(item),
+            restaurant_name: restaurantInfo.restaurant_name,
+            restaurant_id: restaurantInfo.restaurant_id,
+            restaurant_link: link,
+            hidden_gem_score: gemScore,
+            hidden_gem_badge: gemBadge,
+            location: restaurantInfo.location,
+            cuisine_type: restaurantInfo.cuisine_type,
+            match_score: score,
+            data_source: restaurant.data_source || 'local'
+          });
+        });
+      }
+      
+      // Sort results
+      this.sortResults(results, sort_by);
+      
+      const topResults = results.slice(0, limit);
+      
+      console.log(`✅ Found ${results.length} items, returning top ${topResults.length}`);
+      if (topResults.length > 0 && topResults[0].hidden_gem_badge) {
+        console.log(`💎 Top result is a ${topResults[0].hidden_gem_badge.label}!`);
+      }
+      
+      return topResults;
+      
+    } catch (error) {
+      console.error('❌ Menu search error:', error);
+      
+      // Fallback to local if hybrid fails
+      if (data_source === 'hybrid') {
+        console.log('🔄 Falling back to local search...');
+        return this.searchMenus({
+          location, target_location, search_radius, mood_text, dietary, 
+          meal_period, attributes, limit, timeContext, sort_by,
+          data_source: 'local'
+        });
+      }
+      
+      throw error;
     }
+  }
+
+  // ===============================
+  // DATA NORMALIZATION HELPERS
+  // ===============================
+
+  extractMenuItems(restaurant) {
+    if (restaurant.menu_items && Array.isArray(restaurant.menu_items)) {
+      return restaurant.menu_items;
+    }
+    return [];
+  }
+
+  normalizeRestaurantInfo(restaurant) {
+    // Handle Firebase structure
+    if (restaurant.basic_info) {
+      return {
+        restaurant_id: restaurant.restaurant_id || restaurant.id,
+        restaurant_name: restaurant.basic_info.name,
+        location: restaurant.location,
+        cuisine_type: restaurant.basic_info.cuisine_type,
+        opening_hours: restaurant.business_info?.opening_hours || {},
+        delivery_platforms: restaurant.business_info?.delivery_platforms || {},
+        metadata: restaurant.metadata || {},
+        website: restaurant.basic_info?.website
+      };
+    }
+    
+    // Handle local structure
+    return {
+      restaurant_id: restaurant.restaurant_id,
+      restaurant_name: restaurant.restaurant_name,
+      location: restaurant.location,
+      cuisine_type: restaurant.cuisine_type,
+      opening_hours: restaurant.opening_hours || {},
+      delivery_platforms: restaurant.delivery_platforms || {},
+      metadata: restaurant.metadata || {},
+      website: restaurant.website
+    };
+  }
+
+  normalizeMenuItem(item) {
+    // Handle Firebase structure
+    if (item.basic_info) {
+      return {
+        menu_item_id: item.menu_item_id || item.id,
+        name: item.basic_info.name,
+        description: item.basic_info.description,
+        price: item.basic_info.price,
+        emoji: item.basic_info.emoji,
+        category: item.basic_info.category,
+        meal_period: item.classification?.meal_period || 'all_day',
+        dietary: item.classification?.dietary || {},
+        tags: item.classification?.cuisine_tags || [],
+        available: item.availability?.available !== false
+      };
+    }
+    
+    // Handle local structure
+    return item;
+  }
+
+  // ===============================
+  // HELPER METHODS
+  // ===============================
+
+  matchesLocation(restaurant, searchLoc, searchRadius) {
+    if (!searchLoc) return true;
+    
+    const hasCoords = searchLoc?.latitude && searchLoc?.longitude && 
+                     restaurant.location?.coordinates;
+    
+    if (hasCoords) {
+      const distance = this.calculateDistance(
+        searchLoc.latitude,
+        searchLoc.longitude,
+        restaurant.location.coordinates.latitude || restaurant.location.coordinates._latitude,
+        restaurant.location.coordinates.longitude || restaurant.location.coordinates._longitude
+      );
+      return distance <= searchRadius;
+    } else {
+      // Fallback to city/country matching
+      const restaurantLocation = `${restaurant.location.country_code.toLowerCase()}_${restaurant.location.city.toLowerCase()}`;
+      const searchLocation = `${(searchLoc?.country_code || 'GB').toLowerCase()}_${(searchLoc?.city || '').toLowerCase()}`;
+      return restaurantLocation.includes(searchLocation) || searchLocation.includes(restaurantLocation);
+    }
+  }
+
+  isRestaurantOpen(restaurant, timeContext) {
+    if (!restaurant.opening_hours || !timeContext) return true;
+    
+    const now = new Date();
+    const currentDay = now.toLocaleDateString('en', {weekday: 'long'}).toLowerCase();
+    const currentTime = now.toTimeString().slice(0,5);
+    
+    const todayHours = restaurant.opening_hours[currentDay];
+    if (!todayHours) return false;
+    
+    return currentTime >= todayHours.open && currentTime <= todayHours.close;
+  }
+
+  itemMatchesFilters(item, filters) {
+    const normalizedItem = this.normalizeMenuItem(item);
+    
+    if (!normalizedItem.available) return false;
+    
+    // Meal period filter
+    if (filters.meal_period !== 'all_day' && 
+        normalizedItem.meal_period !== 'all_day' && 
+        normalizedItem.meal_period !== filters.meal_period) {
+      return false;
+    }
+    
+    // Dietary restrictions
+    if (filters.dietary && filters.dietary.length > 0) {
+      for (const restriction of filters.dietary) {
+        const normalizedRestriction = restriction.replace('-', '_');
+        if (!normalizedItem.dietary || !normalizedItem.dietary[normalizedRestriction]) {
+          return false;
+        }
+      }
+    }
+    
+    return true;
+  }
+
+  calculateItemScore(item, restaurant, context) {
+    let score = Math.random() * 5; // Base randomness
+    const normalizedItem = this.normalizeMenuItem(item);
+    const itemText = `${normalizedItem.name} ${normalizedItem.description || ''} ${(normalizedItem.tags || []).join(' ')}`.toLowerCase();
+    
+    // Mood matching
+    if (context.mood_text) {
+      const moodWords = context.mood_text.toLowerCase().split(/\s+/);
+      for (const word of moodWords) {
+        if (word.length > 2 && itemText.includes(word)) {
+          score += 10;
+        }
+      }
+    }
+    
+    // Restaurant goals boost
+    const goals = restaurant.metadata?.goals || [];
+    
+    if (goals.includes('increase_visibility')) {
+      score += 3;
+    }
+    
+    if (goals.includes('highlight_specialties') && normalizedItem.tags?.includes('signature')) {
+      score += 15;
+    }
+    
+    if (goals.includes('attract_dietary') && context.dietary?.length > 0) {
+      const matchesDietary = context.dietary.some(d => normalizedItem.dietary?.[d.replace('-','_')]);
+      if (matchesDietary) score += 12;
+    }
+    
+    // Data source boost (prefer Firebase data)
+    if (restaurant.data_source === 'firebase') {
+      score += 5;
+    }
+    
+    return score;
+  }
+
+  sortResults(results, sortBy) {
+    if (sortBy === 'distance' && results.some(r => r.distance_km !== null)) {
+      results.sort((a, b) => (a.distance_km || 999) - (b.distance_km || 999));
+    } else if (sortBy === 'hidden_gem') {
+      results.sort((a, b) => b.hidden_gem_score - a.hidden_gem_score);
+    } else {
+      // Default: relevance (match_score)
+      results.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
+    }
+  }
+
+  calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  calculateHiddenGemScore(restaurant, item) {
+    let score = 0;
+    const normalizedItem = this.normalizeMenuItem(item);
+    
+    // Limited availability
+    if (normalizedItem.availability === 'weekends_only') score += 30;
+    if (normalizedItem.availability === 'seasonal') score += 25;
+    if (normalizedItem.availability === 'chef_special') score += 20;
+    
+    // Small batch
+    if (normalizedItem.daily_limit && normalizedItem.daily_limit < 20) score += 25;
+    
+    // Family recipe / traditional
+    if (normalizedItem.tags?.includes('family_recipe')) score += 20;
+    if (normalizedItem.tags?.includes('traditional')) score += 10;
+    if (normalizedItem.tags?.includes('secret_recipe')) score += 25;
+    
+    // Restaurant metadata boost
+    const goals = restaurant.metadata?.goals || [];
+    if (!goals.includes('increase_visibility')) {
+      score += 12;
+    }
+    if (goals.includes('highlight_specialties') && normalizedItem.tags?.includes('signature')) {
+      score += 10;
+    }
+    
+    return Math.min(score, 100);
+  }
+
+  getHiddenGemBadge(score) {
+    if (score >= 90) return { emoji: '🏆', label: 'Legendary Find', color: '#FFD700' };
+    if (score >= 70) return { emoji: '💎', label: 'Hidden Gem', color: '#9B59B6' };
+    if (score >= 50) return { emoji: '⭐', label: 'Local Favorite', color: '#3498DB' };
+    if (score >= 30) return { emoji: '🔍', label: 'Worth Discovering', color: '#95A5A6' };
+    return null;
+  }
+
+  buildRestaurantLink(restaurant) {
+    const platforms = restaurant.delivery_platforms || {};
+    
+    if (restaurant.website) {
+      return {
+        url: restaurant.website,
+        type: 'website',
+        label: 'Visit Website'
+      };
+    }
+    
+    if (platforms.deliveroo_id) {
+      return {
+        url: `https://deliveroo.co.uk/menu/${platforms.deliveroo_id}`,
+        type: 'delivery',
+        label: 'Order on Deliveroo'
+      };
+    }
+    
+    // Fallback to Google Maps
+    const address = restaurant.location?.address || 
+                   `${restaurant.restaurant_name}, ${restaurant.location?.city}`;
+    return {
+      url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
+      type: 'map',
+      label: 'View on Map'
+    };
   }
 
   detectCuisineType(items) {
@@ -521,7 +845,10 @@ class MenuManager {
       'british': /fish chips|shepherd pie|bangers mash|sunday roast/i
     };
 
-    const itemNames = items.map(item => item.name).join(' ').toLowerCase();
+    const itemNames = items.map(item => {
+      const normalized = this.normalizeMenuItem(item);
+      return normalized.name;
+    }).join(' ').toLowerCase();
     
     for (const [cuisine, pattern] of Object.entries(cuisineIndicators)) {
       if (pattern.test(itemNames)) {
@@ -533,8 +860,9 @@ class MenuManager {
   }
 
   detectMealPeriod(item) {
-    const name = (item.name || '').toLowerCase();
-    const tags = (item.tags || []).join(' ').toLowerCase();
+    const normalized = this.normalizeMenuItem(item);
+    const name = (normalized.name || '').toLowerCase();
+    const tags = (normalized.tags || []).join(' ').toLowerCase();
     const text = `${name} ${tags}`.toLowerCase();
     
     if (/breakfast|pancake|waffle|omelette|eggs|bacon|cereal|croissant|porridge|toast|granola|yogurt/i.test(text)) {
@@ -549,43 +877,33 @@ class MenuManager {
       return 'dinner';
     }
     
-    if (/snack|chips|nuts|fruit|cake|cookie|pastry/i.test(text)) {
-      return 'snack';
-    }
-
-    return item.meal_period || 'all_day';
+    return 'all_day';
   }
 
   generateSearchTags(item) {
-    const tags = [...(item.tags || [])];
-    const name = (item.name || '').toLowerCase();
-    const description = (item.description || '').toLowerCase();
+    const normalized = this.normalizeMenuItem(item);
+    const tags = [...(normalized.tags || [])];
+    const name = (normalized.name || '').toLowerCase();
+    const description = (normalized.description || '').toLowerCase();
     const text = `${name} ${description}`;
     
+    // Add cuisine tags
     if (/curry|tikka|masala|biryani|dal|naan/i.test(text)) tags.push('indian');
     if (/sushi|ramen|tempura|teriyaki|miso/i.test(text)) tags.push('japanese');
     if (/pasta|pizza|risotto|italian/i.test(text)) tags.push('italian');
-    if (/burger|fries|wings|american/i.test(text)) tags.push('american');
-    if (/taco|burrito|mexican|salsa/i.test(text)) tags.push('mexican');
-    if (/fish.*chips|british|pie/i.test(text)) tags.push('british');
     
+    // Add dietary tags
     if (/vegan|plant.*based/i.test(text)) tags.push('vegan');
     if (/vegetarian|veggie/i.test(text)) tags.push('vegetarian');
     if (/gluten.*free/i.test(text)) tags.push('gluten-free');
-    if (/spicy|hot|chili/i.test(text)) tags.push('spicy');
-    if (/healthy|light|fresh/i.test(text)) tags.push('healthy');
-    if (/comfort|hearty|filling/i.test(text)) tags.push('comfort');
-    
-    if (/fried|crispy|crunchy/i.test(text)) tags.push('fried');
-    if (/grilled|barbecue|bbq/i.test(text)) tags.push('grilled');
-    if (/fresh|raw|salad/i.test(text)) tags.push('fresh');
     
     return [...new Set(tags)];
   }
 
   getEmoji(item) {
-    const name = (item.name || '').toLowerCase();
-    const category = (item.category || '').toLowerCase();
+    const normalized = this.normalizeMenuItem(item);
+    const name = (normalized.name || '').toLowerCase();
+    const category = (normalized.category || '').toLowerCase();
     
     if (/pizza/i.test(name)) return '🍕';
     if (/burger/i.test(name)) return '🍔';
@@ -594,117 +912,83 @@ class MenuManager {
     if (/ramen|noodle/i.test(name)) return '🍜';
     if (/curry|rice/i.test(name)) return '🍛';
     if (/salad/i.test(name)) return '🥗';
-    if (/fish/i.test(name)) return '🐟';
-    if (/chicken/i.test(name)) return '🍗';
-    if (/steak|beef/i.test(name)) return '🥩';
-    if (/taco/i.test(name)) return '🌮';
-    if (/sandwich|sub/i.test(name)) return '🥪';
-    if (/fries|chips/i.test(name)) return '🍟';
-    if (/cake|dessert/i.test(name)) return '🍰';
-    if (/coffee/i.test(name)) return '☕';
-    if (/beer/i.test(name)) return '🍺';
-    if (/wine/i.test(name)) return '🍷';
     
     const categoryEmojis = {
       'appetizer': '🥗',
       'main': '🍽️',
       'dessert': '🍰',
-      'drink': '🥤',
-      'soup': '🍲',
-      'breakfast': '🥞',
-      'lunch': '🍽️',
-      'dinner': '🍽️',
-      'snack': '🍪'
+      'drink': '🥤'
     };
     
-    return categoryEmojis[category] || item.emoji || '🍽️';
+    return categoryEmojis[category] || normalized.emoji || '🍽️';
   }
 
-  // async searchMenus({ location, mood_text = '', dietary = [], meal_period = 'all_day', attributes = [], limit = 10, timeContext = null }) {
-  //   const results = [];
-  //   const locationKey = `${(location && location.country_code ? location.country_code : 'GB').toLowerCase()}_${(location && location.city ? location.city : '').toLowerCase()}`;
-    
-  //   console.log(`🔍 Searching menus for location: ${locationKey}, meal: ${meal_period}`);
-    
-  //   for (const [key, menu] of this.menus) {
-  //     const menuLocation = `${menu.location.country_code.toLowerCase()}_${menu.location.city.toLowerCase()}`;
-  //     if (!menuLocation.includes(location && location.country_code ? location.country_code.toLowerCase() : '') && 
-  //         !key.includes(location && location.city ? location.city.toLowerCase() : '')) {
-  //       continue;
-  //     }
-  //    if (timeContext && menu.opening_hours) {
-  //   const now = new Date();
-  //   const currentDay = now.toLocaleDateString('en', {weekday: 'long'}).toLowerCase();
-  //   const currentTime = now.toTimeString().slice(0,5);
-    
-  //   const todayHours = menu.opening_hours[currentDay];
-  //   if (!todayHours || currentTime < todayHours.open || currentTime > todayHours.close) {
-  //     console.log(`⏰ Skipping ${menu.restaurant_name} - closed (${currentTime} not between ${todayHours?.open}-${todayHours?.close})`);
-  //     continue; // Skip closed restaurants
-  //   }
-  // } 
-  //     const matchingItems = menu.menu_items.filter(item => {
-  //       if (!item.available) return false;
-        
-  //       if (meal_period !== 'all_day' && 
-  //           item.meal_period !== 'all_day' && 
-  //           item.meal_period !== meal_period) {
-  //         return false;
-  //       }
-        
-  //       if (dietary.length > 0) {
-  //         for (const restriction of dietary) {
-  //           const normalizedRestriction = restriction.replace('-', '_');
-  //           if (!item.dietary || !item.dietary[normalizedRestriction]) {
-  //             return false;
-  //           }
-  //         }
-  //       }
-        
-  //       let score = Math.random() * 5;
-  //       const itemText = `${item.name} ${item.description || ''} ${(item.search_tags || []).join(' ')}`.toLowerCase();
-        
-  //       if (mood_text) {
-  //         const moodWords = mood_text.toLowerCase().split(/\s+/);
-  //         for (const word of moodWords) {
-  //           if (word.length > 2 && itemText.includes(word)) {
-  //             score += 10;
-  //           }
-  //         }
-  //       }
-        
-  //       for (const attr of attributes) {
-  //         if (itemText.includes(attr.toLowerCase())) {
-  //           score += 8;
-  //         }
-  //       }
-        
-  //       item.match_score = score;
-  //       return true;
-  //     });
+  // ===============================
+  // STATS AND UTILITIES
+  // ===============================
+
+  async getStats() {
+    try {
+      const stats = { local: this.getLocalStats() };
       
-  //     matchingItems.forEach(item => {
-  //       results.push({
-  //         ...item,
-  //         restaurant_name: menu.restaurant_name,
-  //         restaurant_id: menu.restaurant_id,
-  //         delivery_platforms: menu.delivery_platforms,
-  //         location: menu.location,
-  //         cuisine_type: menu.cuisine_type
-  //       });
-  //     });
-  //   }
-    
-  //   results.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
-  //   const topResults = results.slice(0, limit);
-    
-  //   console.log(`✅ Found ${results.length} items, returning top ${topResults.length}`);
-  //   return topResults;
-  // }
+      if (this.useFirebase && adminDb) {
+        try {
+          const firebaseStats = await this.getFirebaseStatsAdmin();
+          stats.firebase = firebaseStats;
+          stats.combined = {
+            total_restaurants: (firebaseStats?.total_restaurants || 0) + stats.local.total_restaurants,
+            total_menu_items: (firebaseStats?.total_menu_items || 0) + stats.local.total_menu_items,
+            data_sources: ['firebase', 'local']
+          };
+        } catch (error) {
+          console.error('Firebase stats error:', error);
+          stats.firebase = null;
+          stats.combined = stats.local;
+        }
+      } else {
+        stats.firebase = null;
+        stats.combined = stats.local;
+      }
+      
+      return stats;
+    } catch (error) {
+      console.error('Stats error:', error);
+      return { local: this.getLocalStats() };
+    }
+  }
+
+  getLocalStats() {
+    return {
+      ...this.menuStats,
+      restaurants_by_country: this.getRestaurantsByCountry(),
+      top_cuisines: this.getTopCuisines()
+    };
+  }
+
+  getRestaurantsByCountry() {
+    const byCountry = {};
+    for (const [, menu] of this.localMenus) {
+      const cc = menu.location.country_code;
+      byCountry[cc] = (byCountry[cc] || 0) + 1;
+    }
+    return byCountry;
+  }
+
+  getTopCuisines() {
+    const cuisines = {};
+    for (const [, menu] of this.localMenus) {
+      const cuisine = menu.cuisine_type || 'unknown';
+      cuisines[cuisine] = (cuisines[cuisine] || 0) + 1;
+    }
+    return Object.entries(cuisines)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([cuisine, count]) => ({ cuisine, count }));
+  }
 
   getAllMenuItems() {
     const allItems = [];
-    for (const [, menu] of this.menus) {
+    for (const [, menu] of this.localMenus) {
       menu.menu_items.forEach(item => {
         allItems.push({
           ...item,
@@ -723,100 +1007,24 @@ class MenuManager {
   getRestaurantCount() {
     return this.menuStats.total_restaurants;
   }
-
-  getDeliveryLink(restaurant_id, platform = 'any') {
-    for (const [, menu] of this.menus) {
-      if (menu.restaurant_id === restaurant_id) {
-        const platforms = menu.delivery_platforms || {};
-        
-        if (platform === 'any') {
-          if (platforms.deliveroo_id) return `https://deliveroo.co.uk/menu/${platforms.deliveroo_id}`;
-          if (platforms.ubereats_id) return `https://www.ubereats.com/store/${platforms.ubereats_id}`;
-          if (platforms.doordash_id) return `https://www.doordash.com/store/${platforms.doordash_id}`;
-        } else if (platforms[`${platform}_id`]) {
-          return this.buildPlatformLink(platform, platforms[`${platform}_id`]);
-        }
-        
-        return `https://www.google.com/search?q=${encodeURIComponent(menu.restaurant_name + ' ' + menu.location.city + ' delivery')}`;
-      }
-    }
-    return null;
-  }
-
-  buildPlatformLink(platform, id) {
-    const templates = {
-      'deliveroo': `https://deliveroo.co.uk/menu/${id}`,
-      'ubereats': `https://www.ubereats.com/store/${id}`,
-      'doordash': `https://www.doordash.com/store/${id}`,
-      'grubhub': `https://www.grubhub.com/restaurant/${id}`
-    };
-    return templates[platform] || null;
-  }
-
-  async removeMenuItem(itemId) {
-    for (const [key, menu] of this.menus) {
-      const itemIndex = menu.menu_items.findIndex(item => 
-        item.menu_item_id === itemId || item.name === itemId
-      );
-      
-      if (itemIndex !== -1) {
-        const removedItem = menu.menu_items.splice(itemIndex, 1)[0];
-        menu.updated_at = new Date().toISOString();
-        
-        this.updateStats();
-        await this.saveMenus();
-        
-        console.log(`🗑️ Removed menu item: ${removedItem.name}`);
-        return { success: true, removed_item: removedItem.name };
-      }
-    }
-    
-    return { success: false, error: 'Item not found' };
-  }
-
-  getStats() {
-    return {
-      ...this.menuStats,
-      restaurants_by_country: this.getRestaurantsByCountry(),
-      top_cuisines: this.getTopCuisines()
-    };
-  }
-
-  getRestaurantsByCountry() {
-    const byCountry = {};
-    for (const [, menu] of this.menus) {
-      const cc = menu.location.country_code;
-      byCountry[cc] = (byCountry[cc] || 0) + 1;
-    }
-    return byCountry;
-  }
-
-  getTopCuisines() {
-    const cuisines = {};
-    for (const [, menu] of this.menus) {
-      const cuisine = menu.cuisine_type || 'unknown';
-      cuisines[cuisine] = (cuisines[cuisine] || 0) + 1;
-    }
-    return Object.entries(cuisines)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([cuisine, count]) => ({ cuisine, count }));
-  }
 }
 
-export const menuManager = new MenuManager();
+// Create singleton instance
+export const menuManager = new EnhancedMenuManager();
 
+// Enhanced recommendation function with Firebase integration
 export async function recommendFromMenus(params) {
   const { 
     location, 
-    target_location, // NEW
-    search_radius = 5, // NEW
+    target_location,
+    search_radius = 5,
     mood_text, 
     dietary, 
     meal_period, 
     cravingAttributes, 
     timeContext,
-    prioritize_hidden_gems = false // NEW
+    prioritize_hidden_gems = false,
+    data_source = 'hybrid'
   } = params;
   
   try {
@@ -830,10 +1038,11 @@ export async function recommendFromMenus(params) {
       attributes: cravingAttributes || [],
       timeContext,
       limit: 6,
-      sort_by: prioritize_hidden_gems ? 'hidden_gem' : 'relevance'
+      sort_by: prioritize_hidden_gems ? 'hidden_gem' : 'relevance',
+      data_source
     });
     
-    console.log(`🔍 Menu search found ${menuItems.length} matching items`);
+    console.log(`🔍 Menu search found ${menuItems.length} matching items (source: ${data_source})`);
     
     if (menuItems.length === 0) {
       console.log('🔍 No menu items found matching criteria');
@@ -856,9 +1065,9 @@ export async function recommendFromMenus(params) {
       },
       price: item.price,
       hidden_gem: item.hidden_gem_badge,
-      source: 'restaurant_menu',
+      source: `restaurant_menu_${item.data_source || 'local'}`,
       cuisine_type: item.cuisine_type,
-      dietary_info: item.dietary,
+      dietary_info: item.dietary_info,
       availability: item.availability
     }));
     
@@ -871,6 +1080,7 @@ export async function recommendFromMenus(params) {
   }
 }
 
+// Sample data function with Firebase integration
 export async function addSampleRestaurants() {
   const samples = [
     {
@@ -879,11 +1089,18 @@ export async function addSampleRestaurants() {
       location: {
         city: 'London',
         country_code: 'GB',
-        address: '12 Upper St Martin\'s Lane, London WC2H 9FB'
+        address: '12 Upper St Martin\'s Lane, London WC2H 9FB',
+        coordinates: { lat: 51.5101, lng: -0.1280 }
       },
       delivery_platforms: {
         deliveroo_id: 'dishoom-covent-garden',
         ubereats_id: 'dishoom-london'
+      },
+      metadata: {
+        goals: ['highlight_specialties', 'attract_dietary'],
+        menu_size: '51-100 items',
+        pos_systems: ['square'],
+        target_audience: ['young_professionals', 'tourists']
       },
       menu_items: [
         {
@@ -900,27 +1117,9 @@ export async function addSampleRestaurants() {
           emoji: '🍛',
           price: '£8.90',  
           description: '24-hour slow-cooked black lentils, rich and creamy',
-          tags: ['comfort', 'vegetarian', 'signature', 'curry'],
+          tags: ['comfort', 'vegetarian', 'signature', 'curry', 'family_recipe'],
           meal_period: 'all_day',
           dietary: { vegetarian: true, vegan: false }
-        }
-      ]
-    },
-    {
-      restaurant_id: 'pizza_pilgrims_soho',
-      restaurant_name: 'Pizza Pilgrims Soho',
-      location: {
-        city: 'London',
-        country_code: 'GB'
-      },
-      menu_items: [
-        {
-          name: 'Margherita Pizza',
-          emoji: '🍕',
-          price: '£9.50',
-          description: 'San Marzano tomatoes, mozzarella, fresh basil',
-          tags: ['vegetarian', 'classic', 'italian'],
-          dietary: { vegetarian: true }
         }
       ]
     }
@@ -930,8 +1129,8 @@ export async function addSampleRestaurants() {
     await menuManager.addRestaurantMenu(sample);
   }
   
-  console.log('✅ Added sample restaurants');
+  console.log('✅ Added sample restaurants to both Firebase and local storage');
   return { success: true, added: samples.length };
 }
 
-console.log('📋 Enhanced Menu Manager with Location Flexibility & Hidden Gems initialized');
+console.log('📋 Enhanced Menu Manager with Firebase Admin Integration initialized');

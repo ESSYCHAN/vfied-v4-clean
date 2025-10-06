@@ -8,7 +8,7 @@ import * as countriesModule from '../data/countries.js';
 import { SUPPORTED_COUNTRIES } from '../data/countries.js';
 import { parseCravings, enhanceMoodText } from '../craving_parser.js';
 import { recommendFromMenus, menuManager } from '../menu_manager.js';
-
+import { RestaurantCollections } from '../../src/collections/index.js';
 // Environment variables
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || '';
 const USE_GPT = ['true', '1', 'yes', 'on'].includes(String(process.env.USE_GPT || process.env.VITE_USE_GPT || '').toLowerCase().trim());
@@ -1088,39 +1088,80 @@ export function setupFoodRoutes(app, upload) {
   });
 
   app.post('/v1/menus', async (req, res) => {
-    try {
-      const { items, replace_existing = false } = req.body;
-      
-      if (!Array.isArray(items)) {
-        return res.status(400).json({
+  try {
+    const { items, restaurant_name, location, replace_existing = false } = req.body;
+    
+    if (!Array.isArray(items) && !restaurant_name) {
+      return res.status(400).json({
+        success: false,
+        error: 'Either items array or restaurant data required'
+      });
+    }
+
+    let added = 0, updated = 0, errors = [];
+    let restaurantId = null;
+
+    // Handle restaurant creation if provided
+    if (restaurant_name) {
+      try {
+        restaurantId = await RestaurantCollections.createRestaurant({
+          name: restaurant_name,
+          city: location?.city || 'London',
+          country_code: location?.country_code || 'GB',
+          coordinates: location?.coordinates || null,
+          data_source: 'api_import'
+        });
+        console.log(`Created restaurant: ${restaurantId}`);
+      } catch (error) {
+        return res.status(500).json({
           success: false,
-          error: 'Items must be an array'
+          error: `Failed to create restaurant: ${error.message}`
         });
       }
+    }
 
-      // Use existing menu manager
-      let added = 0, updated = 0, errors = [];
-      
-      for (const item of items) {
-        try {
+    // Process menu items
+    for (const item of items || []) {
+      try {
+        // Use Firebase collections for new items
+        if (restaurantId || item.restaurant_id) {
+          await MenuItemCollections.createMenuItem({
+            name: item.name,
+            description: item.description || '',
+            price: item.price || '',
+            category: item.category || 'main',
+            restaurant_id: restaurantId || item.restaurant_id,
+            tags: item.tags || [],
+            dietary: {
+              vegetarian: item.vegetarian || false,
+              vegan: item.vegan || false,
+              gluten_free: item.gluten_free || false
+            },
+            data_source: 'api_import'
+          });
+          added++;
+        } else {
+          // Fallback to existing menuManager for backward compatibility
           await menuManager.addMenuItem(item);
           added++;
-        } catch (error) {
-          errors.push(`Failed to add ${item.name}: ${error.message}`);
         }
+      } catch (error) {
+        errors.push(`Failed to add ${item.name}: ${error.message}`);
       }
-
-      res.json({
-        success: true,
-        processed: items.length,
-        added,
-        updated,
-        errors
-      });
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
     }
-  });
+
+    res.json({
+      success: true,
+      restaurant_id: restaurantId,
+      processed: (items || []).length,
+      added,
+      updated,
+      errors
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
   // Restaurant menu endpoint
   app.post('/v1/restaurant/menu', async (req, res) => {

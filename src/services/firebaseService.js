@@ -643,3 +643,22 @@ export async function getFirebaseRestaurants(filters = {}) {
 export async function getFirebaseMenuItems(restaurantId, filters = {}) {
   return firebaseRestaurantService.getMenuItems(restaurantId, filters);
 }
+// Add these exports for compatibility with menu_manager expectations
+export const RestaurantCollections = {
+  createRestaurant: (data) => firebaseRestaurantService.addRestaurant(data),
+  getRestaurantWithMenu: (id) => firebaseRestaurantService.getRestaurant(id)
+};
+
+export const MenuItemCollections = {
+  createMenuItem: async (data) => {
+    // This would need to be implemented in your FirebaseRestaurantService
+    // For now, return a placeholder
+    console.warn('MenuItemCollections.createMenuItem not implemented');
+    return { success: false, message: 'Not implemented' };
+  },
+  getMenuByRestaurant: (restaurantId, filters) => firebaseRestaurantService.getMenuItems(restaurantId, filters)
+};
+
+export const CollectionHelpers = {
+  getRestaurantsSummary: () => firebaseRestaurantService.getRestaurantStats()
+};

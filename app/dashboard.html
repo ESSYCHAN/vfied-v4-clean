@@ -980,7 +980,10 @@
     </div>
   </div>
 
-  <script>
+ <script type="module">
+   import { firebaseRestaurantService } from '../src/services/firebaseService.js';
+   // Make it available globally for the dashboard functions
+  window.firebaseRestaurantService = firebaseRestaurantService;
     (function() {
       'use strict';
       
@@ -1533,16 +1536,29 @@
 
       async function loadMenu() {
         try {
-          const data = await apiGet('/v1/menu');
-          allMenuData = data.menu_items || [];
+          const restaurants = await firebaseRestaurantService.searchRestaurants({ limit: 100 });
           
-          allMenuData = allMenuData.map(item => ({
-            ...item,
-            restaurant_id: item.restaurant_id || item.restaurant_name?.replace(/\s+/g, '_').toLowerCase() || 'unknown'
-          }));
+          // Convert to expected format for your dashboard
+          allMenuData = [];
+          for (const restaurant of restaurants) {
+            const menuItems = await firebaseRestaurantService.getMenuItems(restaurant.restaurant_id || restaurant.id);
+            
+            menuItems.forEach(item => {
+              allMenuData.push({
+                menu_item_id: item.menu_item_id,
+                name: item.basic_info?.name,
+                description: item.basic_info?.description,
+                price: item.basic_info?.price,
+                emoji: item.basic_info?.emoji,
+                restaurant_name: restaurant.basic_info?.name,
+                restaurant_id: restaurant.restaurant_id || restaurant.id,
+                data_source: 'firebase'
+              });
+            });
+          }
           
           refreshMenuDisplay();
-          showMessage('menuMessages', `Loaded ${allMenuData.length} menu items`, 'success');
+          showMessage('menuMessages', `Loaded ${allMenuData.length} menu items from Firebase`, 'success');
         } catch (error) {
           showMessage('menuMessages', `Failed to load menu: ${error.message}`, 'error');
         }
@@ -1617,22 +1633,23 @@
       async function submitMenu() {
         try {
           const menuData = JSON.parse($('menuJsonInput').value);
-          const firebaseOnly = $('firebaseOnlyMode').checked;
           
-          if (firebaseOnly) {
-            menuData.data_source = 'firebase';
-          }
+          // Use your existing Firebase service directly
+          const result = await firebaseRestaurantService.addRestaurant({
+            restaurant_name: menuData.restaurant_name,
+            location: menuData.location,
+            menu_items: menuData.menu_items,
+            metadata: menuData.metadata
+          });
           
-          const data = await apiPost('/v1/menu', menuData);
-          showMessage('menuMessages', data.message || 'Menu submitted successfully', 'success');
-          
-          await loadMenu();
-        } catch (error) {
-          if (error instanceof SyntaxError) {
-            showMessage('menuMessages', 'Invalid JSON format. Please check your syntax.', 'error');
+          if (result.success) {
+            showMessage('menuMessages', `Restaurant created with ${result.items_added} menu items`, 'success');
+            await loadMenu();
           } else {
-            showMessage('menuMessages', `Failed to submit menu: ${error.message}`, 'error');
+            showMessage('menuMessages', 'Failed to create restaurant', 'error');
           }
+        } catch (error) {
+          showMessage('menuMessages', `Failed to submit: ${error.message}`, 'error');
         }
       }
 
@@ -1868,11 +1885,6 @@
       document.addEventListener('DOMContentLoaded', init);
       
     })();
-    console.log('Dashboard env check:', {
-  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  apiKeyStart: import.meta.env.VITE_FIREBASE_API_KEY?.substring(0, 10)
-});
   </script>
 </body>
 </html>
