@@ -1264,17 +1264,17 @@ export const menuManager = new EnhancedMenuManager();
 
 // Enhanced recommendation function with Firebase integration
 export async function recommendFromMenus(params) {
-  const { 
-    location, 
+  const {
+    location,
     target_location,
     search_radius = 5,
-    mood_text, 
-    dietary, 
-    meal_period, 
-    cravingAttributes, 
+    mood_text,
+    dietary,
+    meal_period,
+    cravingAttributes,
     timeContext,
     prioritize_hidden_gems = false,
-    data_source = 'hybrid'
+    data_source = 'firebase'
   } = params;
   
   try {
@@ -1287,19 +1287,19 @@ export async function recommendFromMenus(params) {
       meal_period: meal_period || 'all_day',
       attributes: cravingAttributes || [],
       timeContext,
-      limit: 6,
+      limit: 10,
       sort_by: prioritize_hidden_gems ? 'hidden_gem' : 'relevance',
       data_source
     });
-    
+
     console.log(`🔍 Menu search found ${menuItems.length} matching items (source: ${data_source})`);
-    
+
     if (menuItems.length === 0) {
       console.log('🔍 No menu items found matching criteria');
       return null;
     }
-    
-    const formatted = menuItems.slice(0, 3).map(item => ({
+
+    const formatted = menuItems.slice(0, 6).map(item => ({
       name: item.name,
       emoji: item.emoji || '🍽️',
       explanation: `${item.description || ''} ${item.hidden_gem_badge ? `• ${item.hidden_gem_badge.emoji} ${item.hidden_gem_badge.label}` : ''}`.trim(),
