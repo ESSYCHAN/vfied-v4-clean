@@ -218,12 +218,9 @@ export async function handleDecision() {
       location: getValidLocation(),
       mood_text: mood,
       dietary: selectedDietary,
-      recent_suggestions: recentSuggestions,
-      time_context: {
-        current_hour: new Date().getHours(),
-        meal_period: getMealPeriod(new Date().getHours()),
-        is_weekend: [0,6].includes(new Date().getDay())
-      }
+      recent_suggestions: recentSuggestions
+      // Removed time_context - let backend return items from all meal periods
+      // Users can specify time preferences in their mood text if needed
     };
 
     // NEW: Add location flexibility
