@@ -533,17 +533,13 @@ class EnhancedMenuManager {
         const menuItems = this.extractMenuItems(restaurant);
         const restaurantInfo = this.normalizeRestaurantInfo(restaurant);
 
-        console.log(`  📍 ${restaurantInfo.restaurant_name}: ${menuItems.length} items`);
-
         // Location filtering
         if (!this.matchesLocation(restaurantInfo, searchLoc, search_radius)) {
-          console.log(`    ❌ Location mismatch`);
           continue;
         }
 
         // Opening hours check
         if (timeContext && !this.isRestaurantOpen(restaurantInfo, timeContext)) {
-          console.log(`    ❌ Closed`);
           continue;
         }
 
@@ -556,8 +552,6 @@ class EnhancedMenuManager {
             mood_text
           });
         });
-
-        console.log(`    ✅ ${matchingItems.length} items match filters`);
         
         // Score and add matching items
         matchingItems.forEach(item => {
