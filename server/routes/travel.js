@@ -1128,7 +1128,7 @@ Create a response that answers their question using these specific restaurants.`
         ],
         follow_up_questions: [
           'What neighborhoods have the best food scene?',
-          'Any specific cuisine you're craving?'
+          'Any specific cuisine you are craving?'
         ]
       });
     }
