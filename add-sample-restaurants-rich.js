@@ -294,6 +294,9 @@ const sampleRestaurantsWithPhotos = [
 async function addSampleRestaurants() {
   console.log('🚀 Adding sample restaurants with rich metadata...\n');
 
+  // Wait for menu manager to finish initializing
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
   for (const restaurant of sampleRestaurantsWithPhotos) {
     try {
       await menuManager.addRestaurantMenu(restaurant);

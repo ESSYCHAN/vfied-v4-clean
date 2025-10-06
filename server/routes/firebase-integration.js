@@ -88,7 +88,7 @@ router.get('/restaurants', async (req, res) => {
       cuisine_type,
       verified_only = false,
       limit = 20,
-      data_source = 'hybrid'
+      data_source = 'firebase'
     } = req.query;
 
     // Build filters
@@ -227,7 +227,7 @@ router.post('/recommendations', async (req, res) => {
       meal_period = 'all_day',
       craving_attributes = [],
       prioritize_hidden_gems = false,
-      data_source = 'hybrid',
+      data_source = 'firebase',
       time_context
     } = req.body;
 
@@ -561,7 +561,7 @@ router.get('/menus', async (req, res) => {
   try {
     const { 
       limit = 50, 
-      data_source = 'hybrid',
+      data_source = 'firebase',
       restaurant_id 
     } = req.query;
 

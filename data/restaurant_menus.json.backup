@@ -1967,12 +1967,659 @@
       "cuisine_type": "international",
       "updated_at": "2025-09-25T20:01:38.348Z",
       "created_at": "2025-09-25T20:01:38.348Z"
+    },
+    "gb_london_dishoom_covent_garden": {
+      "restaurant_id": "dishoom_covent_garden",
+      "restaurant_name": "Dishoom",
+      "location": {
+        "city": "London",
+        "country_code": "GB",
+        "address": "12 Upper St Martin's Lane, London WC2H 9FB",
+        "neighborhood": "Covent Garden"
+      },
+      "menu_items": [
+        {
+          "menu_item_id": "dishoom_covent_garden_0_1759772059956",
+          "name": "Bacon Naan Roll",
+          "emoji": "🥓",
+          "price": "£7.50",
+          "description": "Smoked bacon, cream cheese, chili jam",
+          "category": "breakfast",
+          "tags": [
+            "signature",
+            "breakfast",
+            "meat"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "signature",
+            "breakfast",
+            "meat",
+            "indian"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.956Z",
+          "updated_at": "2025-10-06T17:34:19.956Z"
+        },
+        {
+          "menu_item_id": "dishoom_covent_garden_1_1759772059956",
+          "name": "House Black Daal",
+          "emoji": "🍛",
+          "price": "£8.90",
+          "description": "24-hour slow-cooked black lentils",
+          "category": "main",
+          "tags": [
+            "signature",
+            "comfort",
+            "vegetarian",
+            "family_recipe"
+          ],
+          "meal_period": "all_day",
+          "search_tags": [
+            "signature",
+            "comfort",
+            "vegetarian",
+            "family_recipe"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": true,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.956Z",
+          "updated_at": "2025-10-06T17:34:19.956Z"
+        },
+        {
+          "menu_item_id": "dishoom_covent_garden_2_1759772059956",
+          "name": "Kejriwal",
+          "emoji": "🥚",
+          "price": "£8.50",
+          "description": "Fried eggs on chili cheese toast",
+          "category": "breakfast",
+          "tags": [
+            "breakfast",
+            "vegetarian"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "breakfast",
+            "vegetarian"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.956Z",
+          "updated_at": "2025-10-06T17:34:19.956Z"
+        }
+      ],
+      "delivery_platforms": {
+        "deliveroo_id": "dishoom-covent-garden"
+      },
+      "opening_hours": {
+        "monday": {
+          "open": "08:00",
+          "close": "23:00"
+        },
+        "tuesday": {
+          "open": "08:00",
+          "close": "23:00"
+        },
+        "wednesday": {
+          "open": "08:00",
+          "close": "23:00"
+        },
+        "thursday": {
+          "open": "08:00",
+          "close": "23:00"
+        },
+        "friday": {
+          "open": "08:00",
+          "close": "00:00"
+        },
+        "saturday": {
+          "open": "09:00",
+          "close": "00:00"
+        },
+        "sunday": {
+          "open": "09:00",
+          "close": "23:00"
+        }
+      },
+      "cuisine_type": "indian",
+      "metadata": {
+        "goals": [
+          "highlight_specialties",
+          "attract_dietary"
+        ],
+        "menu_size": "51-100 items",
+        "vibe_tags": [
+          "Indian",
+          "Cocktails",
+          "Date Night",
+          "Cozy"
+        ],
+        "price_range": "££",
+        "reviews": {
+          "average_rating": 4.8,
+          "count": 3247
+        }
+      },
+      "metrics": {
+        "total_menu_items": 3,
+        "last_scored_at": "2025-10-06T17:34:19.956Z"
+      },
+      "media": {
+        "hero_image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800",
+        "gallery": [
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800",
+          "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800",
+          "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800"
+        ],
+        "logo": null,
+        "primary_color": null
+      },
+      "updated_at": "2025-10-06T17:34:19.956Z",
+      "created_at": "2025-10-06T17:34:19.956Z"
+    },
+    "gb_london_the_laughing_heart": {
+      "restaurant_id": "the_laughing_heart",
+      "restaurant_name": "The Laughing Heart",
+      "location": {
+        "city": "London",
+        "country_code": "GB",
+        "address": "277 Hackney Road, London E2 8NA",
+        "neighborhood": "Hackney"
+      },
+      "menu_items": [
+        {
+          "menu_item_id": "the_laughing_heart_0_1759772059960",
+          "name": "Sourdough Toast",
+          "emoji": "🍞",
+          "price": "£6.00",
+          "description": "With cultured butter",
+          "category": "appetizer",
+          "tags": [
+            "vegetarian",
+            "sharing"
+          ],
+          "meal_period": "all_day",
+          "search_tags": [
+            "vegetarian",
+            "sharing"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.960Z",
+          "updated_at": "2025-10-06T17:34:19.960Z"
+        },
+        {
+          "menu_item_id": "the_laughing_heart_1_1759772059960",
+          "name": "Eggs Benedict",
+          "emoji": "🥚",
+          "price": "£12.00",
+          "description": "Poached eggs, hollandaise",
+          "category": "brunch",
+          "tags": [
+            "brunch",
+            "weekend"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "brunch",
+            "weekend"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.960Z",
+          "updated_at": "2025-10-06T17:34:19.960Z"
+        },
+        {
+          "menu_item_id": "the_laughing_heart_2_1759772059960",
+          "name": "Burrata",
+          "emoji": "🧀",
+          "price": "£14.00",
+          "description": "Heirloom tomatoes, basil",
+          "category": "appetizer",
+          "tags": [
+            "vegetarian",
+            "signature",
+            "seasonal"
+          ],
+          "meal_period": "all_day",
+          "search_tags": [
+            "vegetarian",
+            "signature",
+            "seasonal"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": true,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.960Z",
+          "updated_at": "2025-10-06T17:34:19.960Z"
+        }
+      ],
+      "delivery_platforms": {},
+      "opening_hours": {
+        "monday": "closed",
+        "tuesday": {
+          "open": "17:00",
+          "close": "23:00"
+        },
+        "wednesday": {
+          "open": "17:00",
+          "close": "23:00"
+        },
+        "thursday": {
+          "open": "17:00",
+          "close": "23:00"
+        },
+        "friday": {
+          "open": "17:00",
+          "close": "00:00"
+        },
+        "saturday": {
+          "open": "12:00",
+          "close": "00:00"
+        },
+        "sunday": {
+          "open": "12:00",
+          "close": "22:00"
+        }
+      },
+      "cuisine_type": "international",
+      "metadata": {
+        "goals": [
+          "highlight_specialties"
+        ],
+        "menu_size": "26-50 items",
+        "vibe_tags": [
+          "Wine Bar",
+          "Small Plates",
+          "European",
+          "Natural Wine",
+          "Romantic"
+        ],
+        "price_range": "£££",
+        "reviews": {
+          "average_rating": 4.9,
+          "count": 856
+        },
+        "hidden_gem_override": 20
+      },
+      "metrics": {
+        "total_menu_items": 3,
+        "last_scored_at": "2025-10-06T17:34:19.960Z"
+      },
+      "media": {
+        "hero_image": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800",
+        "gallery": [
+          "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800",
+          "https://images.unsplash.com/photo-1579027989536-b7b1f875659b?w=800"
+        ],
+        "logo": null,
+        "primary_color": null
+      },
+      "updated_at": "2025-10-06T17:34:19.960Z",
+      "created_at": "2025-10-06T17:34:19.960Z"
+    },
+    "gb_london_bright_hackney": {
+      "restaurant_id": "bright_hackney",
+      "restaurant_name": "Bright",
+      "location": {
+        "city": "London",
+        "country_code": "GB",
+        "address": "1 Westgate St, London E8 3RL",
+        "neighborhood": "Hackney"
+      },
+      "menu_items": [
+        {
+          "menu_item_id": "bright_hackney_0_1759772059962",
+          "name": "Full English",
+          "emoji": "🍳",
+          "price": "£14.50",
+          "description": "Sausage, bacon, eggs, beans, toast",
+          "category": "breakfast",
+          "tags": [
+            "breakfast",
+            "british",
+            "traditional"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "breakfast",
+            "british",
+            "traditional"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.962Z",
+          "updated_at": "2025-10-06T17:34:19.962Z"
+        },
+        {
+          "menu_item_id": "bright_hackney_1_1759772059962",
+          "name": "Porridge",
+          "emoji": "🥣",
+          "price": "£7.00",
+          "description": "With seasonal fruit",
+          "category": "breakfast",
+          "tags": [
+            "breakfast",
+            "healthy",
+            "vegetarian"
+          ],
+          "meal_period": "breakfast",
+          "search_tags": [
+            "breakfast",
+            "healthy",
+            "vegetarian"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": true,
+            "gluten_free": true,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.962Z",
+          "updated_at": "2025-10-06T17:34:19.962Z"
+        },
+        {
+          "menu_item_id": "bright_hackney_2_1759772059962",
+          "name": "Scotch Egg",
+          "emoji": "🥚",
+          "price": "£8.50",
+          "description": "Free-range pork",
+          "category": "appetizer",
+          "tags": [
+            "signature",
+            "british",
+            "meat"
+          ],
+          "meal_period": "all_day",
+          "search_tags": [
+            "signature",
+            "british",
+            "meat"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.962Z",
+          "updated_at": "2025-10-06T17:34:19.962Z"
+        }
+      ],
+      "delivery_platforms": {},
+      "opening_hours": {
+        "monday": "closed",
+        "tuesday": {
+          "open": "18:00",
+          "close": "23:00"
+        },
+        "wednesday": {
+          "open": "18:00",
+          "close": "23:00"
+        },
+        "thursday": {
+          "open": "18:00",
+          "close": "23:00"
+        },
+        "friday": {
+          "open": "18:00",
+          "close": "23:30"
+        },
+        "saturday": {
+          "open": "10:00",
+          "close": "23:30"
+        },
+        "sunday": {
+          "open": "10:00",
+          "close": "22:00"
+        }
+      },
+      "cuisine_type": "international",
+      "metadata": {
+        "goals": [],
+        "menu_size": "26-50 items",
+        "vibe_tags": [
+          "British",
+          "Seasonal",
+          "Hidden Gem",
+          "Small Plates"
+        ],
+        "price_range": "£££",
+        "reviews": {
+          "average_rating": 4.7,
+          "count": 412
+        },
+        "hidden_gem_override": 35
+      },
+      "metrics": {
+        "total_menu_items": 3,
+        "last_scored_at": "2025-10-06T17:34:19.962Z"
+      },
+      "media": {
+        "hero_image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800",
+        "gallery": [
+          "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800",
+          "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800"
+        ],
+        "logo": null,
+        "primary_color": null
+      },
+      "updated_at": "2025-10-06T17:34:19.962Z",
+      "created_at": "2025-10-06T17:34:19.962Z"
+    },
+    "gb_london_padella_borough": {
+      "restaurant_id": "padella_borough",
+      "restaurant_name": "Padella",
+      "location": {
+        "city": "London",
+        "country_code": "GB",
+        "address": "6 Southwark St, London SE1 1TQ",
+        "neighborhood": "Borough Market"
+      },
+      "menu_items": [
+        {
+          "menu_item_id": "padella_borough_0_1759772059964",
+          "name": "Pici Cacio e Pepe",
+          "emoji": "🍝",
+          "price": "£9.00",
+          "description": "Hand-rolled pasta, pecorino, black pepper",
+          "category": "main",
+          "tags": [
+            "signature",
+            "vegetarian",
+            "pasta"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "signature",
+            "vegetarian",
+            "pasta",
+            "italian"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.964Z",
+          "updated_at": "2025-10-06T17:34:19.964Z"
+        },
+        {
+          "menu_item_id": "padella_borough_1_1759772059964",
+          "name": "Pappardelle Beef Shin Ragu",
+          "emoji": "🍝",
+          "price": "£11.50",
+          "description": "8-hour slow-cooked beef",
+          "category": "main",
+          "tags": [
+            "signature",
+            "comfort",
+            "pasta"
+          ],
+          "meal_period": "lunch",
+          "search_tags": [
+            "signature",
+            "comfort",
+            "pasta"
+          ],
+          "dietary": {
+            "vegetarian": false,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.964Z",
+          "updated_at": "2025-10-06T17:34:19.964Z"
+        },
+        {
+          "menu_item_id": "padella_borough_2_1759772059964",
+          "name": "Tiramisu",
+          "emoji": "🍰",
+          "price": "£6.00",
+          "description": "Classic Italian dessert",
+          "category": "dessert",
+          "tags": [
+            "dessert",
+            "italian"
+          ],
+          "meal_period": "all_day",
+          "search_tags": [
+            "dessert",
+            "italian"
+          ],
+          "dietary": {
+            "vegetarian": true,
+            "vegan": false,
+            "gluten_free": false,
+            "dairy_free": false,
+            "halal": false
+          },
+          "available": true,
+          "created_at": "2025-10-06T17:34:19.964Z",
+          "updated_at": "2025-10-06T17:34:19.964Z"
+        }
+      ],
+      "delivery_platforms": {},
+      "opening_hours": {
+        "monday": {
+          "open": "12:00",
+          "close": "22:00"
+        },
+        "tuesday": {
+          "open": "12:00",
+          "close": "22:00"
+        },
+        "wednesday": {
+          "open": "12:00",
+          "close": "22:00"
+        },
+        "thursday": {
+          "open": "12:00",
+          "close": "22:00"
+        },
+        "friday": {
+          "open": "12:00",
+          "close": "22:00"
+        },
+        "saturday": {
+          "open": "12:00",
+          "close": "22:00"
+        },
+        "sunday": {
+          "open": "12:00",
+          "close": "21:00"
+        }
+      },
+      "cuisine_type": "international",
+      "metadata": {
+        "goals": [
+          "increase_visibility"
+        ],
+        "menu_size": "11-25 items",
+        "vibe_tags": [
+          "Italian",
+          "Pasta",
+          "Casual",
+          "No Reservations"
+        ],
+        "price_range": "££",
+        "reviews": {
+          "average_rating": 4.6,
+          "count": 2891
+        }
+      },
+      "metrics": {
+        "total_menu_items": 3,
+        "last_scored_at": "2025-10-06T17:34:19.964Z"
+      },
+      "media": {
+        "hero_image": "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800",
+        "gallery": [
+          "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800",
+          "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=800"
+        ],
+        "logo": null,
+        "primary_color": null
+      },
+      "updated_at": "2025-10-06T17:34:19.964Z",
+      "created_at": "2025-10-06T17:34:19.964Z"
     }
   },
   "stats": {
-    "total_items": 62,
-    "total_restaurants": 3,
-    "last_updated": "2025-10-06T00:00:00.000Z"
+    "total_items": 74,
+    "total_restaurants": 7,
+    "last_updated": "2025-10-06T17:34:19.964Z"
   },
-  "last_saved": "2025-09-25T20:01:38.348Z"
+  "last_saved": "2025-10-06T17:34:19.965Z"
 }

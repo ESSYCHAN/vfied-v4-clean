@@ -51,7 +51,7 @@ const SHORTLIST_SCHEMA = Joi.object({
   limit: Joi.number().min(1).max(12).default(5),
   per_restaurant_items: Joi.number().min(1).max(5).default(3),
   sort_by: Joi.string().valid('relevance','hidden_gem','distance').default('relevance'),
-  data_source: Joi.string().valid('hybrid','local','firebase').default('hybrid'),
+  data_source: Joi.string().valid('hybrid','local','firebase').default('firebase'),
   time_context: Joi.object({
     current_hour: Joi.number().min(0).max(23),
     meal_period: Joi.string().valid('breakfast','lunch','snack','dinner','late_night','all_day'),
@@ -834,7 +834,7 @@ Return STRICT JSON:
           current_hour: new Date().getHours(),
           day_of_week: new Date().getDay()
         } : null,
-        data_source: filters.data_source || 'hybrid',
+        data_source: filters.data_source || 'firebase',
         search_radius: normalizedLocation.search_radius_km
       });
 
@@ -932,7 +932,7 @@ Return STRICT JSON:
         limit: limit * 2, // Get more to filter
         per_restaurant_items: 3,
         sort_by: 'distance',
-        data_source: 'hybrid',
+        data_source: 'firebase',
         search_radius: radius_km
       });
 
@@ -1027,7 +1027,7 @@ Return STRICT JSON:
         limit: 5,
         per_restaurant_items: 3,
         sort_by: 'relevance',
-        data_source: 'hybrid',
+        data_source: 'firebase',
         search_radius: normalizedLocation.search_radius_km
       });
 
