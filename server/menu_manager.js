@@ -245,7 +245,7 @@ class EnhancedMenuManager {
             meal_period: item.classification?.meal_period,
             dietary: item.classification?.dietary,
             tags: item.classification?.cuisine_tags,
-            available: item.availability?.available
+            available: item.availability?.available !== false // Default to true
           };
         });
         
