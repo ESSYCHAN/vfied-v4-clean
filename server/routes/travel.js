@@ -3,6 +3,7 @@
 import Joi from 'joi';
 import * as countriesModule from '../data/countries.js';
 import { SUPPORTED_COUNTRIES } from '../data/countries.js';
+import { menuManager } from '../menu_manager.js';
 
 // Environment variables
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || '';
@@ -12,6 +13,14 @@ const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 // Load data
 const countries = countriesModule.SUPPORTED_COUNTRIES?.countries || countriesModule.default?.countries || [];
 const COUNTRIES_LIST = SUPPORTED_COUNTRIES.countries || [];
+
+const FLEX_LOCATION = Joi.object({
+  city: Joi.string().allow('', null),
+  country_code: Joi.string().min(2).max(2).uppercase().allow('', null),
+  latitude: Joi.alternatives(Joi.number(), Joi.string()).optional(),
+  longitude: Joi.alternatives(Joi.number(), Joi.string()).optional(),
+  neighborhood: Joi.string().allow('', null)
+}).unknown(true);
 
 // Validation schemas
 const ITIN_SCHEMA = Joi.object({
@@ -23,6 +32,32 @@ const ITIN_SCHEMA = Joi.object({
   interests: Joi.array().items(Joi.string()).default(['food','culture']),
   budget: Joi.string().valid('budget','medium','premium','luxury').default('medium')
 });
+
+const SHORTLIST_SCHEMA = Joi.object({
+  location: FLEX_LOCATION.keys({
+    city: Joi.string().required(),
+    country_code: Joi.string().min(2).max(2).uppercase().default('GB')
+  }).required(),
+  mood_text: Joi.string().allow('', null),
+  dietary: Joi.alternatives().try(
+    Joi.array().items(Joi.string()),
+    Joi.string()
+  ).default([]),
+  attributes: Joi.array().items(Joi.string()).default([]),
+  interests: Joi.array().items(Joi.string()).default([]),
+  vibe_preferences: Joi.array().items(Joi.string()).default([]),
+  include_coach: Joi.boolean().default(true),
+  coach_query: Joi.string().allow('', null),
+  limit: Joi.number().min(1).max(12).default(5),
+  per_restaurant_items: Joi.number().min(1).max(5).default(3),
+  sort_by: Joi.string().valid('relevance','hidden_gem','distance').default('relevance'),
+  data_source: Joi.string().valid('hybrid','local','firebase').default('hybrid'),
+  time_context: Joi.object({
+    current_hour: Joi.number().min(0).max(23),
+    meal_period: Joi.string().valid('breakfast','lunch','snack','dinner','late_night','all_day'),
+    day_of_week: Joi.number().min(0).max(6)
+  }).default({})
+}).unknown(true);
 
 // GPT helper function
 async function gptChatJSON({ system, user, max_tokens = 900 }) {
@@ -73,6 +108,38 @@ function shuffle(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+function normalizeStringList(value) {
+  if (Array.isArray(value)) {
+    return value
+      .filter(Boolean)
+      .map((v) => String(v).trim())
+      .filter(Boolean);
+  }
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function formatPriceRange(priceRange) {
+  if (!priceRange) return '$$';
+  const map = {
+    budget: '$',
+    cheap: '$',
+    medium: '$$',
+    moderate: '$$',
+    premium: '$$$',
+    upscale: '$$$',
+    luxury: '$$$$',
+    fine_dining: '$$$$'
+  };
+  const normalized = String(priceRange).toLowerCase();
+  return map[normalized] || priceRange;
 }
 
 // GPT travel plan helper
@@ -133,7 +200,166 @@ function buildConciseItinerary(city, country_code) {
   }));
 }
 
+async function buildCoachRecommendation({ location, shortlist, query, mood_text, dietary, interests }) {
+  const city = location.city || 'the city';
+  const cc = (location.country_code || 'GB').toUpperCase();
+  const shortlistSummary = shortlist.slice(0, 5).map((item) => ({
+    name: item.restaurant_name,
+    hero_item: item.menu_samples?.[0]?.name || null,
+    insight: item.insight,
+    vibe_tags: item.vibe_tags,
+    hidden_gem_badge: item.hidden_gem_badge?.label || null,
+    experience_score: item.experience_score,
+    price_range: formatPriceRange(item.price_range),
+    community_rating: item.community_rating,
+    review_count: item.review_count
+  }));
+
+  const userPayload = {
+    city,
+    country_code: cc,
+    query,
+    mood_text,
+    dietary,
+    interests,
+    shortlist: shortlistSummary
+  };
+
+  if (USE_GPT && OPENAI_API_KEY) {
+    const system = `You are VFIED's travel dining coach. Use the shortlist provided to confirm or refine which restaurants the traveler should prioritise. Return STRICT JSON:
+{
+  "success": true,
+  "response": "Two short sentences that stitch the evening together",
+  "recommendations": [
+    {"name":"Restaurant","details":"Why it matches","price_range":"$-$$$$","hero_item":"Dish to order"}
+  ],
+  "quick_tips": ["emoji tip", "emoji tip"],
+  "follow_up_questions": ["short question", "short question"]
+}
+
+Only recommend from the shortlist. Be specific about dishes and vibes. Keep the tone upbeat and concise.`;
+
+    const user = JSON.stringify(userPayload);
+    const coach = await gptChatJSON({ system, user, max_tokens: 650 });
+    if (coach) return coach;
+  }
+
+  const picks = shortlist.slice(0, 3);
+  if (!picks.length) {
+    return {
+      success: true,
+      response: `Explore ${city}'s local markets and ask locals where they eat after work for the most authentic bites.`,
+      recommendations: [],
+      quick_tips: [
+        '🎯 Follow the spots with loyal regulars',
+        '💬 Ask what the team orders for staff meal'
+      ],
+      follow_up_questions: [
+        'Want café or cocktail vibes next?',
+        'Should we build a day plan as well?'
+      ]
+    };
+  }
+
+  const primary = picks[0];
+  const primaryDish = primary.menu_samples?.[0]?.name;
+  const secondary = picks[1];
+  const responseParts = [
+    `Start at ${primary.restaurant_name}${primaryDish ? ` for the ${primaryDish}` : ''}.`
+  ];
+  if (secondary) {
+    responseParts.push(`Then drift to ${secondary.restaurant_name} to keep the energy going.`);
+  }
+
+  const recommendations = picks.map((item) => ({
+    name: item.restaurant_name,
+    details: item.insight,
+    price_range: formatPriceRange(item.price_range),
+    hero_item: item.menu_samples?.[0]?.name || null
+  }));
+
+  return {
+    success: true,
+    response: responseParts.join(' '),
+    recommendations,
+    quick_tips: [
+      '🎯 Book ahead if you want prime seating',
+      '💡 Mention you found them via VFIED for the warm intro'
+    ],
+    follow_up_questions: [
+      'Need a dessert or nightcap spot?',
+      'Should we add a daytime plan too?'
+    ]
+  };
+}
+
 export function setupTravelRoutes(app) {
+  app.post('/v1/travel/shortlist', async (req, res) => {
+    const started = Date.now();
+
+    try {
+      const { value, error } = SHORTLIST_SCHEMA.validate(req.body || {});
+      if (error) {
+        return res.status(400).json({ success: false, error: error.message });
+      }
+
+      const location = {
+        ...value.location,
+        city: String(value.location.city || 'London').trim(),
+        country_code: String(value.location.country_code || 'GB').trim().slice(0, 2).toUpperCase()
+      };
+
+      const dietary = normalizeStringList(value.dietary).map((d) => d.toLowerCase());
+      const attributeList = normalizeStringList(value.attributes);
+      const interestList = normalizeStringList(value.interests);
+      const vibeList = normalizeStringList(value.vibe_preferences);
+      const attributes = [...new Set([...attributeList, ...interestList, ...vibeList])];
+
+      const shortlistResult = await menuManager.shortlistRestaurants({
+        location,
+        mood_text: value.mood_text || '',
+        dietary,
+        attributes,
+        limit: value.limit,
+        per_restaurant_items: value.per_restaurant_items,
+        sort_by: value.sort_by,
+        timeContext: Object.keys(value.time_context || {}).length ? value.time_context : null,
+        data_source: value.data_source
+      });
+
+      let coach = null;
+      if (value.include_coach) {
+        const query = value.coach_query || value.mood_text || `Where should I eat in ${location.city}?`;
+        coach = await buildCoachRecommendation({
+          location,
+          shortlist: shortlistResult.shortlist,
+          query,
+          mood_text: value.mood_text || '',
+          dietary,
+          interests: interestList
+        });
+      }
+
+      return res.json({
+        success: true,
+        city: location.city,
+        country_code: location.country_code,
+        shortlist: shortlistResult.shortlist,
+        coach,
+        meta: {
+          total_considered: shortlistResult.total_considered,
+          total_restaurants: shortlistResult.total_restaurants,
+          generation_time_ms: shortlistResult.generation_time_ms,
+          data_source: value.data_source,
+          server_time_ms: Date.now() - started
+        }
+      });
+    } catch (err) {
+      console.error('Travel shortlist error:', err);
+      return res.status(500).json({ success: false, error: 'Failed to build travel shortlist' });
+    }
+  });
+
   // Night plan endpoint
   app.post('/v1/travel/nightplan', async (req, res) => {
     const { location = {}, prompt, mode = 'exploring', budget = 'medium', duration = 'full-day', dietary = [] } = req.body || {};

@@ -73,12 +73,21 @@ export class FirebaseRestaurantService {
           seating_capacity: restaurantData.seating_capacity || null,
           accepts_reservations: restaurantData.accepts_reservations || false
         },
+        media: {
+          hero_image: restaurantData.media?.hero_image || '',
+          gallery: restaurantData.media?.gallery || [],
+          logo: restaurantData.media?.logo || '',
+          banner: restaurantData.media?.banner || ''
+        },
         metadata: {
           goals: restaurantData.metadata?.goals || [],
           menu_size: restaurantData.metadata?.menu_size || '21-50 items',
           pos_systems: restaurantData.metadata?.pos_systems || [],
           target_audience: restaurantData.metadata?.target_audience || [],
-          signup_source: restaurantData.metadata?.signup_source || 'dashboard'
+          signup_source: restaurantData.metadata?.signup_source || 'dashboard',
+          hidden_gem_override: restaurantData.metadata?.hidden_gem_override ?? null,
+          hidden_gem_tier: restaurantData.metadata?.hidden_gem_tier || '',
+          reviews: restaurantData.metadata?.reviews || null
         },
         verification: {
           owner_verified: false,
@@ -91,11 +100,21 @@ export class FirebaseRestaurantService {
           total_menu_items: 0,
           view_count: 0,
           recommendation_count: 0,
-          last_menu_update: serverTimestamp()
+          last_menu_update: serverTimestamp(),
+          hidden_gem_override: restaurantData.metadata?.hidden_gem_override ?? null,
+          community_rating: restaurantData.metadata?.reviews?.average_rating ?? null,
+          review_count: restaurantData.metadata?.reviews?.count ?? 0
         },
         created_at: serverTimestamp(),
         updated_at: serverTimestamp()
       };
+
+      if (restaurantData.metrics) {
+        restaurantDoc.statistics = {
+          ...restaurantDoc.statistics,
+          ...restaurantData.metrics
+        };
+      }
 
       batch.set(restaurantRef, restaurantDoc);
 
@@ -145,6 +164,10 @@ export class FirebaseRestaurantService {
               limited_availability: item.availability === 'limited_daily' || false,
               traditional_method: item.cooking_method === 'traditional' || false,
               preparation_time: item.preparation_time || null
+            },
+            media: {
+              image: item.image || item.image_url || null,
+              gallery: item.gallery || []
             },
             statistics: {
               view_count: 0,

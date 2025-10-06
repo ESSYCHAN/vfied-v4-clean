@@ -342,10 +342,15 @@
       transition: all 0.3s ease;
       cursor: pointer;
     }
-    
+
     .upload-zone:hover, .upload-zone.dragover {
       border-color: var(--primary);
       background: rgba(99, 102, 241, 0.05);
+    }
+
+    #imageDropZone.dragover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.08);
     }
     
     .upload-zone-icon {
@@ -916,6 +921,79 @@
 
       <div id="menuMessages"></div>
 
+      <!-- Media & Scoring Toolkit -->
+      <div style="margin-top: 2rem; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+          <h4 style="margin: 0; color: var(--text-secondary);">Media & Hidden Gem Toolkit</h4>
+          <button id="syncMetadataBtn" class="btn btn-secondary btn-sm">Sync from JSON</button>
+        </div>
+        <div style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <h5 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">📸 Restaurant Media</h5>
+              <p style="color: var(--text-muted); font-size: 0.85rem;">Drop JPG/PNG files or paste CDN URLs. New images are staged locally as base64 for quick testing.</p>
+            </div>
+            <div id="imageDropZone" style="border: 2px dashed var(--border-light); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s ease; background: rgba(255,255,255,0.02);">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem;">🖼️</div>
+              <div style="font-weight: 600;">Drop images or click to browse</div>
+              <div style="color: var(--text-muted); font-size: 0.8rem;">PNG, JPG up to 5MB each</div>
+            </div>
+            <input type="file" id="imageFileInput" accept="image/*" multiple style="display:none;">
+            <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Hero Image URL</label>
+            <input id="heroImageInput" class="search-input" placeholder="https://cdn.yoursite.com/hero.jpg">
+            <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Gallery URLs (one per line)</label>
+            <textarea id="galleryUrlsInput" class="textarea" style="min-height: 100px;" placeholder="https://cdn.yoursite.com/1.jpg&#10;https://cdn.yoursite.com/2.jpg"></textarea>
+            <div id="imagePreviewGrid" style="display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));"></div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button id="applyImagesBtn" class="btn btn-primary btn-sm" type="button">Apply Images to JSON</button>
+              <button id="clearImagesBtn" class="btn btn-secondary btn-sm" type="button">Clear Staged Images</button>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <h5 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">💎 Hidden Gem & Reviews</h5>
+              <p style="color: var(--text-muted); font-size: 0.85rem;">Tune the scoring inputs that power discovery. These map directly into <code>metadata</code> on the restaurant payload.</p>
+            </div>
+            <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Hidden Gem Boost</label>
+            <input id="gemOverrideInput" type="number" class="search-input" placeholder="e.g. 12" step="1" min="-40" max="60">
+            <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Hidden Gem Tier</label>
+            <select id="gemTierSelect" class="search-input">
+              <option value="">Auto</option>
+              <option value="legendary">Legendary</option>
+              <option value="hidden_gem">Hidden Gem</option>
+              <option value="local_favorite">Local Favorite</option>
+              <option value="worth_discovering">Worth Discovering</option>
+            </select>
+            <div style="display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
+              <div>
+                <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Avg Rating</label>
+                <input id="communityRatingInput" type="number" step="0.1" min="0" max="5" class="search-input" placeholder="4.7">
+              </div>
+              <div>
+                <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Review Count</label>
+                <input id="reviewCountInput" type="number" min="0" class="search-input" placeholder="128">
+              </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border-radius: var(--radius); padding: 1rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <span style="font-weight:600; color: var(--text-secondary);">Sample Reviews</span>
+                <button id="addReviewBtn" class="btn btn-secondary btn-sm" type="button">Add Review</button>
+              </div>
+              <div style="display:grid; gap:0.5rem; margin-bottom:0.75rem;">
+                <input id="reviewerNameInput" class="search-input" placeholder="Reviewer name">
+                <div style="display:grid; gap:0.5rem; grid-template-columns: 0.6fr 2.4fr;">
+                  <input id="reviewerRatingInput" type="number" step="0.1" min="0" max="5" class="search-input" placeholder="4.5">
+                  <input id="reviewerCommentInput" class="search-input" placeholder="Short testimonial">
+                </div>
+              </div>
+              <div id="reviewsList" style="display:grid; gap:0.5rem;"></div>
+            </div>
+            <button id="applyScoringBtn" class="btn btn-primary btn-sm" type="button">Apply Scoring to JSON</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Enhanced Menu Items Display - Restaurant Grouped -->
       <div id="menuContainer">
         <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
@@ -1000,6 +1078,9 @@
       let selectedItems = new Set();
       let currentConfirmCallback = null;
       let telemetryInterval = null;
+      let pendingImages = [];
+      let pendingReviews = [];
+      const restaurantDetails = new Map();
 
       function updateStatus(message, type = 'info') {
         const status = $('connectionStatus');
@@ -1071,6 +1152,235 @@
         $('bulkExportItems').disabled = count === 0;
       }
 
+      function handleImageFiles(fileList) {
+        const files = Array.from(fileList || []);
+        if (!files.length) return;
+
+        files.forEach(file => {
+          if (!file.type.startsWith('image/')) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            pendingImages.push({
+              id: `image-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+              name: file.name,
+              url: reader.result
+            });
+            renderImagePreview();
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function renderImagePreview() {
+        const grid = $('imagePreviewGrid');
+        if (!grid) return;
+
+        if (pendingImages.length === 0) {
+          grid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align:center; padding:0.75rem; background:rgba(255,255,255,0.03); border-radius: var(--radius);">No staged images yet</div>';
+          return;
+        }
+
+        grid.innerHTML = pendingImages.map(image => `
+          <div style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+            <img src="${image.url}" alt="${image.name}" style="width: 100%; height: 100%; object-fit: cover; display:block;">
+            <button type="button" onclick="window.dashboardApp.removeImage('${image.id}')" style="position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.6); border:none; color:white; border-radius:50%; width:24px; height:24px; cursor:pointer;">×</button>
+          </div>
+        `).join('');
+      }
+
+      function removeImage(imageId) {
+        pendingImages = pendingImages.filter(img => img.id !== imageId);
+        renderImagePreview();
+      }
+
+      function parseGalleryInput() {
+        const raw = $('galleryUrlsInput').value || '';
+        return raw
+          .split(/\n|,/)
+          .map(url => url.trim())
+          .filter(Boolean);
+      }
+
+      function applyImagesToJson() {
+        try {
+          const data = JSON.parse($('menuJsonInput').value || '{}');
+          const galleryManual = parseGalleryInput();
+          const staged = pendingImages.map(img => img.url);
+          const combined = [...new Set([...staged, ...galleryManual])];
+
+          data.media = data.media || {};
+          const hero = $('heroImageInput').value.trim();
+          if (hero) {
+            data.media.hero_image = hero;
+          } else if (combined.length) {
+            data.media.hero_image = combined[0];
+          } else {
+            delete data.media.hero_image;
+          }
+          data.media.gallery = combined;
+
+          $('menuJsonInput').value = JSON.stringify(data, null, 2);
+          showMessage('menuMessages', `Applied ${combined.length} image${combined.length === 1 ? '' : 's'} to JSON`, 'success');
+        } catch (error) {
+          showMessage('menuMessages', `Failed to apply images: ${error.message}`, 'error');
+        }
+      }
+
+      function renderReviewsList() {
+        const container = $('reviewsList');
+        if (!container) return;
+
+        if (pendingReviews.length === 0) {
+          container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem;">No reviews staged</div>';
+          return;
+        }
+
+        container.innerHTML = pendingReviews.map(review => `
+          <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0.75rem; display:flex; justify-content:space-between; gap:0.75rem; align-items:flex-start;">
+            <div>
+              <div style="font-weight:600; color: var(--text-primary);">${review.name || 'Anonymous'} <span style="color:#facc15;">${review.rating ? `• ⭐ ${review.rating}` : ''}</span></div>
+              <div style="font-size:0.85rem; color: var(--text-secondary);">${review.comment || ''}</div>
+            </div>
+            <button type="button" onclick="window.dashboardApp.removeReview('${review.id}')" style="background:transparent; border:1px solid rgba(255,255,255,0.2); border-radius:6px; color: var(--text-muted); padding:4px 8px; font-size:0.75rem; cursor:pointer;">Remove</button>
+          </div>
+        `).join('');
+      }
+
+      function addReviewEntry() {
+        const name = $('reviewerNameInput').value.trim();
+        const rating = parseFloat($('reviewerRatingInput').value);
+        const comment = $('reviewerCommentInput').value.trim();
+
+        if (!name || Number.isNaN(rating) || !comment) {
+          showMessage('menuMessages', 'Add reviewer name, rating, and comment before adding.', 'error');
+          return;
+        }
+
+        pendingReviews.push({
+          id: `review-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`,
+          name,
+          rating: Number(rating.toFixed(1)),
+          comment,
+          created_at: new Date().toISOString()
+        });
+
+        $('reviewerNameInput').value = '';
+        $('reviewerRatingInput').value = '';
+        $('reviewerCommentInput').value = '';
+        renderReviewsList();
+      }
+
+      function removeReview(reviewId) {
+        pendingReviews = pendingReviews.filter(review => review.id !== reviewId);
+        renderReviewsList();
+      }
+
+      function applyScoringToJson() {
+        try {
+          const data = JSON.parse($('menuJsonInput').value || '{}');
+          data.metadata = data.metadata || {};
+
+          const overrideValue = $('gemOverrideInput').value.trim();
+          const overrideNumber = overrideValue === '' ? null : Number(overrideValue);
+          if (overrideValue !== '' && !Number.isNaN(overrideNumber)) {
+            data.metadata.hidden_gem_override = overrideNumber;
+          } else {
+            delete data.metadata.hidden_gem_override;
+          }
+
+          const tier = $('gemTierSelect').value;
+          if (tier) {
+            data.metadata.hidden_gem_tier = tier;
+          } else {
+            delete data.metadata.hidden_gem_tier;
+          }
+
+          const ratingValue = $('communityRatingInput').value.trim();
+          const ratingNumber = ratingValue === '' ? null : Number(ratingValue);
+          const reviewCountValue = $('reviewCountInput').value.trim();
+          const reviewCountNumber = reviewCountValue === '' ? null : Number(reviewCountValue);
+
+          if (!data.metadata.reviews && (ratingNumber !== null || reviewCountNumber !== null || pendingReviews.length)) {
+            data.metadata.reviews = {};
+          }
+
+          if (data.metadata.reviews) {
+            if (ratingNumber !== null && !Number.isNaN(ratingNumber)) {
+              data.metadata.reviews.average_rating = Number(ratingNumber.toFixed(1));
+            } else {
+              delete data.metadata.reviews.average_rating;
+            }
+
+            if (reviewCountNumber !== null && !Number.isNaN(reviewCountNumber)) {
+              data.metadata.reviews.count = reviewCountNumber;
+            } else {
+              delete data.metadata.reviews.count;
+            }
+
+            if (pendingReviews.length) {
+              data.metadata.reviews.entries = pendingReviews;
+            } else {
+              delete data.metadata.reviews.entries;
+            }
+
+            if (!data.metadata.reviews.average_rating && !data.metadata.reviews.count && !data.metadata.reviews.entries) {
+              delete data.metadata.reviews;
+            }
+          }
+
+          $('menuJsonInput').value = JSON.stringify(data, null, 2);
+          showMessage('menuMessages', 'Hidden gem scoring & reviews applied to JSON', 'success');
+        } catch (error) {
+          showMessage('menuMessages', `Failed to apply scoring: ${error.message}`, 'error');
+        }
+      }
+
+      function hydrateMetadataFormFromJson() {
+        try {
+          const data = JSON.parse($('menuJsonInput').value || '{}');
+          const media = data.media || data.metadata?.media || {};
+          $('heroImageInput').value = media.hero_image || '';
+          $('galleryUrlsInput').value = Array.isArray(media.gallery) ? media.gallery.join('\n') : '';
+
+          const override = data.metadata?.hidden_gem_override;
+          $('gemOverrideInput').value = override !== undefined ? override : '';
+          $('gemTierSelect').value = data.metadata?.hidden_gem_tier || '';
+
+          const reviews = data.metadata?.reviews || {};
+          $('communityRatingInput').value = reviews.average_rating !== undefined ? reviews.average_rating : '';
+          $('reviewCountInput').value = reviews.count !== undefined ? reviews.count : '';
+          pendingReviews = Array.isArray(reviews.entries) ? reviews.entries.map((entry, index) => ({
+            id: entry.id || `review-${index}`,
+            ...entry
+          })) : [];
+          renderReviewsList();
+
+          renderImagePreview();
+        } catch (error) {
+          console.warn('Unable to sync metadata form from JSON', error);
+        }
+      }
+
+      function loadRestaurantMetaToForm(restaurantId) {
+        const meta = restaurantDetails.get(restaurantId);
+        if (!meta) {
+          showMessage('menuMessages', 'No metadata available yet for this restaurant.', 'error');
+          return;
+        }
+
+        $('heroImageInput').value = meta.hero_image || '';
+        $('galleryUrlsInput').value = Array.isArray(meta.gallery) ? meta.gallery.join('\n') : '';
+        $('gemOverrideInput').value = meta.hidden_gem_override ?? '';
+        $('gemTierSelect').value = meta.hidden_gem_tier || '';
+        $('communityRatingInput').value = meta.community_rating ?? '';
+        $('reviewCountInput').value = meta.review_count ?? '';
+        pendingReviews = Array.isArray(meta.reviews?.entries) ? meta.reviews.entries : [];
+        renderReviewsList();
+        pendingImages = [];
+        renderImagePreview();
+        showMessage('menuMessages', `Loaded ${meta.name || 'restaurant'} metadata into the toolkit`, 'info');
+      }
+
       function filterMenuData() {
         const searchTerm = $('searchInput').value.toLowerCase();
         const restaurantFilter = $('restaurantFilter').value;
@@ -1098,7 +1408,8 @@
               restaurant_name: key,
               restaurant_id: item.restaurant_id || key.replace(/\s+/g, '_').toLowerCase(),
               data_source: item.data_source,
-              items: []
+              items: [],
+              meta: restaurantDetails.get(item.restaurant_id || key) || null
             };
           }
           grouped[key].items.push(item);
@@ -1136,8 +1447,12 @@
                 <strong>${group.restaurant_name}</strong>
                 <span class="badge badge-${group.data_source === 'firebase' ? 'firebase' : 'local'}">${group.data_source || 'local'}</span>
                 <span style="color: var(--text-muted);">(${group.items.length} items)</span>
+                ${group.meta?.community_rating ? `<span class="badge badge-info">⭐ ${group.meta.community_rating}${group.meta.review_count ? ` (${group.meta.review_count})` : ''}</span>` : ''}
+                ${(group.meta?.hidden_gem_override ?? null) !== null ? `<span class="badge badge-success">Gem ${group.meta.hidden_gem_override >= 0 ? '+' : ''}${group.meta.hidden_gem_override}</span>` : ''}
+                ${group.meta?.hidden_gem_tier ? `<span class="badge badge-warning">${group.meta.hidden_gem_tier.replace(/_/g, ' ')}</span>` : ''}
               </div>
               <div class="restaurant-actions" onclick="event.stopPropagation()">
+                <button class="btn btn-secondary btn-sm" onclick="window.dashboardApp.loadRestaurantMeta('${group.restaurant_id}')">Load Meta</button>
                 <button class="btn btn-secondary btn-sm" onclick="window.dashboardApp.exportRestaurant('${group.restaurant_id}')">Export</button>
                 <button class="btn btn-danger btn-sm" onclick="window.dashboardApp.deleteRestaurant('${group.restaurant_id}', '${group.restaurant_name}')">Delete Restaurant</button>
               </div>
@@ -1540,8 +1855,22 @@
           
           // Convert to expected format for your dashboard
           allMenuData = [];
+          restaurantDetails.clear();
           for (const restaurant of restaurants) {
-            const menuItems = await firebaseRestaurantService.getMenuItems(restaurant.restaurant_id || restaurant.id);
+            const restaurantId = restaurant.restaurant_id || restaurant.id;
+            const meta = {
+              name: restaurant.basic_info?.name,
+              hero_image: restaurant.media?.hero_image || restaurant.metadata?.media?.hero_image || '',
+              gallery: restaurant.media?.gallery || restaurant.metadata?.media?.gallery || [],
+              hidden_gem_override: restaurant.metadata?.hidden_gem_override ?? null,
+              hidden_gem_tier: restaurant.metadata?.hidden_gem_tier || '',
+              community_rating: restaurant.metadata?.reviews?.average_rating ?? restaurant.statistics?.community_rating ?? null,
+              review_count: restaurant.metadata?.reviews?.count ?? restaurant.statistics?.review_count ?? null,
+              reviews: restaurant.metadata?.reviews || {}
+            };
+            restaurantDetails.set(restaurantId, meta);
+
+            const menuItems = await firebaseRestaurantService.getMenuItems(restaurantId);
             
             menuItems.forEach(item => {
               allMenuData.push({
@@ -1551,7 +1880,7 @@
                 price: item.basic_info?.price,
                 emoji: item.basic_info?.emoji,
                 restaurant_name: restaurant.basic_info?.name,
-                restaurant_id: restaurant.restaurant_id || restaurant.id,
+                restaurant_id: restaurantId,
                 data_source: 'firebase'
               });
             });
@@ -1639,7 +1968,9 @@
             restaurant_name: menuData.restaurant_name,
             location: menuData.location,
             menu_items: menuData.menu_items,
-            metadata: menuData.metadata
+            metadata: menuData.metadata,
+            media: menuData.media,
+            metrics: menuData.metrics
           });
           
           if (result.success) {
@@ -1787,6 +2118,9 @@
             JSON.parse(content);
             $('menuJsonInput').value = content;
             showMessage('menuMessages', `File "${file.name}" loaded successfully`, 'success');
+            hydrateMetadataFormFromJson();
+            renderImagePreview();
+            renderReviewsList();
           } catch (error) {
             showMessage('menuMessages', `Invalid JSON file: ${error.message}`, 'error');
           }
@@ -1842,7 +2176,34 @@
             showMessage('menuMessages', 'Please drop a valid JSON file', 'error');
           }
         };
-        
+
+        const imageDropZone = $('imageDropZone');
+        const imageFileInput = $('imageFileInput');
+        if (imageDropZone && imageFileInput) {
+          imageDropZone.onclick = () => imageFileInput.click();
+          imageDropZone.ondragover = (e) => {
+            e.preventDefault();
+            imageDropZone.classList.add('dragover');
+          };
+          imageDropZone.ondragleave = () => imageDropZone.classList.remove('dragover');
+          imageDropZone.ondrop = (e) => {
+            e.preventDefault();
+            imageDropZone.classList.remove('dragover');
+            handleImageFiles(e.dataTransfer.files);
+          };
+          imageFileInput.onchange = (e) => {
+            handleImageFiles(e.target.files);
+            e.target.value = '';
+          };
+        }
+
+        $('applyImagesBtn').onclick = applyImagesToJson;
+        $('clearImagesBtn').onclick = () => { pendingImages = []; renderImagePreview(); };
+        $('addReviewBtn').onclick = addReviewEntry;
+        $('applyScoringBtn').onclick = applyScoringToJson;
+        $('syncMetadataBtn').onclick = hydrateMetadataFormFromJson;
+        $('menuJsonInput').addEventListener('blur', hydrateMetadataFormFromJson);
+
         $('loadPendingEventsBtn').onclick = loadPendingEvents;
         $('loadTelemetryBtn').onclick = loadTelemetry;
         $('telemetryAuto').onchange = startTelemetryAutoRefresh;
@@ -1868,11 +2229,17 @@
         exportRestaurant,
         editMenuItem,
         approveEvent,
-        rejectEvent
+        rejectEvent,
+        removeImage,
+        removeReview,
+        loadRestaurantMeta: loadRestaurantMetaToForm
       };
 
       function init() {
         setupEventListeners();
+        renderImagePreview();
+        renderReviewsList();
+        hydrateMetadataFormFromJson();
         loadHealth();
         
         const yesterday = new Date();

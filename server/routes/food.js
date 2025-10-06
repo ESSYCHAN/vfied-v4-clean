@@ -8,7 +8,7 @@ import * as countriesModule from '../data/countries.js';
 import { SUPPORTED_COUNTRIES } from '../data/countries.js';
 import { parseCravings, enhanceMoodText } from '../craving_parser.js';
 import { recommendFromMenus, menuManager } from '../menu_manager.js';
-import { RestaurantCollections } from '../../src/collections/index.js';
+import { RestaurantCollections, MenuItemCollections } from '../../src/collections/index.js';
 // Environment variables
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || '';
 const USE_GPT = ['true', '1', 'yes', 'on'].includes(String(process.env.USE_GPT || process.env.VITE_USE_GPT || '').toLowerCase().trim());

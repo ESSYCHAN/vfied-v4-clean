@@ -443,21 +443,49 @@ class EnhancedMenuManager {
       updated_at: new Date().toISOString()
     }));
 
+    const existingEntry = this.localMenus.get(key);
+    const media = {
+      hero_image: restaurantData.media?.hero_image || restaurantData.hero_image || existingEntry?.media?.hero_image || null,
+      gallery: Array.isArray(restaurantData.media?.gallery)
+        ? restaurantData.media.gallery
+        : Array.isArray(restaurantData.images)
+          ? restaurantData.images
+          : existingEntry?.media?.gallery || [],
+      logo: restaurantData.media?.logo || restaurantData.logo || existingEntry?.media?.logo || null,
+      primary_color: restaurantData.media?.primary_color || existingEntry?.media?.primary_color || null
+    };
+
+    const combinedMetadata = {
+      ...(existingEntry?.metadata || {}),
+      ...(restaurantData.metadata || {}),
+      reviews: restaurantData.metadata?.reviews || existingEntry?.metadata?.reviews || existingEntry?.reviews || undefined
+    };
+
+    const metrics = {
+      ...(existingEntry?.metrics || {}),
+      ...(restaurantData.metrics || {}),
+      total_menu_items: processedItems.length,
+      last_scored_at: new Date().toISOString()
+    };
+
     const menuEntry = {
       restaurant_id,
       restaurant_name,
       location: {
         city: location.city,
         country_code: (location.country_code || 'GB').toUpperCase(),
-        address: location.address || ''
+        address: location.address || '',
+        neighborhood: location.neighborhood || existingEntry?.location?.neighborhood || ''
       },
       menu_items: processedItems,
       delivery_platforms, 
       opening_hours,
       cuisine_type: this.detectCuisineType(processedItems),
-      metadata: restaurantData.metadata || {},
+      metadata: combinedMetadata,
+      metrics,
+      media,
       updated_at: new Date().toISOString(),
-      created_at: this.localMenus.has(key) ? this.localMenus.get(key).created_at : new Date().toISOString()
+      created_at: existingEntry?.created_at || new Date().toISOString()
     };
 
     this.localMenus.set(key, menuEntry);
@@ -546,8 +574,13 @@ class EnhancedMenuManager {
             hidden_gem_badge: gemBadge,
             location: restaurantInfo.location,
             cuisine_type: restaurantInfo.cuisine_type,
+            price_range: restaurantInfo.price_range,
             match_score: score,
-            data_source: restaurant.data_source || 'local'
+            data_source: restaurant.data_source || 'local',
+            restaurant_media: restaurantInfo.media,
+            restaurant_metrics: restaurantInfo.metrics,
+            restaurant_reviews: restaurantInfo.reviews,
+            restaurant_metadata: restaurantInfo.metadata
           });
         });
       }
@@ -585,6 +618,171 @@ class EnhancedMenuManager {
   // DATA NORMALIZATION HELPERS
   // ===============================
 
+  async shortlistRestaurants(options = {}) {
+    const {
+      location = {},
+      mood_text = '',
+      dietary = [],
+      attributes = [],
+      limit = 5,
+      per_restaurant_items = 3,
+      sort_by = 'relevance',
+      timeContext = null,
+      data_source = 'hybrid'
+    } = options;
+
+    const started = Date.now();
+    const normalizedDietary = Array.isArray(dietary)
+      ? dietary.filter(Boolean).map(d => String(d).trim().toLowerCase())
+      : (dietary ? [String(dietary).trim().toLowerCase()] : []);
+
+    const rawLimit = Math.max(limit * per_restaurant_items * 2, limit * 3);
+
+    const menuMatches = await this.searchMenus({
+      location,
+      mood_text,
+      dietary: normalizedDietary,
+      attributes,
+      limit: rawLimit,
+      sort_by,
+      timeContext,
+      data_source
+    });
+
+    const grouped = new Map();
+
+    for (const item of menuMatches) {
+      const key = item.restaurant_id || item.restaurant_name;
+      if (!key) continue;
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          restaurant_id: item.restaurant_id,
+          restaurant_name: item.restaurant_name,
+          location: item.location,
+          cuisine_type: item.cuisine_type,
+          price_range: item.price_range || 'moderate',
+          data_source: item.data_source,
+          menu_samples: [],
+          match_scores: [],
+          gem_scores: [],
+          hidden_gem_badge: null,
+          media: item.restaurant_media || {},
+          metrics: item.restaurant_metrics || {},
+          reviews: item.restaurant_reviews || {},
+          metadata: item.restaurant_metadata || {},
+          primary_link: null
+        });
+      }
+
+      const entry = grouped.get(key);
+      const sample = {
+        menu_item_id: item.menu_item_id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        emoji: item.emoji,
+        image: item.image,
+        hidden_gem_score: item.hidden_gem_score,
+        hidden_gem_badge: item.hidden_gem_badge
+      };
+
+      if (entry.menu_samples.length < per_restaurant_items) {
+        entry.menu_samples.push(sample);
+      }
+
+      entry.match_scores.push(item.match_score || 0);
+      entry.gem_scores.push(item.hidden_gem_score || 0);
+
+      if (!entry.hidden_gem_badge && item.hidden_gem_badge) {
+        entry.hidden_gem_badge = item.hidden_gem_badge;
+      }
+
+      if (item.hidden_gem_badge && item.hidden_gem_score >= Math.max(...entry.gem_scores)) {
+        entry.hidden_gem_badge = item.hidden_gem_badge;
+      }
+
+      if (!entry.primary_link && item.restaurant_link) {
+        entry.primary_link = item.restaurant_link;
+      }
+    }
+
+    const shortlist = Array.from(grouped.values()).map(entry => {
+      const avgMatch = entry.match_scores.length
+        ? entry.match_scores.reduce((acc, v) => acc + v, 0) / entry.match_scores.length
+        : 0;
+      const avgGem = entry.gem_scores.length
+        ? entry.gem_scores.reduce((acc, v) => acc + v, 0) / entry.gem_scores.length
+        : 0;
+
+      const heroImage = entry.media?.hero_image || entry.media?.gallery?.[0] || null;
+      const gallery = Array.isArray(entry.media?.gallery) ? entry.media.gallery : (heroImage ? [heroImage] : []);
+
+      const communityRatingRaw = entry.reviews?.average_rating ?? entry.reviews?.avg ?? entry.metrics?.average_rating ?? null;
+      const ratingNumber = Number(communityRatingRaw);
+      const hasRating = Number.isFinite(ratingNumber) && ratingNumber > 0;
+      const communityRating = hasRating ? Number(ratingNumber.toFixed(1)) : null;
+      const reviewCountRaw = entry.reviews?.count ?? entry.reviews?.total ?? entry.metrics?.review_count ?? 0;
+      const reviewCount = Number(reviewCountRaw) || 0;
+
+      const experienceScore = Math.round(
+        Math.min(
+          100,
+          (avgMatch || 0) * 0.6 + (avgGem || 0) * 0.4
+        )
+      );
+
+      const topSample = entry.menu_samples[0];
+      const insight = topSample
+        ? `${topSample.name}${topSample.description ? ' • ' + topSample.description : ''}`
+        : 'Ask for the house specialty';
+
+      const vibeTags = new Set();
+      if (entry.hidden_gem_badge?.label) vibeTags.add(entry.hidden_gem_badge.label);
+      if (entry.metadata?.vibe_tags) {
+        (Array.isArray(entry.metadata.vibe_tags) ? entry.metadata.vibe_tags : [entry.metadata.vibe_tags])
+          .filter(Boolean)
+          .forEach(tag => vibeTags.add(tag));
+      }
+
+      return {
+        restaurant_id: entry.restaurant_id,
+        restaurant_name: entry.restaurant_name,
+        location: entry.location,
+        cuisine_type: entry.cuisine_type,
+        price_range: entry.price_range,
+        data_source: entry.data_source,
+        menu_samples: entry.menu_samples,
+        hidden_gem_badge: entry.hidden_gem_badge,
+        hidden_gem_score: Math.round(avgGem),
+        match_score: Math.round(avgMatch),
+        experience_score: experienceScore,
+        hero_image: heroImage,
+        gallery,
+        community_rating: communityRating,
+        review_count: reviewCount,
+        insight,
+        vibe_tags: Array.from(vibeTags),
+        metadata: entry.metadata,
+        metrics: entry.metrics,
+        primary_link: entry.primary_link,
+        score_breakdown: {
+          average_match: Number(avgMatch.toFixed(1)),
+          average_hidden_gem: Number(avgGem.toFixed(1))
+        }
+      };
+    })
+      .sort((a, b) => b.experience_score - a.experience_score)
+      .slice(0, limit);
+
+    return {
+      shortlist,
+      total_considered: menuMatches.length,
+      total_restaurants: grouped.size,
+      generation_time_ms: Date.now() - started
+    };
+  }
+
   extractMenuItems(restaurant) {
     if (restaurant.menu_items && Array.isArray(restaurant.menu_items)) {
       return restaurant.menu_items;
@@ -600,22 +798,30 @@ class EnhancedMenuManager {
         restaurant_name: restaurant.basic_info.name,
         location: restaurant.location,
         cuisine_type: restaurant.basic_info.cuisine_type,
+        price_range: restaurant.business_info?.price_range || restaurant.basic_info?.price_range || 'moderate',
         opening_hours: restaurant.business_info?.opening_hours || {},
         delivery_platforms: restaurant.business_info?.delivery_platforms || {},
         metadata: restaurant.metadata || {},
+        metrics: restaurant.metrics || restaurant.metadata?.metrics || {},
+        media: restaurant.media || restaurant.metadata?.media || {},
+        reviews: restaurant.reviews || restaurant.metadata?.reviews || null,
         website: restaurant.basic_info?.website
       };
     }
-    
+
     // Handle local structure
     return {
       restaurant_id: restaurant.restaurant_id,
       restaurant_name: restaurant.restaurant_name,
       location: restaurant.location,
       cuisine_type: restaurant.cuisine_type,
+      price_range: restaurant.price_range || restaurant.metadata?.price_range || 'moderate',
       opening_hours: restaurant.opening_hours || {},
       delivery_platforms: restaurant.delivery_platforms || {},
       metadata: restaurant.metadata || {},
+      metrics: restaurant.metrics || restaurant.metadata?.metrics || {},
+      media: restaurant.media || restaurant.metadata?.media || {},
+      reviews: restaurant.reviews || restaurant.metadata?.reviews || null,
       website: restaurant.website
     };
   }
@@ -633,12 +839,16 @@ class EnhancedMenuManager {
         meal_period: item.classification?.meal_period || 'all_day',
         dietary: item.classification?.dietary || {},
         tags: item.classification?.cuisine_tags || [],
-        available: item.availability?.available !== false
+        available: item.availability?.available !== false,
+        image: item.media?.primary || item.media?.image || item.basic_info?.image || null
       };
     }
-    
+
     // Handle local structure
-    return item;
+    return {
+      ...item,
+      image: item.image || item.image_url || item.photo || item.thumbnail || null
+    };
   }
 
   // ===============================
@@ -792,8 +1002,39 @@ class EnhancedMenuManager {
     if (goals.includes('highlight_specialties') && normalizedItem.tags?.includes('signature')) {
       score += 10;
     }
+
+    const metrics = restaurant.metrics || restaurant.metadata?.metrics || {};
+    const reviews = restaurant.reviews || restaurant.metadata?.reviews || {};
+    const avgRating = Number(metrics.average_rating || reviews.average_rating || reviews.avg || 0);
+    const reviewCount = Number(metrics.review_count || reviews.count || reviews.total || 0);
+
+    if (avgRating) {
+      // Reward high-rated but still under-the-radar spots
+      score += Math.max(0, (avgRating - 4) * 12);
+    }
+
+    if (reviewCount) {
+      if (reviewCount < 25) score += 8; // quieter gems
+      else if (reviewCount > 200) score -= 6; // likely mainstream
+    }
+
+    if (restaurant.media?.hero_image || restaurant.media?.gallery?.length) {
+      score += 5;
+    }
+
+    if (metrics.popularity_score) {
+      score += Math.max(0, 18 - metrics.popularity_score);
+    }
+
+    if (typeof restaurant.metadata?.hidden_gem_override === 'number') {
+      score += restaurant.metadata.hidden_gem_override;
+    }
+
+    if (restaurant.metadata?.hidden_gem_tier === 'legendary') {
+      score = Math.max(score, 90);
+    }
     
-    return Math.min(score, 100);
+    return Math.min(Math.max(score, 0), 100);
   }
 
   getHiddenGemBadge(score) {
@@ -806,7 +1047,16 @@ class EnhancedMenuManager {
 
   buildRestaurantLink(restaurant) {
     const platforms = restaurant.delivery_platforms || {};
-    
+    const media = restaurant.media || {};
+
+    if (media.reservation_url) {
+      return {
+        url: media.reservation_url,
+        type: 'reservation',
+        label: 'Book a Table'
+      };
+    }
+
     if (restaurant.website) {
       return {
         url: restaurant.website,
