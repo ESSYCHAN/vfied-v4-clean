@@ -176,6 +176,96 @@ async function gptTravelPlan({ city, country_code, prompt }) {
   return out;
 }
 
+// Helper: Check restaurant availability based on opening hours and time context
+function checkRestaurantAvailability(restaurant, timeContext) {
+  if (!restaurant.opening_hours || Object.keys(restaurant.opening_hours).length === 0) {
+    return {
+      status: 'unknown',
+      label: 'Hours not available',
+      is_open: null,
+      opens_at: null,
+      closes_at: null
+    };
+  }
+
+  const now = new Date();
+  const currentDay = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][timeContext?.day_of_week ?? now.getDay()];
+  const currentHour = timeContext?.current_hour ?? now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTimeMinutes = currentHour * 60 + currentMinute;
+
+  const todayHours = restaurant.opening_hours[currentDay];
+
+  if (!todayHours || todayHours === 'closed') {
+    return {
+      status: 'closed',
+      label: 'Closed today',
+      is_open: false,
+      opens_at: null,
+      closes_at: null
+    };
+  }
+
+  // Parse opening hours (e.g., "09:00" -> 540 minutes)
+  const parseTime = (timeStr) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const openTime = parseTime(todayHours.open || '00:00');
+  const closeTime = parseTime(todayHours.close || '23:59');
+
+  const isOpen = currentTimeMinutes >= openTime && currentTimeMinutes < closeTime;
+  const closingSoon = isOpen && (closeTime - currentTimeMinutes) <= 60; // Within 1 hour of closing
+
+  return {
+    status: isOpen ? (closingSoon ? 'closing_soon' : 'open') : 'closed',
+    label: isOpen ? (closingSoon ? 'Closing soon' : 'Available now') : `Opens at ${todayHours.open}`,
+    is_open: isOpen,
+    opens_at: todayHours.open,
+    closes_at: todayHours.close
+  };
+}
+
+// Helper: Calculate and format distance between user and restaurant
+function calculateDistanceDisplay(userLocation, restaurantLocation) {
+  // If both have coordinates, calculate actual distance
+  if (userLocation.latitude && userLocation.longitude &&
+      restaurantLocation.coordinates) {
+
+    const lat1 = userLocation.latitude;
+    const lon1 = userLocation.longitude;
+    const lat2 = restaurantLocation.coordinates.latitude || restaurantLocation.coordinates._latitude;
+    const lon2 = restaurantLocation.coordinates.longitude || restaurantLocation.coordinates._longitude;
+
+    // Haversine formula
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const km = R * c;
+
+    // Format for display
+    if (km < 1) {
+      return { km, text: `${Math.round(km * 1000)}m away` };
+    } else if (km < 10) {
+      return { km, text: `${km.toFixed(1)}km away` };
+    } else {
+      return { km, text: `${Math.round(km)}km away` };
+    }
+  }
+
+  // Fallback: no precise distance available
+  return {
+    km: null,
+    text: `${restaurantLocation.city || restaurantLocation.neighborhood || 'Nearby'}`
+  };
+}
+
 // Build concise itinerary
 function buildConciseItinerary(city, country_code) {
   const country = findCountryByCode(country_code);
@@ -294,6 +384,7 @@ Only recommend from the shortlist. Be specific about dishes and vibes. Keep the 
 }
 
 export function setupTravelRoutes(app) {
+  // Primary endpoint: Restaurant Discovery Shortlist
   app.post('/v1/travel/shortlist', async (req, res) => {
     const started = Date.now();
 
@@ -303,10 +394,15 @@ export function setupTravelRoutes(app) {
         return res.status(400).json({ success: false, error: error.message });
       }
 
+      // Normalize location with geo-coordinates support
       const location = {
-        ...value.location,
         city: String(value.location.city || 'London').trim(),
-        country_code: String(value.location.country_code || 'GB').trim().slice(0, 2).toUpperCase()
+        country_code: String(value.location.country_code || 'GB').trim().slice(0, 2).toUpperCase(),
+        latitude: value.location.latitude || value.location.lat,
+        longitude: value.location.longitude || value.location.lng,
+        neighborhood: value.location.neighborhood,
+        search_radius_km: value.location.search_radius_km || 5,
+        use_geo: Boolean(value.location.latitude && value.location.longitude)
       };
 
       const dietary = normalizeStringList(value.dietary).map((d) => d.toLowerCase());
@@ -314,6 +410,16 @@ export function setupTravelRoutes(app) {
       const interestList = normalizeStringList(value.interests);
       const vibeList = normalizeStringList(value.vibe_preferences);
       const attributes = [...new Set([...attributeList, ...interestList, ...vibeList])];
+
+      // Get current time context for availability
+      const now = new Date();
+      const timeContext = Object.keys(value.time_context || {}).length
+        ? value.time_context
+        : {
+            current_hour: now.getHours(),
+            day_of_week: now.getDay(),
+            is_weekend: [0, 6].includes(now.getDay())
+          };
 
       const shortlistResult = await menuManager.shortlistRestaurants({
         location,
@@ -323,8 +429,62 @@ export function setupTravelRoutes(app) {
         limit: value.limit,
         per_restaurant_items: value.per_restaurant_items,
         sort_by: value.sort_by,
-        timeContext: Object.keys(value.time_context || {}).length ? value.time_context : null,
-        data_source: value.data_source
+        timeContext,
+        data_source: value.data_source,
+        search_radius: location.search_radius_km
+      });
+
+      // Enrich restaurants with UI-ready data
+      const enrichedShortlist = shortlistResult.shortlist.map(restaurant => {
+        const availability = checkRestaurantAvailability(restaurant, timeContext);
+        const distance = calculateDistanceDisplay(location, restaurant.location);
+
+        return {
+          ...restaurant,
+          // Core display data
+          hero_image: restaurant.hero_image || restaurant.media?.hero_image || restaurant.gallery?.[0] || null,
+          gallery: restaurant.gallery || restaurant.media?.gallery || [],
+          rating: restaurant.community_rating,
+          review_count: restaurant.review_count,
+
+          // Availability & status
+          availability_status: availability.status,
+          availability_label: availability.label,
+          is_open_now: availability.is_open,
+          opens_at: availability.opens_at,
+          closes_at: availability.closes_at,
+
+          // Location & distance
+          distance_text: distance.text,
+          distance_km: distance.km,
+          address: restaurant.location?.address || `${restaurant.location?.city}`,
+
+          // Tags for filtering/display
+          cuisine_tags: [
+            restaurant.cuisine_type,
+            ...(restaurant.vibe_tags || [])
+          ].filter(Boolean).slice(0, 5),
+
+          // Menu preview
+          featured_items: restaurant.menu_samples.slice(0, 3).map(item => ({
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            emoji: item.emoji,
+            image: item.image
+          })),
+
+          // Hidden gem indicator
+          is_hidden_gem: Boolean(restaurant.hidden_gem_badge),
+          gem_badge: restaurant.hidden_gem_badge,
+
+          // Links
+          booking_link: restaurant.primary_link,
+
+          // Metadata
+          price_range: restaurant.price_range || '££',
+          data_source: restaurant.data_source
+        };
       });
 
       let coach = null;
@@ -332,7 +492,7 @@ export function setupTravelRoutes(app) {
         const query = value.coach_query || value.mood_text || `Where should I eat in ${location.city}?`;
         coach = await buildCoachRecommendation({
           location,
-          shortlist: shortlistResult.shortlist,
+          shortlist: enrichedShortlist,
           query,
           mood_text: value.mood_text || '',
           dietary,
@@ -344,14 +504,24 @@ export function setupTravelRoutes(app) {
         success: true,
         city: location.city,
         country_code: location.country_code,
-        shortlist: shortlistResult.shortlist,
+        user_location: location.use_geo ? {
+          latitude: location.latitude,
+          longitude: location.longitude
+        } : null,
+        restaurants: enrichedShortlist,
         coach,
         meta: {
           total_considered: shortlistResult.total_considered,
           total_restaurants: shortlistResult.total_restaurants,
           generation_time_ms: shortlistResult.generation_time_ms,
           data_source: value.data_source,
-          server_time_ms: Date.now() - started
+          server_time_ms: Date.now() - started,
+          filters_applied: {
+            dietary,
+            attributes,
+            has_geo: location.use_geo,
+            search_radius_km: location.search_radius_km
+          }
         }
       });
     } catch (err) {
@@ -626,74 +796,341 @@ Return STRICT JSON:
     }
   });
 
-  // Travel coach endpoint
+  // Restaurant Search Endpoint
+  app.post('/v1/travel/restaurants/search', async (req, res) => {
+    const started = Date.now();
+
+    try {
+      const {
+        query = '',
+        location = {},
+        filters = {},
+        limit = 20,
+        sort_by = 'relevance'
+      } = req.body;
+
+      const normalizedLocation = {
+        city: location.city || 'London',
+        country_code: (location.country_code || 'GB').toUpperCase(),
+        latitude: location.latitude || location.lat,
+        longitude: location.longitude || location.lng,
+        search_radius_km: location.search_radius_km || 10,
+        use_geo: Boolean(location.latitude && location.longitude)
+      };
+
+      const searchResult = await menuManager.shortlistRestaurants({
+        location: normalizedLocation,
+        mood_text: query,
+        dietary: filters.dietary || [],
+        attributes: [
+          ...(filters.cuisine_types || []),
+          ...(filters.vibes || []),
+          ...(filters.occasions || [])
+        ],
+        limit,
+        per_restaurant_items: 3,
+        sort_by,
+        timeContext: filters.only_open_now ? {
+          current_hour: new Date().getHours(),
+          day_of_week: new Date().getDay()
+        } : null,
+        data_source: filters.data_source || 'hybrid',
+        search_radius: normalizedLocation.search_radius_km
+      });
+
+      // Enrich with UI data
+      const now = new Date();
+      const timeContext = {
+        current_hour: now.getHours(),
+        day_of_week: now.getDay()
+      };
+
+      const results = searchResult.shortlist.map(restaurant => {
+        const availability = checkRestaurantAvailability(restaurant, timeContext);
+        const distance = calculateDistanceDisplay(normalizedLocation, restaurant.location);
+
+        // Filter out closed restaurants if requested
+        if (filters.only_open_now && !availability.is_open) {
+          return null;
+        }
+
+        return {
+          restaurant_id: restaurant.restaurant_id,
+          restaurant_name: restaurant.restaurant_name,
+          hero_image: restaurant.hero_image || restaurant.media?.hero_image,
+          gallery: restaurant.gallery || restaurant.media?.gallery || [],
+          rating: restaurant.community_rating,
+          review_count: restaurant.review_count,
+          cuisine_type: restaurant.cuisine_type,
+          price_range: restaurant.price_range,
+          distance_text: distance.text,
+          distance_km: distance.km,
+          availability_status: availability.status,
+          availability_label: availability.label,
+          is_open_now: availability.is_open,
+          address: restaurant.location?.address || restaurant.location?.city,
+          featured_items: restaurant.menu_samples.slice(0, 3),
+          cuisine_tags: [restaurant.cuisine_type, ...(restaurant.vibe_tags || [])].filter(Boolean),
+          is_hidden_gem: Boolean(restaurant.hidden_gem_badge),
+          gem_badge: restaurant.hidden_gem_badge,
+          booking_link: restaurant.primary_link
+        };
+      }).filter(Boolean); // Remove nulls from closed restaurants
+
+      return res.json({
+        success: true,
+        restaurants: results,
+        total_found: results.length,
+        query,
+        filters: filters,
+        meta: {
+          search_location: normalizedLocation,
+          generation_time_ms: Date.now() - started
+        }
+      });
+
+    } catch (error) {
+      console.error('Restaurant search error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to search restaurants'
+      });
+    }
+  });
+
+  // Nearby Restaurants Endpoint (Geo-focused)
+  app.post('/v1/travel/restaurants/nearby', async (req, res) => {
+    const started = Date.now();
+
+    try {
+      const {
+        latitude,
+        longitude,
+        radius_km = 2,
+        limit = 10,
+        only_open_now = false,
+        sort_by = 'distance'
+      } = req.body;
+
+      if (!latitude || !longitude) {
+        return res.status(400).json({
+          success: false,
+          error: 'Latitude and longitude are required'
+        });
+      }
+
+      const location = {
+        latitude,
+        longitude,
+        search_radius_km: radius_km,
+        use_geo: true,
+        city: 'Nearby' // Will be overridden by actual data
+      };
+
+      const nearbyResult = await menuManager.shortlistRestaurants({
+        location,
+        limit: limit * 2, // Get more to filter
+        per_restaurant_items: 3,
+        sort_by: 'distance',
+        data_source: 'hybrid',
+        search_radius: radius_km
+      });
+
+      const now = new Date();
+      const timeContext = {
+        current_hour: now.getHours(),
+        day_of_week: now.getDay()
+      };
+
+      const restaurants = nearbyResult.shortlist
+        .map(restaurant => {
+          const availability = checkRestaurantAvailability(restaurant, timeContext);
+          const distance = calculateDistanceDisplay(location, restaurant.location);
+
+          if (only_open_now && !availability.is_open) {
+            return null;
+          }
+
+          return {
+            restaurant_id: restaurant.restaurant_id,
+            restaurant_name: restaurant.restaurant_name,
+            hero_image: restaurant.hero_image || restaurant.media?.hero_image,
+            rating: restaurant.community_rating,
+            review_count: restaurant.review_count,
+            cuisine_type: restaurant.cuisine_type,
+            price_range: restaurant.price_range,
+            distance_text: distance.text,
+            distance_km: distance.km,
+            availability_status: availability.status,
+            availability_label: availability.label,
+            is_open_now: availability.is_open,
+            address: restaurant.location?.address,
+            featured_items: restaurant.menu_samples.slice(0, 3),
+            is_hidden_gem: Boolean(restaurant.hidden_gem_badge),
+            gem_badge: restaurant.hidden_gem_badge,
+            booking_link: restaurant.primary_link
+          };
+        })
+        .filter(Boolean)
+        .slice(0, limit);
+
+      return res.json({
+        success: true,
+        restaurants,
+        total_found: restaurants.length,
+        user_location: { latitude, longitude, radius_km },
+        meta: {
+          generation_time_ms: Date.now() - started
+        }
+      });
+
+    } catch (error) {
+      console.error('Nearby restaurants error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to find nearby restaurants'
+      });
+    }
+  });
+
+  // Travel coach endpoint (Restaurant-focused)
   app.post('/v1/travel/coach', async (req, res) => {
     const { query, location = {}, context = {} } = req.body || {};
-    
+
     if (!query) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Query is required' 
+      return res.status(400).json({
+        success: false,
+        error: 'Query is required'
       });
     }
 
     const city = location.city || 'the city';
     const cc = (location.country_code || 'GB').toUpperCase();
 
-    // Try GPT
-    if (USE_GPT && OPENAI_API_KEY) {
-      const system = `You are VFIED's expert travel coach. Give concise, authentic local food advice for ${city}.
+    // Get actual restaurant recommendations from the database
+    try {
+      const normalizedLocation = {
+        city,
+        country_code: cc,
+        latitude: location.latitude || location.lat,
+        longitude: location.longitude || location.lng,
+        search_radius_km: location.search_radius_km || 5,
+        use_geo: Boolean(location.latitude && location.longitude)
+      };
+
+      // Search for restaurants matching the query
+      const restaurantResults = await menuManager.shortlistRestaurants({
+        location: normalizedLocation,
+        mood_text: query,
+        dietary: context.dietary || [],
+        attributes: context.interests || [],
+        limit: 5,
+        per_restaurant_items: 3,
+        sort_by: 'relevance',
+        data_source: 'hybrid',
+        search_radius: normalizedLocation.search_radius_km
+      });
+
+      const now = new Date();
+      const timeContext = {
+        current_hour: now.getHours(),
+        day_of_week: now.getDay()
+      };
+
+      // Format top 3 restaurant recommendations
+      const topRestaurants = restaurantResults.shortlist.slice(0, 3).map(restaurant => {
+        const availability = checkRestaurantAvailability(restaurant, timeContext);
+        const distance = calculateDistanceDisplay(normalizedLocation, restaurant.location);
+
+        return {
+          restaurant_id: restaurant.restaurant_id,
+          name: restaurant.restaurant_name,
+          hero_image: restaurant.hero_image || restaurant.media?.hero_image,
+          details: restaurant.insight || `Known for ${restaurant.menu_samples[0]?.name || 'authentic cuisine'}`,
+          price_range: restaurant.price_range,
+          rating: restaurant.community_rating,
+          review_count: restaurant.review_count,
+          location: restaurant.location?.neighborhood || restaurant.location?.city,
+          distance_text: distance.text,
+          availability_label: availability.label,
+          is_open_now: availability.is_open,
+          hero_item: restaurant.menu_samples[0]?.name,
+          cuisine_type: restaurant.cuisine_type,
+          hidden_gem_badge: restaurant.hidden_gem_badge,
+          booking_link: restaurant.primary_link
+        };
+      });
+
+      // Use GPT to craft personalized response around these restaurants
+      if (USE_GPT && OPENAI_API_KEY && topRestaurants.length > 0) {
+        const system = `You are VFIED's restaurant discovery coach. You recommend SPECIFIC restaurants from the provided list.
 
 Return STRICT JSON:
 {
   "success": true,
-  "response": "2-3 sentences max, direct and actionable advice",
-  "recommendations": [
-    {"name":"Specific Place/Dish","details":"1 sentence why it's special","price_range":"$/$/$/$","location":"specific neighborhood"}
-  ],
-  "quick_tips": ["🎯 tip1", "⏰ tip2", "💡 tip3"],
-  "follow_up_questions": ["short question 1", "short question 2"]
+  "response": "2-3 sentences connecting their question to these specific restaurants",
+  "restaurants": [use the provided restaurant objects],
+  "quick_tips": ["🎯 actionable tip", "💡 insider tip"],
+  "follow_up_questions": ["related question"]
 }
 
-IMPORTANT: Keep response under 150 words total. Be specific, not generic. Focus on actionable local insights.`;
+Be warm, specific, and reference the actual restaurants by name. Mention standout dishes.`;
 
-      const user = `User asks: "${query}" 
-Location: ${city}, ${cc}
-Context: ${JSON.stringify(context)}
+        const user = `User asks: "${query}" in ${city}.
 
-Give specific, local recommendations with neighborhoods and exact places when possible.`;
+Available restaurants:
+${topRestaurants.map(r => `- ${r.name} (${r.cuisine_type}, ${r.price_range}) - ${r.hero_item || r.details}`).join('\n')}
 
-      const result = await gptChatJSON({ system, user, max_tokens: 600 });
-      if (result) return res.json(result);
-    }
+Create a response that answers their question using these specific restaurants.`;
 
-    // Fallback response
-    res.json({
-      success: true,
-      response: `For "${query}" in ${city}, focus on neighborhoods where locals eat. Skip tourist areas and look for busy spots with lines of residents.`,
-      recommendations: [
-        {
-          name: 'Local Market Food Stalls',
-          details: 'Where locals eat daily - authentic and fresh',
-          price_range: '$',
-          location: 'Central market district'
-        },
-        {
-          name: 'Family-Run Restaurants', 
-          details: 'Traditional recipes, often no English menu',
-          price_range: '$',
-          location: 'Residential neighborhoods'
+        const gptResult = await gptChatJSON({ system, user, max_tokens: 600 });
+
+        if (gptResult) {
+          return res.json({
+            ...gptResult,
+            restaurants: topRestaurants // Use actual restaurant data
+          });
         }
-      ],
-      quick_tips: [
-        '🎯 Ask locals: "Where do you eat after work?"',
-        '⏰ Best deals during lunch hours (12-2pm)',
-        '💡 Busy = fresh - follow the crowds'
-      ],
-      follow_up_questions: [
-        'What neighborhoods have the best food scene?',
-        'Any local food customs I should know?'
-      ]
-    });
+      }
+
+      // Fallback with actual restaurant data
+      const responseText = topRestaurants.length > 0
+        ? `For "${query}" in ${city}, I'd recommend ${topRestaurants[0].name}${topRestaurants[0].hero_item ? ` for their ${topRestaurants[0].hero_item}` : ''}. ${topRestaurants.length > 1 ? `Also check out ${topRestaurants[1].name} nearby.` : ''}`
+        : `Looking for spots matching "${query}" in ${city}. Try exploring ${city}'s local neighborhoods or markets for authentic finds.`;
+
+      res.json({
+        success: true,
+        response: responseText,
+        restaurants: topRestaurants,
+        quick_tips: [
+          '🎯 Check if reservations are needed',
+          '⏰ Visit during off-peak hours for better service',
+          '💡 Ask staff for their personal recommendations'
+        ],
+        follow_up_questions: [
+          'Want to see more hidden gems nearby?',
+          'Should I find similar places in a different neighborhood?'
+        ]
+      });
+
+    } catch (error) {
+      console.error('Coach endpoint error:', error);
+
+      // Final fallback
+      res.json({
+        success: true,
+        response: `For "${query}" in ${city}, explore neighborhoods where locals eat. Skip tourist areas and look for busy spots.`,
+        restaurants: [],
+        quick_tips: [
+          '🎯 Ask locals where they eat',
+          '⏰ Best finds during lunch hours',
+          '💡 Busy spots mean authentic food'
+        ],
+        follow_up_questions: [
+          'What neighborhoods have the best food scene?',
+          'Any specific cuisine you're craving?'
+        ]
+      });
+    }
   });
 }

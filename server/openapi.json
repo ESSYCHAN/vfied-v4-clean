@@ -1,0 +1,362 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VFIED Travel & Restaurant Discovery API",
+    "description": "Enhanced restaurant discovery with rich metadata, geo-search, and AI recommendations",
+    "version": "2.4.0"
+  },
+  "servers": [
+    { "url": "https://vfied-v4-clean.onrender.com", "description": "Production" },
+    { "url": "http://localhost:3048", "description": "Development" }
+  ],
+  "tags": [
+    { "name": "Travel", "description": "Restaurant discovery and travel planning" }
+  ],
+  "paths": {
+    "/v1/travel/shortlist": {
+      "post": {
+        "tags": ["Travel"],
+        "summary": "Get personalized restaurant shortlist with rich metadata",
+        "operationId": "getRestaurantShortlist",
+        "description": "Primary restaurant discovery endpoint. Returns restaurants with photos, ratings, availability, distance, and menu samples. Supports geo-based search and smart filtering.",
+        "security": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "object",
+                    "required": ["city", "country_code"],
+                    "properties": {
+                      "city": { "type": "string", "example": "London" },
+                      "country_code": { "type": "string", "minLength": 2, "maxLength": 2, "example": "GB" },
+                      "latitude": { "type": "number", "example": 51.5074, "description": "User's latitude for geo-based search" },
+                      "longitude": { "type": "number", "example": -0.1278, "description": "User's longitude for geo-based search" },
+                      "neighborhood": { "type": "string", "example": "Soho" },
+                      "search_radius_km": { "type": "number", "default": 5, "minimum": 1, "maximum": 50 }
+                    }
+                  },
+                  "mood_text": { "type": "string", "example": "cozy date night", "maxLength": 500 },
+                  "dietary": { "type": "array", "items": { "type": "string", "enum": ["vegetarian", "vegan", "gluten-free", "dairy-free", "halal", "nut-free"] } },
+                  "attributes": { "type": "array", "items": { "type": "string" }, "example": ["romantic", "hidden_gem"] },
+                  "vibe_preferences": { "type": "array", "items": { "type": "string" }, "example": ["Wine Bar", "Small Plates"] },
+                  "limit": { "type": "integer", "default": 5, "minimum": 1, "maximum": 20 },
+                  "per_restaurant_items": { "type": "integer", "default": 3, "minimum": 1, "maximum": 5, "description": "Number of menu samples per restaurant" },
+                  "sort_by": { "type": "string", "enum": ["relevance", "distance", "hidden_gem"], "default": "relevance" },
+                  "data_source": { "type": "string", "enum": ["hybrid", "firebase", "local"], "default": "hybrid" },
+                  "include_coach": { "type": "boolean", "default": true, "description": "Include AI coach recommendations" },
+                  "time_context": {
+                    "type": "object",
+                    "properties": {
+                      "current_hour": { "type": "integer", "minimum": 0, "maximum": 23 },
+                      "day_of_week": { "type": "integer", "minimum": 0, "maximum": 6 },
+                      "meal_period": { "type": "string", "enum": ["breakfast", "lunch", "dinner", "snack", "late_night"] }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Restaurant shortlist with rich metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "restaurants"],
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "city": { "type": "string" },
+                    "country_code": { "type": "string" },
+                    "user_location": {
+                      "type": "object",
+                      "properties": {
+                        "latitude": { "type": "number" },
+                        "longitude": { "type": "number" }
+                      }
+                    },
+                    "restaurants": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/RestaurantCard" }
+                    },
+                    "coach": { "$ref": "#/components/schemas/CoachResponse" },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total_considered": { "type": "integer" },
+                        "total_restaurants": { "type": "integer" },
+                        "generation_time_ms": { "type": "integer" },
+                        "data_source": { "type": "string" },
+                        "server_time_ms": { "type": "integer" },
+                        "filters_applied": { "type": "object" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/travel/restaurants/search": {
+      "post": {
+        "tags": ["Travel"],
+        "summary": "Advanced restaurant search with filters",
+        "operationId": "searchRestaurants",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": { "type": "string", "example": "best pasta in London" },
+                  "location": { "$ref": "#/components/schemas/LocationInput" },
+                  "filters": {
+                    "type": "object",
+                    "properties": {
+                      "dietary": { "type": "array", "items": { "type": "string" } },
+                      "cuisine_types": { "type": "array", "items": { "type": "string" }, "example": ["Italian", "Japanese"] },
+                      "vibes": { "type": "array", "items": { "type": "string" }, "example": ["Casual", "Romantic"] },
+                      "occasions": { "type": "array", "items": { "type": "string" }, "example": ["Date Night", "Weekend Brunch"] },
+                      "only_open_now": { "type": "boolean", "default": false },
+                      "data_source": { "type": "string", "enum": ["hybrid", "firebase", "local"], "default": "hybrid" }
+                    }
+                  },
+                  "limit": { "type": "integer", "default": 20, "minimum": 1, "maximum": 50 },
+                  "sort_by": { "type": "string", "enum": ["relevance", "distance", "hidden_gem"], "default": "relevance" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "restaurants": { "type": "array", "items": { "$ref": "#/components/schemas/RestaurantCard" } },
+                    "total_found": { "type": "integer" },
+                    "query": { "type": "string" },
+                    "filters": { "type": "object" },
+                    "meta": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/travel/restaurants/nearby": {
+      "post": {
+        "tags": ["Travel"],
+        "summary": "Find restaurants near geo-coordinates",
+        "operationId": "getNearbyRestaurants",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["latitude", "longitude"],
+                "properties": {
+                  "latitude": { "type": "number", "example": 51.5074 },
+                  "longitude": { "type": "number", "example": -0.1278 },
+                  "radius_km": { "type": "number", "default": 2, "minimum": 0.5, "maximum": 50 },
+                  "limit": { "type": "integer", "default": 10, "minimum": 1, "maximum": 50 },
+                  "only_open_now": { "type": "boolean", "default": false },
+                  "sort_by": { "type": "string", "enum": ["distance", "relevance", "hidden_gem"], "default": "distance" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Nearby restaurants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "restaurants": { "type": "array", "items": { "$ref": "#/components/schemas/RestaurantCard" } },
+                    "total_found": { "type": "integer" },
+                    "user_location": {
+                      "type": "object",
+                      "properties": {
+                        "latitude": { "type": "number" },
+                        "longitude": { "type": "number" },
+                        "radius_km": { "type": "number" }
+                      }
+                    },
+                    "meta": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/travel/coach": {
+      "post": {
+        "tags": ["Travel"],
+        "summary": "Ask travel coach for restaurant recommendations",
+        "operationId": "askTravelCoach",
+        "description": "Enhanced coach endpoint that returns actual restaurant recommendations from the database, not just generic advice",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": { "type": "string", "example": "Where should I take my parents for Sunday lunch?", "maxLength": 500 },
+                  "location": { "$ref": "#/components/schemas/LocationInput" },
+                  "context": {
+                    "type": "object",
+                    "properties": {
+                      "dietary": { "type": "array", "items": { "type": "string" } },
+                      "interests": { "type": "array", "items": { "type": "string" } },
+                      "budget": { "type": "string", "enum": ["budget", "medium", "premium", "luxury"] }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Personalized coach response with actual restaurant recommendations",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CoachResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LocationInput": {
+        "type": "object",
+        "properties": {
+          "city": { "type": "string", "example": "London" },
+          "country_code": { "type": "string", "minLength": 2, "maxLength": 2, "example": "GB" },
+          "latitude": { "type": "number", "example": 51.5074 },
+          "longitude": { "type": "number", "example": -0.1278 },
+          "neighborhood": { "type": "string", "example": "Soho" },
+          "search_radius_km": { "type": "number", "default": 5 }
+        }
+      },
+      "RestaurantCard": {
+        "type": "object",
+        "required": ["restaurant_id", "restaurant_name"],
+        "properties": {
+          "restaurant_id": { "type": "string", "example": "dishoom_covent_garden" },
+          "restaurant_name": { "type": "string", "example": "Dishoom" },
+          "hero_image": { "type": "string", "format": "uri", "nullable": true, "example": "https://images.unsplash.com/photo-..." },
+          "gallery": { "type": "array", "items": { "type": "string", "format": "uri" } },
+          "rating": { "type": "number", "minimum": 0, "maximum": 5, "example": 4.8, "nullable": true },
+          "review_count": { "type": "integer", "example": 3247, "nullable": true },
+          "availability_status": { "type": "string", "enum": ["open", "closing_soon", "closed", "unknown"] },
+          "availability_label": { "type": "string", "example": "Available now" },
+          "is_open_now": { "type": "boolean", "nullable": true },
+          "opens_at": { "type": "string", "example": "08:00", "nullable": true },
+          "closes_at": { "type": "string", "example": "23:00", "nullable": true },
+          "distance_text": { "type": "string", "example": "1.2km away" },
+          "distance_km": { "type": "number", "example": 1.2, "nullable": true },
+          "address": { "type": "string", "example": "12 Upper St Martin's Lane, London WC2H 9FB" },
+          "cuisine_tags": { "type": "array", "items": { "type": "string" }, "example": ["Indian", "Cocktails", "Date Night"] },
+          "cuisine_type": { "type": "string", "example": "indian" },
+          "price_range": { "type": "string", "example": "££" },
+          "featured_items": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "example": "Bacon Naan Roll" },
+                "description": { "type": "string", "example": "Smoked bacon, cream cheese, chili jam" },
+                "price": { "type": "string", "example": "£7.50" },
+                "emoji": { "type": "string", "example": "🥓" },
+                "image": { "type": "string", "format": "uri", "nullable": true }
+              }
+            }
+          },
+          "is_hidden_gem": { "type": "boolean" },
+          "gem_badge": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "emoji": { "type": "string", "example": "💎" },
+              "label": { "type": "string", "example": "Hidden Gem" },
+              "color": { "type": "string", "example": "#9B59B6" }
+            }
+          },
+          "booking_link": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "url": { "type": "string", "format": "uri" },
+              "type": { "type": "string", "enum": ["reservation", "delivery", "website", "map"] },
+              "label": { "type": "string", "example": "Book a Table" }
+            }
+          },
+          "data_source": { "type": "string", "enum": ["firebase", "local", "hybrid"] }
+        }
+      },
+      "CoachResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "response": { "type": "string", "example": "For cozy date night in London, I'd recommend The Laughing Heart for their Burrata." },
+          "restaurants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "restaurant_id": { "type": "string" },
+                "name": { "type": "string" },
+                "hero_image": { "type": "string", "format": "uri", "nullable": true },
+                "details": { "type": "string" },
+                "price_range": { "type": "string" },
+                "rating": { "type": "number", "nullable": true },
+                "review_count": { "type": "integer", "nullable": true },
+                "location": { "type": "string" },
+                "distance_text": { "type": "string" },
+                "availability_label": { "type": "string" },
+                "is_open_now": { "type": "boolean", "nullable": true },
+                "hero_item": { "type": "string", "nullable": true },
+                "cuisine_type": { "type": "string" },
+                "hidden_gem_badge": { "type": "object", "nullable": true },
+                "booking_link": { "type": "object", "nullable": true }
+              }
+            }
+          },
+          "quick_tips": { "type": "array", "items": { "type": "string" }, "example": ["🎯 Check if reservations are needed"] },
+          "follow_up_questions": { "type": "array", "items": { "type": "string" }, "example": ["Want to see more hidden gems nearby?"] }
+        }
+      }
+    }
+  }
+}
