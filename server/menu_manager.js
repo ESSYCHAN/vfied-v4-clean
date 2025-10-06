@@ -847,6 +847,7 @@ class EnhancedMenuManager {
     // Handle local structure
     return {
       ...item,
+      available: item.available !== false, // Default to true if not explicitly false
       image: item.image || item.image_url || item.photo || item.thumbnail || null
     };
   }
