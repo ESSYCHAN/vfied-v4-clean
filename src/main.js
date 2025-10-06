@@ -2,6 +2,7 @@
 import { initializeFood } from './modules/food.js';
 import { initializeEvents } from './modules/events.js';
 import { initializeAuth } from './modules/auth.js';
+import { initializeTravel, getTravelRecommendations, displayTravelRecommendations } from './modules/travel.js';
 import { initializeUI, toast, updateStatsUI } from './modules/ui.js';
 import { CONFIG } from './config.js';
 import './mobile-enhancements.js';
@@ -46,6 +47,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initializeAuth({
     API_BASE,
     toast
+  });
+
+  await initializeTravel({
+    API_BASE,
+    toast,
+    updateStatsUI
   });
 
   // Initialize other features
@@ -100,7 +107,8 @@ async function loadTravelLists() {
     const res = await fetch('/data/travel_lists.json', { cache: 'no-store' });
     travelLists = await res.json();
     renderTravelCities();
-    renderTravelGrid();
+    // Load API recommendations for the first city
+    await loadTravelRecommendations();
   } catch {
     travelLists = {};
     console.warn('Travel lists data not available');
@@ -149,37 +157,61 @@ function renderTravelCities() {
 
   const cities = Object.keys(travelLists);
   select.innerHTML = cities.map((c) => `<option value="${c}">${c}</option>`).join('');
-  select.addEventListener('change', renderTravelGrid);
+  select.addEventListener('change', loadTravelRecommendations);
 }
 
-function renderTravelGrid() {
+async function loadTravelRecommendations() {
   const city = document.getElementById('travel-city-select')?.value || Object.keys(travelLists)[0];
-  const items = (travelLists[city] || []).slice(0, 10);
+  if (!city) return;
+
   const grid = document.getElementById('travel-grid');
   if (!grid) return;
 
-  grid.innerHTML = '';
-  items.forEach((item) => {
-    const card = document.createElement('div');
-    card.className = 'travel-card';
-    card.innerHTML = `
-      <div class="travel-emoji">${item.emoji}</div>
-      <div class="travel-body">
-        <div class="travel-title">${escapeHtml(item.name)}</div>
-        <div class="travel-note">${escapeHtml(item.note || '')}</div>
-      </div>
-    `;
-    card.addEventListener('click', () => tryTravel(city, item.name));
-    grid.appendChild(card);
-  });
-}
+  // Show loading state
+  grid.innerHTML = `
+    <div style="text-align: center; padding: 40px; color: #94a3b8;">
+      <div style="font-size: 32px; margin-bottom: 16px;">⏳</div>
+      <div>Loading recommendations for ${escapeHtml(city)}...</div>
+    </div>
+  `;
 
-function tryTravel(city, itemName) {
-  const moodInput = document.getElementById('mood-input');
-  if (moodInput) {
-    moodInput.value = `travel mode: try ${itemName} in ${city}`;
-    if (window.VFIED?.handleDecision) {
-      window.VFIED.handleDecision();
+  try {
+    const recommendations = await getTravelRecommendations(city, '', {
+      showHiddenGems: false
+    });
+
+    if (recommendations.success) {
+      displayTravelRecommendations(recommendations, city);
+    } else {
+      throw new Error(recommendations.error || 'No recommendations returned');
+    }
+  } catch (error) {
+    console.error('Failed to load travel recommendations:', error);
+
+    // Fallback to static JSON data
+    const items = (travelLists[city] || []).slice(0, 10);
+
+    if (items.length > 0) {
+      grid.innerHTML = '';
+      items.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'travel-card';
+        card.innerHTML = `
+          <div class="travel-emoji">${item.emoji}</div>
+          <div class="travel-body">
+            <div class="travel-title">${escapeHtml(item.name)}</div>
+            <div class="travel-note">${escapeHtml(item.note || '')}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    } else {
+      grid.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #94a3b8;">
+          <div style="font-size: 32px; margin-bottom: 16px;">❌</div>
+          <div>Failed to load recommendations</div>
+        </div>
+      `;
     }
   }
 }
