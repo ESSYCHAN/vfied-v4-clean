@@ -506,18 +506,18 @@ class EnhancedMenuManager {
   // ENHANCED SEARCH WITH HYBRID SOURCES
   // ===============================
 
-  async searchMenus({ 
-    location, 
+  async searchMenus({
+    location,
     target_location = null,
     search_radius = 10,
-    mood_text = '', 
-    dietary = [], 
-    meal_period = 'all_day', 
-    attributes = [], 
-    limit = 10, 
+    mood_text = '',
+    dietary = [],
+    meal_period = 'all_day',
+    attributes = [],
+    limit = 10,
     timeContext = null,
     sort_by = 'relevance',
-    data_source = 'hybrid'
+    data_source = 'firebase'
   }) {
     
     try {
@@ -628,7 +628,7 @@ class EnhancedMenuManager {
       per_restaurant_items = 3,
       sort_by = 'relevance',
       timeContext = null,
-      data_source = 'hybrid'
+      data_source = 'firebase'
     } = options;
 
     const started = Date.now();

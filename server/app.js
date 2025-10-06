@@ -277,7 +277,7 @@ app.post('/v1/restaurant/menu', async (req, res) => {
       delivery_platforms,
       opening_hours,
       metadata,
-      data_source = 'hybrid'
+      data_source = 'firebase'
     } = req.body;
 
     // Validate required fields
@@ -386,10 +386,10 @@ app.post('/v1/restaurant/menu', async (req, res) => {
 // Enhanced menu listing with Firebase integration
 app.get('/v1/menus', async (req, res) => {
   try {
-    const { 
-      limit = 50, 
-      data_source = 'hybrid',
-      restaurant_id 
+    const {
+      limit = 50,
+      data_source = 'firebase',
+      restaurant_id
     } = req.query;
 
     let menuItems = [];
