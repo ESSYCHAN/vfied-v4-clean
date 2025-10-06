@@ -740,14 +740,8 @@
                 country_code: this.currentLocation.country_code // "KE"
               },
               dietary: Array.from(this.selectedDietary),     // ["vegan","nut-free"]
-              mood: document.getElementById('mood-input').value.trim(),
-              time_context: {
-              current_hour: new Date().getHours(),
-              meal_period: this.getMealPeriod(new Date().getHours()),
-              is_weekend: [0,6].includes(new Date().getDay()),
-              day_of_week: new Date().getDay()
-            }
-              // mood: document.getElementById('mood-input').value.trim() // "celebrating with friends"
+              mood_text: document.getElementById('mood-input').value.trim()
+              // Removed time_context - returns items from all meal periods for variety
             })
           }, 'quick_decision');
           
